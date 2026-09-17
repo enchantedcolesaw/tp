@@ -96,5 +96,6 @@ public class PersonTest {
                 + ", email=" + ALICE.getEmail() + ", address=" + ALICE.getAddress()
                 + ", remark=" + ALICE.getRemark() + ", tags=" + ALICE.getTags() + "}";
         assertEquals(expected, ALICE.toString());
+        assertEquals(ALICE.hashCode(), new PersonBuilder(ALICE).build().hashCode());
     }
 }
