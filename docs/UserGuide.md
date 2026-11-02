@@ -46,7 +46,8 @@ opened TAssist.
 
 The bar at the top shows the **tutorial groups** next to the TAssist name, with the active group highlighted, and
 the **screens** below it. **Students** and **Records** are on the left; **Help** and **Storage** are on the right.
-Hover over a screen, or over a shortened group name, to see more. The tooltip of a screen names the command that does
+Hover over a screen, or over a shortened group name, to see more. A long group name is shortened in the middle, so
+names that differ only at the end still look different. The tooltip of a screen names the command that does
 the same, such as `view storage`.
 
 ![TAssist displaying the Students screen for tutorial group T01](images/Ui.png)

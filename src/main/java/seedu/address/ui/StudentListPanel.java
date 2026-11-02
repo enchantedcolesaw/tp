@@ -47,8 +47,8 @@ public class StudentListPanel extends UiPart<Region> {
 
     private static final String FXML = "StudentListPanel.fxml";
     private static final double ROW_NUMBER_WIDTH = 56;
-    private static final double NAME_COLUMN_WIDTH = 320;
-    private static final double ID_COLUMN_WIDTH = 180;
+    private static final double NAME_COLUMN_WIDTH = 280;
+    private static final double ID_COLUMN_WIDTH = 260;
     /** Wide enough for a 20-character student ID, so that the ID the TA must type is shown in full. */
     private static final double ID_COLUMN_MAX_WIDTH = 260;
     private static final double TOOLTIP_MAX_WIDTH = 480;
