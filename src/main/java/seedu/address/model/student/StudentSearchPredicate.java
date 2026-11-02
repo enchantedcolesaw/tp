@@ -3,12 +3,13 @@ package seedu.address.model.student;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
+import java.text.Normalizer;
 import java.util.function.Predicate;
 
 import seedu.address.commons.util.StringUtil;
 
 /**
- * Matches students whose names and IDs contain the supplied fragments, ignoring case.
+ * Matches students whose names and IDs contain the supplied fragments, ignoring case and, in names, accents.
  */
 public class StudentSearchPredicate implements Predicate<Student> {
     private final String nameFragment;
@@ -28,8 +29,13 @@ public class StudentSearchPredicate implements Predicate<Student> {
     @Override
     public boolean test(Student student) {
         requireAllNonNull(student);
-        return containsIgnoreCase(student.getName().toString(), nameFragment)
+        return containsIgnoreCase(removeAccents(student.getName().toString()), removeAccents(nameFragment))
                 && containsIgnoreCase(student.getStudentId().toString(), idFragment);
+    }
+
+    /** Returns {@code value} without accent marks, so that {@code José} contains {@code jose}. */
+    private static String removeAccents(String value) {
+        return Normalizer.normalize(value, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
     }
 
     private boolean containsIgnoreCase(String value, String fragment) {
