@@ -926,7 +926,9 @@ The file looks like this:
   `Saved data could not be read. Group T01 has more than one student with ID A1. No changes were made to the saved file.`
 * For an invalid student name, ID, attendance week or status, or participation week or score, the reason names the
   group and student ID, for example `Group T02, student B2: Week must be a whole number from 1 to 13.` If the
-  student ID is missing or blank, the reason says `student with missing ID`.
+  student ID is missing or blank, the reason says `student with missing ID`. An invalid group name, assignment name,
+  or assignment record is named the same way, for example `Group T02, assignment record 3: Invalid grade. ...`,
+  where 3 means the third entry in that group's `assignmentRecords` list.
 * For a file that is not valid JSON, or a value of the wrong type, the reason names the line where reading stopped.
   The file must contain a single JSON object. Extra text after its closing brace makes the file invalid; trailing
   spaces, tabs, and line breaks are allowed.
