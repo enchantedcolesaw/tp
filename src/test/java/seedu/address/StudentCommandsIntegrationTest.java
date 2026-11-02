@@ -241,6 +241,27 @@ public class StudentCommandsIntegrationTest extends AppIntegrationTest {
     }
 
     @Test
+    public void execute_undoOrRedoActiveGroupRename_preservesSearchAndSort() throws Exception {
+        feedback("student add n/Ben Lim id/B2");
+        feedback("student add n/Alice Tan id/A3");
+        feedback("student add n/Alice Ng id/A1");
+        feedback("student find n/Alice");
+        feedback("student sort by/id");
+        List<Student> displayed = List.copyOf(app.logic.getDisplayedStudentList());
+        feedback("group rename g/T01 n/T01-Thu");
+
+        feedback("undo");
+        assertEquals("T01", app.model.getActiveGroup().orElseThrow().getName().toString());
+        assertEquals(displayed, app.logic.getDisplayedStudentList());
+        feedback("redo");
+        assertEquals(displayed, app.logic.getDisplayedStudentList());
+
+        feedback("group add g/T05");
+        feedback("undo");
+        assertEquals(app.logic.getActiveGroupStudentList(), app.logic.getDisplayedStudentList());
+    }
+
+    @Test
     public void execute_searchAndList_changesOnlyDisplayAndResetsOnRestart() throws Exception {
         feedback("student add n/Alice Tan id/A1");
         feedback("student add n/Ben Lim id/B2");

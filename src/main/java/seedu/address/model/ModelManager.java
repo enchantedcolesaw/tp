@@ -85,8 +85,29 @@ public class ModelManager implements Model {
     @Override
     public void setTAssist(ReadOnlyTAssist tAssist) {
         requireNonNull(tAssist);
+        boolean isActiveGroupRenamed = isActiveGroupRenamed(this.tAssist, tAssist);
         this.tAssist.resetData(tAssist);
-        trackActiveGroup();
+        if (isActiveGroupRenamed) {
+            // As with renameGroup, the same roster stays active under its other name, so the display settings stay.
+            followActiveGroup();
+        } else {
+            trackActiveGroup();
+        }
+    }
+
+    /**
+     * Returns true if the active group of {@code next} is that of {@code current} under another name, as when a
+     * rename of the active group is undone or redone: neither name is a group in the other data.
+     */
+    private static boolean isActiveGroupRenamed(ReadOnlyTAssist current, ReadOnlyTAssist next) {
+        Optional<GroupName> currentName = current.getActiveGroup().map(Group::getName);
+        Optional<GroupName> nextName = next.getActiveGroup().map(Group::getName);
+        return currentName.isPresent() && nextName.isPresent()
+                && !hasGroupNamed(next, currentName.get()) && !hasGroupNamed(current, nextName.get());
+    }
+
+    private static boolean hasGroupNamed(ReadOnlyTAssist data, GroupName name) {
+        return data.getGroupList().stream().anyMatch(group -> group.getName().equals(name));
     }
 
     @Override
