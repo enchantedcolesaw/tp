@@ -532,6 +532,9 @@ Format: `attendance mark id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/STATUS`
   If any ID is invalid or not in the active group, nobody is marked, and the error names the first such ID.
 * Repeating a mark for the same student and week replaces the earlier mark, and the feedback shows the old and
   new status. Other students, weeks, and participation records are preserved.
+* Marking a student absent for a week in which they have a participation score above 0 still records the mark, and
+  the feedback adds a warning, such as `Warning: Alice Tan has participation score 4 for Week 3.`, so that you can
+  check whether you meant another student or week.
 
 For Alice Tan in active group T01, `attendance mark id/A0123456X w/3 s/present` shows
 `Recorded Alice Tan as present for Week 3.` Re-entering it with `s/absent` shows
@@ -620,6 +623,8 @@ Format: `participation set id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/SCORE`
   first such ID.
 * Setting the same student and week again replaces the score, and the feedback shows the old and new score.
   Other weeks, other students, and other groups are unaffected.
+* A score above 0 for a student marked absent that week is still recorded, and the feedback adds a warning, such as
+  `Warning: Alice Tan is marked absent for Week 3.` A score of 0 gives no warning.
 
 Example: `participation set id/A0123456X w/3 s/2` shows
 `Recorded participation score 2 for Alice Tan in Week 3.`
@@ -695,6 +700,9 @@ Format: `assignment add a/ASSIGNMENT_NAME`
 * Names ignore case when matching, but keep the capitalization entered for display. `PS1` and `ps1` are duplicates,
   and so are `Problem Set 1` and `problem set 1` typed with extra spaces.
 * An assignment belongs to one group. Another group may have an assignment with the same name.
+* If the group already has an assignment whose name differs only in capitalization, spaces, or punctuation, such as
+  `PS1` when you add `PS 1` or `PS-1`, the new assignment is still created, and the feedback adds
+  `Warning: T01 already has a similar assignment named PS1. Check that this is a different assignment.`
 * Supply `a/` exactly once.
 
 Example: `assignment add a/PS1` shows `Created assignment PS1 for T01.` when T01 is active.

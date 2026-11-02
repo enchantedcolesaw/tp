@@ -575,7 +575,8 @@ or scores defensively, even when called without a parser.
 leaves all scores unchanged. For each student, it reads that week's existing value, if any, creates an immutable copy
 with `Student.withParticipationRecord`, and passes the copy to `Model.setStudent`. Feedback distinguishes a first
 entry, a replacement (showing the old and new score, such as `2 to 4`), and an entry equal to the existing score,
-which says nothing changed. The replacement preserves roster order, attendance, and scores for other weeks; students
+which says nothing changed. A score above 0 for a student whose week is marked `ABSENT` adds
+`MESSAGE_ABSENT_WARNING` to that student's line; the score is still recorded, since the mark may be the mistake. The replacement preserves roster order, attendance, and scores for other weeks; students
 in other groups are untouched.
 
 The sequence diagram below shows how `LogicManager` executes the input `participation set id/A0123456X w/3 s/2`
@@ -725,7 +726,9 @@ within one group.
 
 `AssignmentAddCommand` finds the active group and rejects a name that the group already holds, then calls
 `Model.addAssignment`. Its duplicate message shows the name of the existing assignment, so the TA sees the
-capitalization that is stored. `AssignmentSubmitCommand` and `AssignmentGradeCommand` resolve the active group,
+capitalization that is stored. Before adding, it compares only the letters and digits of each name, ignoring case,
+so `PS 1` and `PS-1` match `PS1`. A match adds a warning naming the existing assignment instead of rejecting the
+name, because names such as `PS1.5` and `PS15` may be intended. `AssignmentSubmitCommand` and `AssignmentGradeCommand` resolve the active group,
 assignment, and students before updating an immutable `Assignment` through `Model#setAssignment`.
 `AssignmentSubmitCommand` finds every named student through `Command#getStudents` first, so an unknown ID changes no
 record. It then applies each changed status to one updated `Assignment` and replaces it once, with one feedback line
@@ -831,7 +834,9 @@ through `Command#getStudents`. If any ID is unknown, no student is marked. For e
 existing record, if any, creates an updated student through
 `withAttendanceRecord`, and replaces it through `Model#setStudent`. The stored status is `PRESENT` or `ABSENT`.
 The confirmation distinguishes a first mark, an update (showing the old and new status, such as
-`present to absent`), and a mark equal to the existing one, which says nothing changed.
+`present to absent`), and a mark equal to the existing one, which says nothing changed. Marking a student absent
+who has a participation score above 0 that week adds `MESSAGE_SCORE_WARNING`, the reverse of the warning in
+`participation set`.
 Existing `LogicManager` persistence saves the result.
 
 `AttendanceListCommandParser` requires only `w/` and uses the same week validation. `AttendanceListCommand`
@@ -1817,6 +1822,10 @@ label.
    `Unexpected extra text after 'w/3': 'now'. This value cannot contain spaces.` errors without changing any record.
 7. Switch to an empty group and list Week 3. Expect `No students in GROUP_NAME.`
    With no active group, all three commands must ask you to create or select a group first.
+8. Switch back with `group use g/T01`, then enter `attendance mark id/A0234567Y w/6 s/absent`, then `participation set id/A0234567Y w/6 s/3`. Expect
+   the score to be recorded with `Warning: Ben Lim is marked absent for Week 6.` Enter `participation set
+   id/A0234567Y w/6 s/0`; expect no warning. Set the score back to 3, then enter `attendance mark id/A0234567Y w/6
+   s/absent` again; expect `Warning: Ben Lim has participation score 3 for Week 6.` after the unchanged-mark message.
 
 ### Creating assignments and listing their records
 
@@ -1848,6 +1857,8 @@ label.
 6. Enter `assignment add a/ PS1 ` and `assignment add a/ps1`. Expect `Assignment PS1 already exists in T01.` both
    times.
    Enter `assignment add a/Mid-term   1`. Expect `Created assignment Mid-term 1 for T01.`
+   Enter `assignment add a/PS-1`. Expect the assignment to be created, with
+   `Warning: T01 already has a similar assignment named PS1. Check that this is a different assignment.` Enter `undo`.
 7. Try `assignment list a/PS9`, `assignment add a/PS_1`, `assignment add a/`, `assignment add`,
    `assignment add a/PS2 a/PS3`, and `assignment add a/PS2 n/x`. Expect specific unknown-assignment, invalid-name,
    missing-value (`Missing value after a/.`), missing-parameter, and duplicate- or unknown-prefix errors, without changing the group or the file. Enter

@@ -60,7 +60,8 @@ public class AttendanceIntegrationTest {
         assertFeedback("attendance mark id/A0123456X w/1 s/present", "Recorded Alice Tan as present for Week 1.");
         assertFeedback("attendance mark id/A0123456X w/3 s/present", "Recorded Alice Tan as present for Week 3.");
         assertFeedback("attendance mark id/A0123456X w/3 s/absent",
-                "Updated Alice Tan's attendance for Week 3: present to absent.");
+                "Updated Alice Tan's attendance for Week 3: present to absent."
+                        + " Warning: Alice Tan has participation score 4 for Week 3.");
         restart();
 
         assertFeedback("attendance list w/3", "Attendance for T01, Week 3: 0 present, 1 absent, 2 not recorded\n"

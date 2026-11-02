@@ -35,6 +35,20 @@ public class ParticipationSetCommandTest {
     }
 
     @Test
+    public void execute_positiveScoreForAbsentStudent_warnsButRecords() {
+        model.setStudent(NAME_T01, ALICE.withAttendanceRecord(3, "ABSENT"));
+        Model expected = new ModelManager(model.getTAssist(), new UserPrefs());
+        expected.setStudent(NAME_T01, ALICE.withAttendanceRecord(3, "ABSENT").withParticipationRecord(3, 4));
+
+        assertCommandSuccess(new ParticipationSetCommand(ALICE.getStudentId(), 3, 4), model,
+                "Recorded participation score 4 for Alice Tan in Week 3."
+                        + String.format(ParticipationSetCommand.MESSAGE_ABSENT_WARNING, "Alice Tan", 3), expected);
+        expected.setStudent(NAME_T01, ALICE.withAttendanceRecord(3, "ABSENT").withParticipationRecord(3, 0));
+        assertCommandSuccess(new ParticipationSetCommand(ALICE.getStudentId(), 3, 0), model,
+                "Updated Alice Tan's participation score for Week 3: 4 to 0.", expected);
+    }
+
+    @Test
     public void execute_firstScore_preservesOtherRecordsAndGroups() {
         Student recorded = ALICE.withAttendanceRecord(3, "present").withParticipationRecord(1, 5);
         model.setStudent(NAME_T01, recorded);

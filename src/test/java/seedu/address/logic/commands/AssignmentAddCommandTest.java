@@ -25,6 +25,11 @@ import seedu.address.testutil.TypicalGroups;
 
 public class AssignmentAddCommandTest {
 
+    private static Model withAssignment(Model model, AssignmentName name) {
+        model.addAssignment(NAME_T01, new Assignment(name));
+        return model;
+    }
+
     private Model modelWithActiveT01() {
         Model model = new ModelManager(TypicalGroups.getTypicalTAssist(), new UserPrefs());
         model.setActiveGroup(NAME_T01);
@@ -51,6 +56,21 @@ public class AssignmentAddCommandTest {
 
         assertCommandSuccess(new AssignmentAddCommand(name), model,
                 "Created assignment problem set-1 for T01.", expected);
+    }
+
+    @Test
+    public void execute_similarNameInSameGroup_warnsButCreates() {
+        Model model = modelWithActiveT01();
+        model.addAssignment(NAME_T01, PS1);
+        AssignmentName similar = new AssignmentName("ps-1");
+        Model expected = modelWithActiveT01();
+        expected.addAssignment(NAME_T01, PS1);
+        expected.addAssignment(NAME_T01, new Assignment(similar));
+
+        assertCommandSuccess(new AssignmentAddCommand(similar), model, "Created assignment ps-1 for T01."
+                + String.format(AssignmentAddCommand.MESSAGE_SIMILAR_WARNING, "T01", "PS1"), expected);
+        assertCommandSuccess(new AssignmentAddCommand(NAME_PS2), model, "Created assignment PS2 for T01.",
+                withAssignment(expected, NAME_PS2));
     }
 
     @Test
