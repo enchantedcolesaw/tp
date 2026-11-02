@@ -65,15 +65,14 @@ public class ResultDisplay extends UiPart<Region> {
      */
     public void scrollPage(boolean isDown) {
         double pageHeight = Math.max(measureLineHeight(), resultDisplay.getHeight() - measureLineHeight());
-        double scrollTop = resultDisplay.getScrollTop() + (isDown ? pageHeight : -pageHeight);
-        resultDisplay.setScrollTop(Math.max(0, scrollTop));
+        PageScrolling.scrollPage(resultDisplay, pageHeight, isDown);
     }
 
     /**
-     * Returns true if the message fills the feedback row, so that some of it may need scrolling to read.
+     * Returns true if some of the message is hidden, so that it needs scrolling to read.
      */
     public boolean hasLongMessage() {
-        return countLines() >= MAX_VISIBLE_LINES;
+        return PageScrolling.getMaxScrollTop(resultDisplay) > 0;
     }
 
     /**

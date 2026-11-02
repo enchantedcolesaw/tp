@@ -160,7 +160,7 @@ public class MainWindow extends UiPart<Stage> {
             return;
         }
         try {
-            workspacePanel.setRecordListing(logic.execute(recordListingCommand).getFeedbackToUser());
+            workspacePanel.refreshRecordListing(logic.execute(recordListingCommand).getFeedbackToUser());
         } catch (CommandException | ParseException e) {
             logger.fine("Records could not be refreshed: " + e.getMessage());
             String reason = e.getMessage().lines().findFirst().orElse("");

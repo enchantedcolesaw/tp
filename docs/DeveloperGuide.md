@@ -132,8 +132,10 @@ to show `Changes saved.` in the footer. Commands keep the current screen unless 
 Attendance, participation, and assignment listings return `CommandResult.forRecordListing(...)` with their complete
 text and a request to open Records. `MainWindow` sends the text to `RecordListPanel` and puts only its heading in
 `ResultDisplay`. The records text area grows with the workspace, so a normal tutorial's records use the main area.
-PageUp and PageDown scroll Records while it is open and the feedback is short, and the feedback box otherwise;
-neither takes focus from the command box. The last listing stays available through `view records`, without
+PageUp and PageDown scroll Records while it is open and the whole feedback is visible, and the feedback box
+otherwise; neither takes focus from the command box. `PageScrolling` stops both at the end of their text, so PageUp
+responds at once after PageDown reaches the end. A rerun listing keeps its scroll position, so the rows the TA was
+looking at stay in view after a mark; a new list command starts at the top. The last listing stays available through `view records`, without
 changing the model or file. `MainWindow` keeps the list command that produced it and reruns that command after any
 command with saved changes, such as a mark, a group switch, or `undo`, so Records never shows outdated values. A
 list command changes no data, so rerunning it saves nothing and adds nothing to the undo history. Restarting

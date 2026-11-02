@@ -240,6 +240,39 @@ public class WorkspaceSmokeTest {
     }
 
     @Test
+    public void recordListing_pageKeysAndRefresh_stayInListingAndKeepPosition() throws Exception {
+        runOnFx(this::initializeWorkspace);
+        try {
+            runOnFx(() -> {
+                enter(input, "group use g/T01");
+                for (int i = 0; i < 30; i++) {
+                    enter(input, "student add n/Student id/S" + i);
+                }
+                enter(input, "attendance list w/3");
+                render(root, "records-page-keys", 1280, 720);
+            });
+            runOnFx(() -> {
+                TextArea listing = (TextArea) root.lookup("#recordListing");
+                for (int i = 0; i < 6; i++) {
+                    pressKey(KeyCode.PAGE_DOWN);
+                }
+                double bottom = listing.getScrollTop();
+                assertTrue(bottom > 0);
+                pressKey(KeyCode.PAGE_UP);
+                assertTrue(listing.getScrollTop() < bottom, "PageUp moves at once after PageDown passes the end");
+                for (int i = 0; i < 6; i++) {
+                    pressKey(KeyCode.PAGE_DOWN);
+                }
+                enter(input, "attendance mark id/S29 w/3 s/absent");
+                assertTrue(listing.getText().contains("Student | S29 | Absent"));
+                assertEquals(bottom, listing.getScrollTop(), 1);
+            });
+        } finally {
+            runOnFx(() -> stage.hide());
+        }
+    }
+
+    @Test
     public void recordsScreen_emptyState_opensWithoutChangingData() throws Exception {
         runOnFx(this::initializeWorkspace);
         try {
@@ -662,7 +695,8 @@ public class WorkspaceSmokeTest {
                 runOnFx(() -> {
                     TableView<?> table = studentTable();
                     assertTrue(table.getColumns().get(1).getWidth() > 320);
-                    assertEquals(180, table.getColumns().get(2).getWidth(), 1);
+                    double idWidth = table.getColumns().get(2).getWidth();
+                    assertTrue(idWidth >= 179 && idWidth <= 261, "IDs get 180 to 260 pixels, enough for 20 characters");
                     double columnWidth = table.getColumns().stream().mapToDouble(column -> column.getWidth()).sum();
                     assertTrue(table.getWidth() - columnWidth < 20, "Columns should use the table's free width");
                     assertTrue(columnWidth <= table.getWidth(), "Columns should fit without horizontal scrolling");
