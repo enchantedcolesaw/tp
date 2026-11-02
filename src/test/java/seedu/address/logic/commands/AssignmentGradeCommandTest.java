@@ -11,6 +11,8 @@ import static seedu.address.testutil.TypicalAssignments.PS1;
 import static seedu.address.testutil.TypicalGroups.NAME_T01;
 import static seedu.address.testutil.TypicalStudents.ALICE;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.Messages;
@@ -59,15 +61,17 @@ public class AssignmentGradeCommandTest {
     }
 
     @Test
-    public void execute_unsubmittedAssignment_reportsErrorWithoutChanges() {
+    public void execute_unsubmittedAssignment_recordsSubmissionAndGrade() {
         Model model = new ModelManager(TypicalGroups.getTypicalTAssist(), new UserPrefs());
         model.setActiveGroup(NAME_T01);
         model.addAssignment(NAME_T01, PS1);
+        Model expected = modelWithSubmittedAssignment();
+        expected.setAssignment(NAME_T01, PS1.withSubmissionStatus(ALICE_ID, true).withGrade(ALICE_ID, 87));
 
-        assertCommandFailure(new AssignmentGradeCommand(NAME_PS1, ALICE_ID, 87), model,
-                String.format(AssignmentGradeCommand.MESSAGE_NOT_SUBMITTED, "PS1", ALICE_ID));
-        assertEquals(AssignmentRecord.notSubmitted(), model.getGroup(NAME_T01).findAssignment(NAME_PS1)
-                .orElseThrow().getStudentRecord(ALICE_ID));
+        assertCommandSuccess(new AssignmentGradeCommand(NAME_PS1, ALICE_ID, 87), model,
+                String.format(AssignmentGradeCommand.MESSAGE_SUBMITTED_AND_GRADED, "Alice Tan", "PS1", 87), expected);
+        assertEquals(new AssignmentRecord(true, Optional.of(87)),
+                model.getGroup(NAME_T01).findAssignment(NAME_PS1).orElseThrow().getStudentRecord(ALICE_ID));
     }
 
     @Test

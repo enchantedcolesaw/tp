@@ -92,7 +92,7 @@ public class AcceptanceWalkthroughTest extends AppIntegrationTest {
                 "attendance mark id/A0123456X w/14 s/present", "attendance mark id/A0123456X w/1 s/late",
                 "attendance mark id/A0123456X w/1 s/present w/2", "attendance mark id/A9 w/1 s/present",
                 "participation set id/A0123456X w/1 s/6", "participation set id/A0123456X w/1",
-                "assignment add a/ps1", "assignment grade a/PS1 id/A0345678Z m/50",
+                "assignment add a/ps1", "assignment grade a/PS1 id/A0999999Z m/50",
                 "assignment grade a/PS1 id/A0123456X m/101", "assignment list a/PS9",
                 "attendance", "unknown", "view nowhere", "help nothing");
         for (String command : invalidCommands) {

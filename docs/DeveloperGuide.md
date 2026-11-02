@@ -720,7 +720,9 @@ capitalization that is stored. `AssignmentSubmitCommand` and `AssignmentGradeCom
 assignment, and students before updating an immutable `Assignment` through `Model#setAssignment`.
 `AssignmentSubmitCommand` finds every named student through `Command#getStudents` first, so an unknown ID changes no
 record. It then applies each changed status to one updated `Assignment` and replaces it once, with one feedback line
-per student. A grade update also checks that the record is submitted. Each failed command leaves the model unchanged.
+per student. A grade update calls `AssignmentRecord#withSubmissionStatus(true)` before `withGrade`, because a graded
+assignment is a submitted one; the feedback says when the submission was recorded too. Each failed command leaves the
+model unchanged.
 With `a/`, `AssignmentListCommand` returns one row per student in roster order: name, student ID, submission
 status, and grade; missing records show `Not submitted` and `-`. Without `a/`, it numbers the names of the active
 group's assignments in creation order, so the TA can recover the exact names after a restart. The
@@ -1418,8 +1420,8 @@ The following extensions apply to every use case that changes or views records o
 2.  TAssist creates the assignment for the active group and shows a confirmation.
 3.  TA requests to mark the assignment of one or more students as submitted.
 4.  TAssist records the submission statuses and shows a confirmation for each student.
-5.  TA requests to record a grade for the assignment of one of those students.
-6.  TAssist records the grade and shows a confirmation.
+5.  TA requests to record a grade for the assignment of one student.
+6.  TAssist records the grade, records the assignment as submitted if it was not, and shows a confirmation.
 7.  TA repeats steps 3-6 for other students.
 8.  TA requests to view the records of the assignment.
 9.  TAssist shows the submission status and grade of every student in the group for that assignment.
@@ -1463,9 +1465,9 @@ The following extensions apply to every use case that changes or views records o
       Use case resumes at step 5.
 
 * 5b. The student's assignment has not been marked as submitted.
-    * 5b1. TAssist shows an error message asking the TA to mark the assignment as submitted first.
+    * 5b1. TAssist records the assignment as submitted together with the grade, and says so in the confirmation.
 
-      Use case resumes at step 3.
+      Use case resumes at step 7.
 
 * 5c. The student already has a grade for that assignment (e.g. the TA is correcting a mistake).
     * 5c1. TAssist replaces the previous grade with the new grade and shows both grades.
@@ -1806,8 +1808,9 @@ label.
    Enter `assignment submit a/PS1 id/A0234567Y s/no` twice. Each time, expect
    `Ben Lim's PS1 submission status is already not submitted. Nothing changed.` without `Changes saved.`
    The model and saved file should remain unchanged.
-3. Enter `assignment grade a/PS1 id/A0234567Y m/87`. Expect an error with the exact command
-   `assignment submit a/PS1 id/A0234567Y s/yes`. Enter `assignment submit a/PS1 id/A0123456X id/A0999999Z s/yes`.
+3. Enter `assignment grade a/PS1 id/A0234567Y m/87`. Expect
+   `Recorded Ben Lim's PS1 submission status as submitted and grade 87.`, and the list shows Ben as `Submitted | 87`.
+   Enter `undo` to return Ben to `Not submitted | -`. Enter `assignment submit a/PS1 id/A0123456X id/A0999999Z s/yes`.
    Expect an error that student ID A0999999Z does not exist in T01, and both students still `Not submitted`.
    Then submit Alice and Ben together with `assignment submit a/PS1 id/A0123456X id/a0234567y id/A0123456X s/yes`.
    Expect one success line for Alice and one for Ben, in that order. Grade Alice with
