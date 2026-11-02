@@ -244,6 +244,105 @@ public class WorkspaceSmokeTest {
     }
 
     @Test
+    public void recordListing_otherAssignmentDeleted_doesNotReuseEarlierRename() throws Exception {
+        runOnFx(this::initializeWorkspace);
+        try {
+            runOnFx(() -> {
+                enter(input, "group use g/T01");
+                enter(input, "assignment add a/PS1");
+                enter(input, "assignment grade a/PS1 id/A0123456X m/87");
+                enter(input, "assignment list a/PS1");
+                enter(input, "assignment rename a/PS1 n/PS2");
+                enter(input, "assignment add a/PS3");
+                enter(input, "assignment grade a/PS3 id/A0123456X m/10");
+                enter(input, "assignment list a/PS3");
+                TextArea listing = (TextArea) root.lookup("#recordListing");
+                String requestedListing = listing.getText();
+                assertTrue(requestedListing.contains("Alice Tan | A0123456X | Submitted | 10"));
+
+                enter(input, "assignment delete a/PS3 f/yes");
+                assertAssignmentListingUnavailable("PS3", "T01");
+                enter(input, "undo");
+                assertEquals(requestedListing, listing.getText());
+                enter(input, "redo");
+                assertAssignmentListingUnavailable("PS3", "T01");
+            });
+        } finally {
+            runOnFx(() -> stage.hide());
+        }
+    }
+
+    @Test
+    public void recordListing_groupChanged_doesNotReusePreviousGroupsRename() throws Exception {
+        runOnFx(this::initializeWorkspace);
+        try {
+            runOnFx(() -> {
+                enter(input, "group use g/T02");
+                enter(input, "assignment add a/PS1");
+                enter(input, "group use g/T01");
+                enter(input, "assignment add a/PS1");
+                enter(input, "assignment list a/PS1");
+                enter(input, "assignment rename a/PS1 n/PS2");
+                TextArea listing = (TextArea) root.lookup("#recordListing");
+                String renamedListing = listing.getText();
+                assertTrue(renamedListing.startsWith("PS2 records for T01:"));
+
+                enter(input, "group use g/T02");
+                assertAssignmentListingUnavailable("PS2", "T02");
+                enter(input, "undo");
+                assertEquals(renamedListing, listing.getText());
+                enter(input, "redo");
+                assertAssignmentListingUnavailable("PS2", "T02");
+                enter(input, "assignment add a/PS2");
+                assertTrue(listing.getText().startsWith("PS2 records for T02:"));
+            });
+        } finally {
+            runOnFx(() -> stage.hide());
+        }
+    }
+
+    @Test
+    public void recordListing_oldNameReused_preservesRenameUndoRedoAfterDeletion() throws Exception {
+        runOnFx(this::initializeWorkspace);
+        try {
+            runOnFx(() -> {
+                enter(input, "group use g/T01");
+                enter(input, "assignment add a/PS1");
+                enter(input, "assignment grade a/PS1 id/A0123456X m/87");
+                enter(input, "assignment list a/PS1");
+                TextArea listing = (TextArea) root.lookup("#recordListing");
+                String originalListing = listing.getText();
+                enter(input, "assignment rename a/PS1 n/PS2");
+                String renamedListing = listing.getText();
+                enter(input, "assignment add a/PS1");
+                enter(input, "assignment delete a/PS2 f/yes");
+                assertAssignmentListingUnavailable("PS2", "T01");
+
+                enter(input, "undo");
+                assertEquals(renamedListing, listing.getText());
+                enter(input, "undo");
+                assertEquals(renamedListing, listing.getText());
+                enter(input, "undo");
+                assertEquals(originalListing, listing.getText());
+                enter(input, "redo");
+                assertEquals(renamedListing, listing.getText());
+                enter(input, "redo");
+                assertEquals(renamedListing, listing.getText());
+                enter(input, "redo");
+                assertAssignmentListingUnavailable("PS2", "T01");
+                enter(input, "assignment add a/PS2");
+                assertTrue(listing.getText().startsWith("PS2 records for T01:"));
+                enter(input, "undo");
+                assertAssignmentListingUnavailable("PS2", "T01");
+                enter(input, "undo");
+                assertEquals(renamedListing, listing.getText());
+            });
+        } finally {
+            runOnFx(() -> stage.hide());
+        }
+    }
+
+    @Test
     public void recordListing_pageKeysAndRefresh_stayInListingAndKeepPosition() throws Exception {
         runOnFx(this::initializeWorkspace);
         try {
@@ -1462,6 +1561,12 @@ public class WorkspaceSmokeTest {
     private static boolean hasVisibleVerticalScrollBar(Parent parent) {
         return parent.lookupAll(".scroll-bar").stream().anyMatch(node -> node instanceof ScrollBar bar
                 && bar.getOrientation() == Orientation.VERTICAL && bar.isVisible());
+    }
+
+    private void assertAssignmentListingUnavailable(String assignmentName, String groupName) {
+        TextArea listing = (TextArea) root.lookup("#recordListing");
+        assertEquals(MainWindow.MESSAGE_LISTING_UNAVAILABLE + "Assignment " + assignmentName + " does not exist in "
+                + groupName + ". See the group's assignments with: assignment list", listing.getText());
     }
 
     private TableView<?> studentTable() {
