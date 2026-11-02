@@ -137,7 +137,11 @@ neither takes focus from the command box. The last listing stays available throu
 changing the model or file. `MainWindow` keeps the list command that produced it and reruns that command after any
 command with saved changes, such as a mark, a group switch, or `undo`, so Records never shows outdated values. A
 list command changes no data, so rerunning it saves nothing and adds nothing to the undo history. Restarting
-clears the listing.
+clears the listing. An assignment listing keeps `assignment list a/NAME` with the stored name
+(`CommandResult#getListingCommand()`), and `assignment rename` returns the old and new form of that command
+(`CommandResult#getListingRename()`), so a listing of the renamed assignment moves to its new name. If rerunning
+fails, for example because the active group has no assignment of that name, Records says that the listing is no
+longer available and gives the first line of the reason, without the advice to create the assignment again.
 
 The command reference is shown only on the Help screen. `help` returns `CommandResult.forHelp(...)` with a one-line
 confirmation and, for `help TOPIC`, the topic. `MainWindow` then asks `WorkspacePanel` to open Help, which scrolls
@@ -163,10 +167,12 @@ It starts a fresh history position, returns focus to the input, and places the c
 A repeated template clears failed-input styling too. Enter still follows the normal parser and command path;
 an incomplete template stays editable after its validation error.
 
-Groups, attendance, participation, and assignments have no screen of their own; their commands show records in the
-feedback box. Earlier versions showed empty **Coming soon** tables for them, which looked like unfinished work, so they
-were removed. Table screens for these records remain a possible future enhancement: each would observe the model in the
-same way as the Students screen, add a `WorkspaceView` constant, and register a button in `NavigationBar`.
+Groups have no screen of their own: the group strip always shows them, and `group list` shows them in the feedback
+box. Attendance, participation, and assignment listings appear as text on the Records screen described above.
+Earlier versions showed empty **Coming soon** tables for each kind of record, which looked like unfinished work, so
+they were replaced by Records. Table views of these records remain a possible future enhancement: each would observe
+the model in the same way as the Students screen, add a `WorkspaceView` constant, and register a button in
+`NavigationBar`.
 
 The screenshot below shows the implemented Students screen with an active group and its roster.
 
@@ -178,8 +184,9 @@ The original mock-up is preserved as [`UiMockup.png`](images/UiMockup.png). The 
 
 * The mock-up's dark menu header and separate group strip are replaced by a light group bar and a screen-navigation row.
 * The app uses native JavaFX controls rather than rendering the mock-up as an HTML page.
-* The mock-up shows an Attendance screen. The app has Students, Help, and Storage screens and the group bar, all
-  showing live data. Attendance, participation, and assignment records appear in the feedback box instead.
+* The mock-up shows an Attendance screen. The app has Students, Records, Help, and Storage screens and the group bar,
+  all showing live data. Attendance, participation, and assignment listings appear as text on Records instead of
+  as an attendance table.
 
 The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-T12-4/tp/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-T12-4/tp/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
 
@@ -278,12 +285,12 @@ Logic logic = new LogicManager(model, storage, registry, dataLoadStatus);
 
 * `TAssistParser` and `LogicManager` take snapshots of registrations at construction. Later changes to the source
   registry do not change the running parser or its help.
-* A feature keyword cannot shadow a built-in command (`help`, `view` or `exit`). Duplicate registrations and invalid registration
+* A feature keyword cannot shadow a built-in command (`help`, `view`, `undo`, `redo` or `exit`). Duplicate registrations and invalid registration
   keywords are developer errors and throw `IllegalArgumentException`.
 
 #### In-app help
 
-* The built-in commands `help`, `view` and `exit` keep their `HelpEntry` objects in `HelpCatalog`. `TAssistParser` combines
+* The built-in commands `help`, `view`, `undo`, `redo` and `exit` keep their `HelpEntry` objects in `HelpCatalog`. `TAssistParser` combines
   them with the registered feature entries, and `Logic#getHelpEntries()` exposes the combined list.
 * `HelpCommandParser` accepts an optional topic and maps `groups`, `students`, and `assignments` to their singular
   topics before validation. `HelpCatalog.TOPICS` lists the canonical topics, and an unknown topic
@@ -599,8 +606,8 @@ changes nothing when the week has no score.
   * Pros: Fixes any mistake, not only weekly records.
   * Cons: It only helps right after the mistake. A wrong mark noticed a week later stays in the data and the export.
 
-`participation set`, `participation list`, and `participation clear` use the standard feedback box and keep the
-current screen selected. Existing JSON storage already persists participation records, so the
+`participation set` and `participation clear` report in the standard feedback box and keep the current screen
+selected; `participation list` opens Records with the complete listing, like the other list commands. Existing JSON storage already persists participation records, so the
 feature adds no new file format. Loading rejects a fractional participation score, or one outside 0–5, the same way
 it rejects a week outside 1–13. `ParticipationCommandsIntegrationTest` exercises startup registration, help,
 restart persistence, clearing a score, and rejected commands preserving existing records and the file. Command and
@@ -816,7 +823,7 @@ Existing `LogicManager` persistence saves the result.
 selects attendance through `Group#getWeeklyRecordEntries`. If the group has no students, it returns
 `No students in GROUP.` Otherwise, it lists every student, formatting each row with the student's name, ID, and
 capitalized status, using `WeeklyRecordEntry#formatValueOrNotRecorded` to show a missing mark as `Not recorded`.
-The rows appear in the scrollable command feedback box.
+The rows appear on the Records screen, and the feedback box shows only the heading.
 
 `AttendanceClearCommandParser` requires `id/` and `w/` exactly once, with the same validation as marking. It does not
 accept `s/`, so a status copied from a mark command is reported instead of being ignored. `AttendanceClearCommand`
@@ -1173,6 +1180,12 @@ Priority 1 = Must have in MVP, Priority 2 = Nice to have, Priority 3 = Stretch
 | 39 | P2 | TA | export a group's records to CSV | hand figures to the course coordinator |
 | 40 | P3 | TA | import partial records from another TA's export | take over a group mid-semester |
 | 41 | P3 | busy TA | undo and redo my latest changes | recover quickly from a command entered by mistake |
+| 42 | P2 | TA | rename a tutorial group | fix a typo in its name without losing its students and records |
+| 43 | P2 | TA | delete a tutorial group | remove a group I no longer teach |
+| 44 | P2 | TA | rename an assignment | fix its name without losing its submissions and grades |
+| 45 | P2 | TA | delete an assignment | remove one that I created by mistake |
+| 46 | P3 | TA | sort the students of a group by name or ID | find a student quickly in a long roster |
+| 47 | P2 | TA | return to the records I listed last | check them again after looking at another screen |
 
 
 ### Use cases
@@ -1354,8 +1367,8 @@ The following extensions apply to every use case that changes or views records o
 
 **MSS**
 
-1.  TA requests to set a student's participation score for a given week.
-2.  TAssist records the score and shows a confirmation.
+1.  TA requests to set the participation score of one or more students for a given week.
+2.  TAssist records the score for each student and shows a confirmation for each.
 3.  TA requests to view the group's participation scores for that week.
 4.  TAssist shows the participation score of every student in the group for that week.
 
@@ -1363,8 +1376,8 @@ The following extensions apply to every use case that changes or views records o
 
 **Extensions**
 
-* 1a. No student in the active group has the given student ID.
-    * 1a1. TAssist shows an error message stating that the student does not exist in the group.
+* 1a. A given student ID does not belong to any student in the active group.
+    * 1a1. TAssist shows an error message naming the first such ID, and changes no score.
 
       Use case resumes at step 1.
 
@@ -1559,6 +1572,10 @@ The following extensions apply to every use case that changes or views records o
 * **Submission status**: Whether a student has submitted a given assignment
 * **Grade**: A whole number from 0 to 100 given to a student for an assignment
 * **Command box**: The text field in which the user types commands, one line at a time
+* **Feedback box**: The area below the screen that shows the result or error of the last command
+* **Prefix**: The short label that starts a parameter, such as `g/`, `id/` or `w/`
+* **Students screen**: The screen that lists the students of the active group
+* **Records screen**: The screen that shows the attendance, participation or assignment records listed last
 
 --------------------------------------------------------------------------------------------------------------------
 
