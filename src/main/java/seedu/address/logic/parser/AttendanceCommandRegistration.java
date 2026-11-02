@@ -40,7 +40,7 @@ public final class AttendanceCommandRegistration {
                 new HelpEntry("attendance", AttendanceClearCommand.MESSAGE_USAGE,
                         "Remove a student's attendance mark for a week from 1 to 13, so that the week shows "
                                 + "Not recorded again. Use it to correct a mark entered for the wrong student or week. "
-                                + "IDs ignore case.",
+                                + "IDs ignore case. Repeat id/ to clear several students at once.",
                         List.of("attendance clear id/A0123456X w/3")));
     }
 }

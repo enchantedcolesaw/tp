@@ -547,7 +547,7 @@ public class WorkspaceSmokeTest {
                 assertEquals("Recorded participation score 0 for Alice Tan in Week 3.", feedback.getText());
                 enter(input, "participation list w/3");
                 TextArea listing = (TextArea) root.lookup("#recordListing");
-                assertEquals("Participation for T01, Week 3:\nAlice Tan | A0123456X | 0"
+                assertEquals("Participation for T01, Week 3: 1 recorded, 2 not recorded\nAlice Tan | A0123456X | 0"
                         + "\nBen Lim | A0234567Y | Not recorded\nCarl Goh | A0345678Z | Not recorded",
                         listing.getText());
                 enter(input, "participation set id/A0123456X w/3 s/6");
@@ -790,7 +790,7 @@ public class WorkspaceSmokeTest {
                 assertTrue(listing.getText().contains("Alice Tan | A0123456X | Present"));
                 assertTrue(listing.getText().contains("Student | A116 | Not recorded"));
                 assertEquals("records", tabs.getSelectionModel().getSelectedItem().getId());
-                assertEquals("Attendance for T01, Week 3:", feedback.getText());
+                assertEquals("Attendance for T01, Week 3: 1 present, 0 absent, 19 not recorded", feedback.getText());
                 assertTrue(input.getText().isEmpty());
             });
             runOnFx(() -> render(root, "attendance-list", 853, 440));

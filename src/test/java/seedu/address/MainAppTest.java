@@ -194,11 +194,11 @@ public class MainAppTest {
         app.init();
 
         assertEquals(DataLoadStatus.LOADED, app.getDataLoadStatus());
-        assertEquals("Participation for T01, Week 1:\nAlice Tan | A1 | 3",
+        assertEquals("Participation for T01, Week 1: 1 recorded, 0 not recorded\nAlice Tan | A1 | 3",
                 app.logic.execute("participation list w/1").getFeedbackToUser());
-        assertEquals("Participation for T01, Week 2:\nAlice Tan | A1 | 5",
+        assertEquals("Participation for T01, Week 2: 1 recorded, 0 not recorded\nAlice Tan | A1 | 5",
                 app.logic.execute("participation list w/2").getFeedbackToUser());
-        assertEquals("Attendance for T01, Week 1:\nAlice Tan | A1 | Present",
+        assertEquals("Attendance for T01, Week 1: 1 present, 0 absent, 0 not recorded\nAlice Tan | A1 | Present",
                 app.logic.execute("attendance list w/1").getFeedbackToUser());
         assertTrue(app.logic.execute("group add g/T02").hasSavedChanges());
         app.stop();

@@ -31,7 +31,7 @@ public class AttendanceListCommandTest {
         model.setStudent(TypicalGroups.NAME_T01, ALICE.withAttendanceRecord(3, "PRESENT"));
         model.setStudent(TypicalGroups.NAME_T01, CARL.withAttendanceRecord(3, "ABSENT"));
 
-        assertListingUnchanged(3, "Attendance for T01, Week 3:\n"
+        assertListingUnchanged(3, "Attendance for T01, Week 3: 1 present, 1 absent, 1 not recorded\n"
                 + "Alice Tan | A0123456X | Present\n"
                 + "Ben Lim | A0234567Y | Not recorded\n"
                 + "Carl Goh | A0345678Z | Absent");
@@ -42,7 +42,7 @@ public class AttendanceListCommandTest {
     public void execute_invalidStoredStatus_showsStoredText() {
         model.setStudent(TypicalGroups.NAME_T01, ALICE.withAttendanceRecord(3, "late"));
 
-        assertListingUnchanged(3, "Attendance for T01, Week 3:\n"
+        assertListingUnchanged(3, "Attendance for T01, Week 3: 0 present, 0 absent, 2 not recorded\n"
                 + "Alice Tan | A0123456X | late\n"
                 + "Ben Lim | A0234567Y | Not recorded\n"
                 + "Carl Goh | A0345678Z | Not recorded");
@@ -53,7 +53,7 @@ public class AttendanceListCommandTest {
     public void execute_noRecordsForSelectedWeek_listsEveryoneAsNotRecorded() {
         model.setStudent(TypicalGroups.NAME_T01, ALICE.withAttendanceRecord(3, "PRESENT"));
         for (int week : new int[] {1, 13}) {
-            assertListingUnchanged(week, "Attendance for T01, Week " + week + ":\n"
+            assertListingUnchanged(week, "Attendance for T01, Week " + week + ": 0 present, 0 absent, 3 not recorded\n"
                     + "Alice Tan | A0123456X | Not recorded\n"
                     + "Ben Lim | A0234567Y | Not recorded\n"
                     + "Carl Goh | A0345678Z | Not recorded");
@@ -64,7 +64,7 @@ public class AttendanceListCommandTest {
     public void execute_otherActiveGroup_doesNotListAnotherGroupsRecords() {
         model.setStudent(TypicalGroups.NAME_T01, ALICE.withAttendanceRecord(3, "PRESENT"));
         model.setActiveGroup(TypicalGroups.NAME_T02);
-        assertListingUnchanged(3, "Attendance for T02, Week 3:\n"
+        assertListingUnchanged(3, "Attendance for T02, Week 3: 0 present, 0 absent, 2 not recorded\n"
                 + "Daniel Ong | A0456789W | Not recorded\n"
                 + "Elle Teo | A0567890U | Not recorded");
     }

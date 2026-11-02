@@ -33,7 +33,7 @@ public class ParticipationCommandsIntegrationTest extends AppIntegrationTest {
         assertEquals("Recorded participation score 2 for Alice Tan in Week 3.",
                 feedback("participation set id/a0123456x w/3 s/2"));
         restart();
-        assertEquals("Participation for T01, Week 3:\nAlice Tan | A0123456X | 2"
+        assertEquals("Participation for T01, Week 3: 1 recorded, 2 not recorded\nAlice Tan | A0123456X | 2"
                 + "\nBen Lim | A0234567Y | Not recorded\nCarl Goh | A0345678Z | Not recorded",
                 feedback("participation list w/3"));
         assertEquals("Updated Alice Tan's participation score for Week 3: 2 to 4.",
@@ -78,7 +78,7 @@ public class ParticipationCommandsIntegrationTest extends AppIntegrationTest {
     public void init_participationHelp_registersWorkingExamples() throws Exception {
         List<HelpEntry> entries = HelpCatalog.filterByTopic(app.logic.getHelpEntries(), "participation");
         assertEquals(List.of("participation set id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/SCORE",
-                "participation list w/WEEK", "participation clear id/STUDENT_ID w/WEEK"),
+                "participation list w/WEEK", "participation clear id/STUDENT_ID [id/STUDENT_ID]... w/WEEK"),
                 entries.stream().map(HelpEntry::getCommandFormat).toList());
         assertEquals(CommandResult.forHelp("Showing participation commands.", "participation"),
                 app.logic.execute("help participation"));
@@ -104,7 +104,7 @@ public class ParticipationCommandsIntegrationTest extends AppIntegrationTest {
                 feedback("participation clear id/a0123456x w/3"));
         restart();
 
-        assertEquals("Participation for T01, Week 3:\nAlice Tan | A0123456X | Not recorded"
+        assertEquals("Participation for T01, Week 3: 1 recorded, 2 not recorded\nAlice Tan | A0123456X | Not recorded"
                 + "\nBen Lim | A0234567Y | 2\nCarl Goh | A0345678Z | Not recorded",
                 feedback("participation list w/3"));
         assertEquals(5, app.model.getActiveGroupStudentList().getFirst().getParticipationRecord(4).orElseThrow());

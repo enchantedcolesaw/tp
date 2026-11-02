@@ -586,12 +586,13 @@ The `parse participation set` reference frame is shown below. `CommandRegistry` 
 ![Parsing of the `participation set id/A0123456X w/3 s/2` command](images/ParticipationSetParseSequenceDiagram.png)
 
 `ParticipationListCommand` uses `Group.getWeeklyRecordEntries` with `Student::getParticipationRecords`, so it reuses
-the shared weekly listing mechanism. Each row formats its value or `Not recorded`; zero is an actual score.
+the shared weekly listing mechanism. Each row formats its value or `Not recorded`; zero is an actual score. The
+heading counts the students with and without a score, so a recorded zero counts as recorded.
 
 Because zero is an actual score, setting a score to 0 cannot undo a score entered by mistake.
 `ParticipationClearCommand` removes the week's score with `withoutParticipationRecord`, so the week shows
-`Not recorded` again. It works like `attendance clear`: it takes only `id/` and `w/`, names the score it removed, and
-changes nothing when the week has no score.
+`Not recorded` again. It works like `attendance clear`: it takes only `id/`, which may be repeated, and `w/`, names
+each score it removed, and changes nothing for a student whose week has no score.
 
 **Aspect: How a TA removes a wrong weekly record**
 
@@ -829,14 +830,19 @@ Existing `LogicManager` persistence saves the result.
 selects attendance through `Group#getWeeklyRecordEntries`. If the group has no students, it returns
 `No students in GROUP.` Otherwise, it lists every student, formatting each row with the student's name, ID, and
 capitalized status, using `WeeklyRecordEntry#formatValueOrNotRecorded` to show a missing mark as `Not recorded`.
-The rows appear on the Records screen, and the feedback box shows only the heading.
+The heading counts the present, absent, and unmarked students, counting stored values rather than display text, so
+the TA can see at a glance whether anyone was missed. The rows appear on the Records screen, and the feedback box
+shows only the heading.
 
-`AttendanceClearCommandParser` requires `id/` and `w/` exactly once, with the same validation as marking. It does not
-accept `s/`, so a status copied from a mark command is reported instead of being ignored. `AttendanceClearCommand`
-finds the student in the active group, then replaces them through `Model#setStudent` with a copy from
-`withoutAttendanceRecord`. The feedback names the status it removed, such as `present to Not recorded`, so a TA who
-cleared the wrong week can mark it again. If the week has no mark, the command changes nothing and says so. The data
-is then unchanged, so `LogicManager` does not save, just as for a repeated mark.
+`AttendanceClearCommandParser` requires `w/` exactly once and declares `id/` with `allowRepeated`, as
+`AttendanceMarkCommandParser` does, so that one command can undo a batch mark; `parseStudentIds` drops repeated IDs.
+It does not accept `s/`, so a status copied from a mark command is reported instead of being ignored.
+`AttendanceClearCommand` finds every named student in the active group through `Command#getStudents` first, so an
+unknown ID clears nothing. It then replaces each student that has a mark through `Model#setStudent` with a copy from
+`withoutAttendanceRecord`, with one feedback line per student. Each line names the status it removed, such as
+`present to Not recorded`, so a TA who cleared the wrong week can mark it again. A student whose week has no mark is
+reported as unchanged. If no named student has a mark, the data is unchanged, so `LogicManager` does not save, just as
+for a repeated mark.
 
 #### Where per-student records are stored
 
@@ -1363,9 +1369,9 @@ The following extensions apply to every use case that changes or views records o
 
       Use case ends.
 
-* 5b. TA notices a mark for a student or week that should have none (e.g. the TA marked the wrong week).
-    * 5b1. TA requests to clear that student's attendance for that week.
-    * 5b2. TAssist removes the mark and shows the status it removed.
+* 5b. TA notices marks for one or more students or a week that should have none (e.g. the TA marked the wrong week).
+    * 5b1. TA requests to clear those students' attendance for that week.
+    * 5b2. TAssist removes each mark and shows the status it removed for each student.
 
       Use case resumes at step 4.
 
@@ -1662,6 +1668,7 @@ through the real parsers, model and JSON storage, but the steps below also check
       Expected: Alice is `Absent`, Ben is `Absent` and Chloe is `Not recorded`; Alice has 3, Ben is
       `Not recorded` and Chloe has 0; Alice is `Submitted | 87`, Ben is `Submitted | -` and Chloe is
       `Not submitted | -`.
+      The headings count `0 present, 2 absent, 1 not recorded` and `2 recorded, 1 not recorded`.
    1. Enter `group use g/T02` and `attendance list w/1`.<br>
       Expected: T02's Alice is `Present`. Records of one group never appear in another.
 
@@ -1793,6 +1800,10 @@ label.
    `Cleared Alice Tan's participation score for Week 3: 4 to Not recorded.` List Week 3; Alice shows `Not recorded`.
    Enter the clear command again. Expect `Alice Tan has no participation score recorded for Week 3. Nothing changed.`
    Close and reopen, then list Weeks 3 and 13. Expect `Not recorded` and 5.
+   Enter `participation set id/A0123456X id/A0234567Y w/4 s/1`, then
+   `participation clear id/A0123456X id/A0999999Z w/4`. Expect an unknown-student error naming A0999999Z, and both
+   Week 4 scores remain. Enter `participation clear id/A0123456X id/A0234567Y w/4`. Expect one `Cleared ...` line for
+   Alice, then one for Ben.
 6. Try `participation clear id/A0123456X w/3 s/2`, `participation clear w/3`, and
    `participation clear id/A0123456X w/3 now`. Expect unknown-prefix, missing-prefix, and
    `Unexpected extra text after 'w/3': 'now'. This value cannot contain spaces.` errors without changing any record.
@@ -2001,10 +2012,11 @@ label.
       Expected: `Updated Alice Tan's attendance for Week 3: present to absent.`
    1. Enter `attendance mark id/A0123456X w/3 s/absent` again.
       Expected: `Alice Tan's attendance for Week 3 is already absent. Nothing changed.`
-   1. Enter `attendance list w/3`. Expected: `Attendance for T01, Week 3:` and
-      `Alice Tan | A0123456X | Absent`. Other students, if present, show `Not recorded`.
-   1. Enter `attendance list w/13`. Expected: `Attendance for T01, Week 13:`, with every student shown as
+   1. Enter `attendance list w/3`. Expected: a heading `Attendance for T01, Week 3: 0 present, 1 absent, N not recorded`,
+      where N is the number of other students, and `Alice Tan | A0123456X | Absent`. Other students show
       `Not recorded`.
+   1. Enter `attendance list w/13`. Expected: `Attendance for T01, Week 13: 0 present, 0 absent, N not recorded`,
+      where N is the number of students, with every student shown as `Not recorded`.
    1. Close and reopen the app. Enter `attendance list w/3`. Expected: Alice is still absent.
 
 1. Clearing a mark
@@ -2016,6 +2028,8 @@ label.
       `Changes saved.`
    1. Enter `attendance list w/4`. Expected: every student shows `Not recorded`.
    1. Enter `attendance list w/3`. Expected: Alice is still absent in Week 3.
+   1. Enter `attendance clear id/A0123456X id/A0999999Z w/3`.
+      Expected: an unknown-student error naming A0999999Z, and `attendance list w/3` still shows Alice as absent.
    1. Enter `attendance clear id/A0123456X w/4 s/present`.
       Expected: `Unknown prefix 's/'. Allowed prefixes: id/ w/.`
    1. Enter `attendance clear id/A0123456X w/4 now`.

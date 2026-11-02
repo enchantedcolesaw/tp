@@ -25,10 +25,10 @@ public class ParticipationListCommandTest {
         model.setStudent(NAME_T01, ALICE.withParticipationRecord(3, 0));
         Model expected = new ModelManager(model.getTAssist(), new UserPrefs());
         assertRecordListingSuccess(new ParticipationListCommand(3), model,
-                "Participation for T01, Week 3:\nAlice Tan | A0123456X | 0"
+                "Participation for T01, Week 3: 1 recorded, 2 not recorded\nAlice Tan | A0123456X | 0"
                         + "\nBen Lim | A0234567Y | Not recorded\nCarl Goh | A0345678Z | Not recorded", expected);
         assertRecordListingSuccess(new ParticipationListCommand(13), model,
-                "Participation for T01, Week 13:\nAlice Tan | A0123456X | Not recorded"
+                "Participation for T01, Week 13: 0 recorded, 3 not recorded\nAlice Tan | A0123456X | Not recorded"
                         + "\nBen Lim | A0234567Y | Not recorded\nCarl Goh | A0345678Z | Not recorded", expected);
     }
 
