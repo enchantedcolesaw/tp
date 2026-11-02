@@ -52,8 +52,21 @@ final class StudentCommandParserUtil {
         if (!missingPrefixes.isEmpty()) {
             throw new ParseException(getMissingParametersMessage(usage, missingPrefixes));
         }
+        verifyNoBlankValues(values, usage, prefixes);
         parser.verifyNoExtraText(values);
         return values;
+    }
+
+    /**
+     * Reports the first of {@code prefixes} that has a blank value as a missing value, followed by {@code usage}.
+     */
+    static void verifyNoBlankValues(ArgumentMultimap values, String usage, Prefix... prefixes) throws ParseException {
+        for (Prefix prefix : prefixes) {
+            if (values.getValue(prefix).filter(String::isBlank).isPresent()) {
+                throw new ParseException(String.format(TAssistArgumentParser.MESSAGE_BLANK_VALUE, prefix)
+                        + " Usage: " + usage);
+            }
+        }
     }
 
     /**

@@ -369,7 +369,11 @@ Prefixes contain lowercase letters followed by `/`, and start at the beginning o
 Prefix-like tokens at those boundaries are reserved for parameters. A slash embedded in a value does not separate
 parameters, and URL schemes such as `https://` are retained as values. Parameters can appear in any order.
 Unknown prefixes, repeated parameters, missing required parameters, and unexpected text before parameters
-produce specific errors. If a missing prefix appears inside another value right after other text, as `w/` does in
+produce specific errors. A required prefix typed with a blank value, as in `assignment add a/`, is reported as
+`Missing value after a/.` with the command's format, after any wholly missing prefixes, so a blank value is not
+described as an invalid one. Optional prefixes keep blank values for their command to check, which lets the group
+commands say `Missing group name.` and `student find` name the blank filter; the student commands check theirs with
+`StudentCommandParserUtil#verifyNoBlankValues`. If a missing prefix appears inside another value right after other text, as `w/` does in
 `id/A0123456Xw/3`, the error says `Missing space before w/ in 'id/A0123456Xw/3'.` instead of naming `w/` as
 missing. It quotes only the value's first word, the only word that can hide a prefix, since a later word with a
 slash is read as a prefix of its own. Such a word, as in `n/Alice Tanid/A1`, is an unknown prefix (`Tanid/`). The
@@ -626,8 +630,9 @@ participation feedback and failed-input retention through the JavaFX command box
 `StudentCommandRegistration` registers `student add`, `student edit`, `student list`, `student find`,
 `student sort`, and `student delete`, including their help formats and examples. `MainApp.init` installs these registrations before constructing `LogicManager`.
 The add and delete parsers use `StudentCommandParserUtil` to reject malformed parameters and report missing
-prefixes with the command's usage. Present but blank values go through the existing domain validators, so a blank
-name or ID reports its value constraints. Listing accepts no parameters. `StudentName` accepts `s/o`, `d/o`, `a/l`
+prefixes with the command's usage. `StudentCommandParserUtil#verifyNoBlankValues` then reports a blank value, such as
+`n/` in `student add` or `nid/` in `student edit`, as `Missing value after nid/.` with the command's format, instead
+of describing it as an invalid name or ID. Listing accepts no parameters. `StudentName` accepts `s/o`, `d/o`, `a/l`
 and `a/p` only as a separate word between two parts of a name, and the add and find parsers keep them in the name as
 literal words (see [Command registration and shared validation](#command-registration-and-shared-validation)).
 
@@ -1845,7 +1850,7 @@ label.
    Enter `assignment add a/Mid-term   1`. Expect `Created assignment Mid-term 1 for T01.`
 7. Try `assignment list a/PS9`, `assignment add a/PS_1`, `assignment add a/`, `assignment add`,
    `assignment add a/PS2 a/PS3`, and `assignment add a/PS2 n/x`. Expect specific unknown-assignment, invalid-name,
-   missing-parameter, and duplicate- or unknown-prefix errors, without changing the group or the file. Enter
+   missing-value (`Missing value after a/.`), missing-parameter, and duplicate- or unknown-prefix errors, without changing the group or the file. Enter
    `assignment grade a/PS1 id/A0123456X g/87`; expect an unknown-prefix error, since `g/` is reserved for groups.
 8. Switch to group T02 and enter `assignment list a/PS1`. Expect an unknown-assignment error, because assignments
    belong to one group.

@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
+import static seedu.address.logic.parser.CommandParserTestUtil.blankValueMessage;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalStudents.ALICE;
 
@@ -64,11 +65,11 @@ public class StudentEditCommandParserTest {
     public void parse_invalidValues_reportsConstraintOfThatValue() {
         assertParseFailure(parser, "id/ABC n/Alicia", StudentId.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, "id/A1 n/Alicia1", StudentName.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, "id/A1 n/", StudentName.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "id/A1 n/", blankValueMessage("n/", StudentEditCommand.MESSAGE_USAGE));
         assertParseFailure(parser, "id/A1 n/" + "a".repeat(61), StudentName.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, "id/A1 nid/ABC", StudentId.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, "id/A1 nid/", StudentId.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, "id/ nid/A2", StudentId.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "id/A1 nid/", blankValueMessage("nid/", StudentEditCommand.MESSAGE_USAGE));
+        assertParseFailure(parser, "id/ nid/A2", blankValueMessage("id/", StudentEditCommand.MESSAGE_USAGE));
     }
 
     @Test

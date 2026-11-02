@@ -36,4 +36,11 @@ public class CommandParserTestUtil {
             assertEquals(expectedMessage, pe.getMessage());
         }
     }
+
+    /**
+     * Returns the error for a blank value after {@code prefix}, followed by the command format {@code usage}.
+     */
+    public static String blankValueMessage(String prefix, String usage) {
+        return String.format(TAssistArgumentParser.MESSAGE_BLANK_VALUE, prefix) + " Usage: " + usage;
+    }
 }

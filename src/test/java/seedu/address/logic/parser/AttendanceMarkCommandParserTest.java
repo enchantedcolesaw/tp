@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
+import static seedu.address.logic.parser.CommandParserTestUtil.blankValueMessage;
 import static seedu.address.testutil.TypicalStudents.ALICE;
 import static seedu.address.testutil.TypicalStudents.BEN;
 
@@ -37,7 +38,8 @@ public class AttendanceMarkCommandParserTest {
 
     @Test
     public void parse_repeatedStudentIdWithBadValue_reportsThatValue() {
-        assertParseFailure(parser, "id/A0123456X id/ w/3 s/present", StudentId.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "id/A0123456X id/ w/3 s/present",
+                blankValueMessage("id/", AttendanceMarkCommand.MESSAGE_USAGE));
         assertParseFailure(parser, "id/A0123456X id/invalid! w/3 s/present",
                 String.format(TAssistParserUtil.MESSAGE_INVALID_STUDENT_ID_IN_LIST, "invalid!"));
         assertParseFailure(parser, "id/A0123456X later id/A0234567Y w/3 s/present",
@@ -77,11 +79,12 @@ public class AttendanceMarkCommandParserTest {
 
     @Test
     public void parse_invalidValues_reportsValueConstraints() {
-        assertParseFailure(parser, "id/ w/3 s/present", StudentId.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "id/ w/3 s/present", blankValueMessage("id/", AttendanceMarkCommand.MESSAGE_USAGE));
         assertParseFailure(parser, "id/invalid! w/3 s/present", StudentId.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, "id/A0123456X w/ s/present", AttendanceCommandParserUtil.MESSAGE_INVALID_WEEK);
+        assertParseFailure(parser, "id/A0123456X w/ s/present",
+                blankValueMessage("w/", AttendanceMarkCommand.MESSAGE_USAGE));
         assertParseFailure(parser, "id/A0123456X w/14 s/present", AttendanceCommandParserUtil.MESSAGE_INVALID_WEEK);
-        assertParseFailure(parser, "id/A0123456X w/3 s/", AttendanceStatus.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "id/A0123456X w/3 s/", blankValueMessage("s/", AttendanceMarkCommand.MESSAGE_USAGE));
         assertParseFailure(parser, "id/A0123456X w/3 s/late", AttendanceStatus.MESSAGE_CONSTRAINTS);
     }
 

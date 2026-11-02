@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
+import static seedu.address.logic.parser.CommandParserTestUtil.blankValueMessage;
 import static seedu.address.testutil.TypicalStudents.ALICE;
 import static seedu.address.testutil.TypicalStudents.BEN;
 
@@ -49,6 +50,8 @@ public class ParticipationClearCommandParserTest {
         for (String id : new String[] {"ABC", "A1!", "1".repeat(21)}) {
             assertParseFailure(parser, "id/" + id + " w/3", StudentId.MESSAGE_CONSTRAINTS);
         }
+        assertParseFailure(parser, "id/A0123456X w/", blankValueMessage("w/", ParticipationClearCommand.MESSAGE_USAGE));
+        assertParseFailure(parser, "id/ w/3", blankValueMessage("id/", ParticipationClearCommand.MESSAGE_USAGE));
     }
 
     @Test

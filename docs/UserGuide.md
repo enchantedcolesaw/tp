@@ -475,7 +475,8 @@ Format: `student sort by/FIELD`
   restarting also resets both.
 
 For example, enter `student find n/alice`, then `student sort by/id` to order only matching students by ID.
-An unsupported or blank field shows `Invalid sort field. Use by/name or by/id.` Text after the field, as in
+An unsupported field shows `Invalid sort field. Use by/name or by/id.`, and a blank one shows
+`Missing value after by/. Type the value right after the prefix.` with the format. Text after the field, as in
 `student sort by/id now`, shows `Unexpected extra text after 'by/id': 'now'. This value cannot contain spaces.`
 Sorting zero displayed students reports, for example, `Sorted 0 students in T01 by name.`
 
@@ -510,7 +511,8 @@ Duplicate ID when editing | `Student ID A0234567Y already exists in T01.` Choose
 Nothing to edit | `Nothing to edit. Include a new name with n/ or a new student ID with nid/. Usage: student edit id/STUDENT_ID [n/NEW_NAME] [nid/NEW_ID]` Add `n/`, `nid/`, or both.
 Missing parameter | `Missing required parameter(s): id/. Usage: student add n/NAME id/STUDENT_ID` names the missing prefixes, followed by the command's format. Supply all required prefixes.
 Missing space before a prefix | `Missing space before id/ in 'n/Aliceid/A0123456X'. Put a space before each prefix.` Add a space before the named prefix.
-Invalid or blank value | The feedback identifies the invalid student name or ID and gives its rules.
+Invalid value | The feedback identifies the invalid student name or ID and gives its rules.
+Blank value | `Missing value after id/. Type the value right after the prefix.` followed by the command's format.
 Repeated or unknown prefix | The feedback identifies the prefix. Use only the command's documented prefixes, once each.
 Extra text after a value | The feedback names the extra text after a single-word value such as `id/A0123456X`, `f/yes`, or `by/id`, and says that value cannot contain spaces. Remove the extra text, or add the prefix it was meant to follow.
 Extra input to `student list` | `This command takes no parameters. Remove the extra input.`
@@ -544,8 +546,9 @@ Problem | Feedback and correction
 --------|------------------------
 No active group | `No active tutorial group. Create or select a group first.` Use `group add` or `group use`.
 Unknown student | `Student ID A0999999Z does not exist in T01. See students in the active group with: student list` Check the ID, or switch to the student's group with `group use`.
-Invalid or blank week | `Invalid week. Enter a number from 1 to 13.` Supply digits only, without a sign or decimal point.
-Invalid or blank status | `Invalid attendance status. Use present or absent.` Supply `present` or `absent` after `s/`.
+Invalid week | `Invalid week. Enter a number from 1 to 13.` Supply digits only, without a sign or decimal point.
+Invalid status | `Invalid attendance status. Use present or absent.` Supply `present` or `absent` after `s/`.
+Blank value | `Missing value after w/. Type the value right after the prefix.` followed by the command's format.
 Missing parameter | The feedback names the missing prefixes. Include `id/`, `w/`, and `s/` for marking; `w/` for listing; `id/` and `w/` for clearing.
 Repeated or unknown prefix | The feedback names the prefix. Use only the documented prefixes, once each, except `id/` in `attendance mark` and `attendance clear`.
 Extra text after a value | The feedback names the extra text after a single-word value such as `w/3` in `w/3 please`, and says that value cannot contain spaces. Remove the extra text, or add the prefix it was meant to follow.
@@ -671,8 +674,9 @@ Problem | Feedback and correction
 --------|------------------------
 No active group | `No active tutorial group. Create or select a group first.` Use `group add` or `group use`.
 Unknown student | `Student ID A0999999Z does not exist in T01. See students in the active group with: student list` Check the ID, or switch to the student's group with `group use`.
-Invalid or blank week | `Invalid week. Enter a number from 1 to 13.` Supply digits only, without a sign or decimal point.
-Invalid or blank score | `Invalid participation score. Enter a whole number from 0 to 5.` Supply one of 0, 1, 2, 3, 4, or 5.
+Invalid week | `Invalid week. Enter a number from 1 to 13.` Supply digits only, without a sign or decimal point.
+Invalid score | `Invalid participation score. Enter a whole number from 0 to 5.` Supply one of 0, 1, 2, 3, 4, or 5.
+Blank value | `Missing value after s/. Type the value right after the prefix.` followed by the command's format.
 Missing parameter | The feedback names the missing prefixes. Include `id/`, `w/`, and `s/` for setting; `w/` for listing; `id/` and `w/` for clearing.
 Repeated or unknown prefix | The feedback names the prefix. Use only the documented prefixes, once each, except `id/` in `participation set` and `participation clear`.
 Extra text after a value | The feedback names the extra text after a single-word value such as `id/A0123456X` or `w/3`, and says that value cannot contain spaces. Remove the extra text, or add the prefix it was meant to follow.
@@ -805,7 +809,8 @@ Problem | Feedback and correction
 No active group | `No active tutorial group. Create or select a group first.` Use `group add` or `group use`.
 Duplicate assignment | `Assignment PS1 already exists in T01.` The message shows the name of the existing assignment. Use a different name, or list its records with `assignment list a/PS1`. `assignment rename` shows the same message when the new name belongs to another assignment.
 Unknown assignment | `Assignment PS2 does not exist in T01. See the group's assignments with: assignment list`, then, except for `assignment rename` and `assignment delete`, on the next line `Or create it with: assignment add a/PS2` Check the name against `assignment list`. Assignments belong to one group, so also check the active group.
-Invalid or blank name | `Invalid assignment name. Use 1-60 letters, digits, spaces, hyphens, periods, colons, or parentheses, with at least one letter or digit.` Follow the naming rules above.
+Invalid name | `Invalid assignment name. Use 1-60 letters, digits, spaces, hyphens, periods, colons, or parentheses, with at least one letter or digit.` Follow the naming rules above. A blank `a/` in `assignment list` is reported the same way.
+Blank value | `Missing value after a/. Type the value right after the prefix.` followed by the command's format.
 Invalid submission status | `Invalid submission status. Use yes or no.` Enter `yes` or `no` after `s/`.
 Invalid grade | `Invalid grade. Enter a whole number from 0 to 100.` Supply a whole number after `m/`.
 Unknown student | `Student ID A0999999Z does not exist in T01. See students in the active group with: student list` Check the ID, or switch to the student's group with `group use`.

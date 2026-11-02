@@ -30,6 +30,8 @@ public class StudentEditCommandParser implements Parser<StudentEditCommand> {
                 StudentName.SLASH_PARTICLES);
         ArgumentMultimap values = parser.parseWithoutExtraTextCheck(arguments);
         verifyRequiredValues(parser, values);
+        StudentCommandParserUtil.verifyNoBlankValues(values, StudentEditCommand.MESSAGE_USAGE, PREFIX_ID, PREFIX_NAME,
+                PREFIX_NEW_ID);
         parser.verifyNoExtraText(values);
 
         return new StudentEditCommand(TAssistParserUtil.parseStudentId(values.getValue(PREFIX_ID).orElseThrow()),

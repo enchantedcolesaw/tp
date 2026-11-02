@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
+import static seedu.address.logic.parser.CommandParserTestUtil.blankValueMessage;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalStudents.ALICE;
 import static seedu.address.testutil.TypicalStudents.BEN;
@@ -29,19 +30,25 @@ public class ParticipationSetCommandParserTest {
     public void parse_repeatedId_setsEveryStudentOnceInGivenOrder() {
         assertParseSuccess(parser, "id/A0123456X id/a0234567y w/3 s/2 id/A0123456X",
                 new ParticipationSetCommand(List.of(ALICE.getStudentId(), BEN.getStudentId()), 3, 2));
-        assertParseFailure(parser, "id/A0123456X id/ w/3 s/2", StudentId.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "id/A0123456X id/ w/3 s/2",
+                blankValueMessage("id/", ParticipationSetCommand.MESSAGE_USAGE));
     }
 
     @Test
     public void parse_invalidValues_reportsFieldSpecificError() {
-        for (String week : new String[] {"", "0", "14", "-1", "+1", "1.5", "three", "9".repeat(1000)}) {
+        for (String week : new String[] {"0", "14", "-1", "+1", "1.5", "three", "9".repeat(1000)}) {
             assertParseFailure(parser, "id/A0123456X w/" + week + " s/2", TAssistParserUtil.MESSAGE_WEEK);
         }
-        for (String score : new String[] {"", "-1", "6", "+1", "2.5", "two", "9".repeat(1000)}) {
+        for (String score : new String[] {"-1", "6", "+1", "2.5", "two", "9".repeat(1000)}) {
             assertParseFailure(parser, "id/A0123456X w/3 s/" + score, TAssistParserUtil.MESSAGE_PARTICIPATION_SCORE);
         }
-        for (String id : new String[] {"", "ABC", "A1!", "1".repeat(21)}) {
+        for (String id : new String[] {"ABC", "A1!", "1".repeat(21)}) {
             assertParseFailure(parser, "id/" + id + " w/3 s/2", StudentId.MESSAGE_CONSTRAINTS);
+        }
+        String[][] blanks = {{"id/ w/3 s/2", "id/"}, {"id/A1 w/ s/2", "w/"}, {"id/A1 w/3 s/", "s/"}};
+        for (String[] blank : blanks) {
+            assertParseFailure(parser, blank[0], String.format(TAssistArgumentParser.MESSAGE_BLANK_VALUE, blank[1])
+                    + " Usage: " + ParticipationSetCommand.MESSAGE_USAGE);
         }
     }
 

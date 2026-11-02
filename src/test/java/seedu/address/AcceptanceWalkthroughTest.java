@@ -16,9 +16,9 @@ import seedu.address.commons.core.DataLoadStatus;
 import seedu.address.logic.LogicManager;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.logic.parser.TAssistArgumentParser;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.TAssist;
-import seedu.address.model.assignment.AssignmentName;
 import seedu.address.model.student.StudentName;
 
 /**
@@ -114,8 +114,8 @@ public class AcceptanceWalkthroughTest extends AppIntegrationTest {
         assertEquals("Added Bob Lee to T03.", feedback("\u3000student\u2003add n/Bob\u2003Lee id/A2\u202F"));
         assertEquals("Added Cy Ng to T03.", feedback("student add\u2028n/Cy\u0085Ng\u2029id/A3"));
         TAssist beforeRejected = new TAssist(app.model.getTAssist());
-        assertThrows(ParseException.class, AssignmentName.MESSAGE_CONSTRAINTS, () ->
-                app.logic.execute("assignment add a/\u2003"));
+        assertThrows(ParseException.class, String.format(TAssistArgumentParser.MESSAGE_BLANK_VALUE, "a/")
+                + " Usage: assignment add a/ASSIGNMENT_NAME", () -> app.logic.execute("assignment add a/\u2003"));
         assertEquals(beforeRejected, app.model.getTAssist());
 
         restart();

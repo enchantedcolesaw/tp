@@ -144,7 +144,7 @@ public class AttendanceIntegrationTest {
     @Test
     public void execute_rejectedClear_preservesModelAndFile() throws Exception {
         logic.execute("attendance mark id/A0123456X w/3 s/present");
-        for (String week : new String[] {"0", "14", "3.5", ""}) {
+        for (String week : new String[] {"0", "14", "3.5"}) {
             assertFailureUnchanged("attendance clear id/A0123456X w/" + week,
                     ParseException.class, AttendanceCommandParserUtil.MESSAGE_INVALID_WEEK);
         }
