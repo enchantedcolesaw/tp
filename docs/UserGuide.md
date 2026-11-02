@@ -4,10 +4,10 @@ title: User Guide
 ---
 
 TAssist is a **desktop application for CS2040S teaching assistants, optimized for typing commands**.
-The Students screen shows the students in your active tutorial group.
-You can create, list, switch, rename, and delete tutorial groups, add, list, and delete their students, record weekly attendance,
-record and list weekly participation scores, and create, rename, and delete assignments, record submissions and grades, and list records.
-A mistaken change can be reversed with `undo` and `redo`, which cover your last 20 changes since you opened TAssist.
+You can manage tutorial groups and their students (add, edit, find, sort, and delete), record, correct, and list
+weekly attendance and participation, track assignment submissions and grades, and export a group's records to a
+spreadsheet. A mistaken change can be reversed with `undo` and `redo`, which cover your last 20 changes since you
+opened TAssist.
 
 * Table of Contents
 {:toc}
@@ -45,14 +45,15 @@ A mistaken change can be reversed with `undo` and `redo`, which cover your last 
 ## Using the workspace
 
 The bar at the top shows the **tutorial groups** next to the TAssist name, with the active group highlighted, and
-the **screens** below it. **Students** is on the left; **Help** and **Storage** are on the right.
+the **screens** below it. **Students** and **Records** are on the left; **Help** and **Storage** are on the right.
 Hover over a screen, or over a shortened group name, to see more. The tooltip of a screen names the command that does
 the same, such as `view storage`.
 
 ![TAssist displaying the Students screen for tutorial group T01](images/Ui.png)
 
-This example shows the result of `assignment list a/PS1`: Alice has submitted PS1 and received 87, while Ben has not
-submitted it. The footer shows the full path of the local data file; your path depends on the home folder you chose.
+This example shows tutorial group T01 on the Students screen after `student list`, which also lists the students in
+the feedback box. The footer shows the full path of the local data file; your path depends on the home folder you
+chose.
 
 Use the `view` command to open the same screens by typing. The command box and feedback remain visible on every screen.
 Press **Escape** to return focus to the command box, or **F1** to open Help. Clicking a screen keeps your cursor in
@@ -71,7 +72,9 @@ the command box.
 `attendance list w/3`, `participation list w/3`, and `assignment list a/PS1` open **Records** with the complete listing.
 The feedback box shows its heading. Records keeps the last listing when you open another screen;
 use `view records` to return to it. After each command that changes your data, such as marking attendance, switching
-groups, or `undo`, the listing updates to match. It is not saved between launches. `assignment list` also opens Records with the assignment names.
+groups, or `undo`, the listing updates to match. If you rename the listed assignment, the listing follows the new
+name. If the listing can no longer be shown, for example because the newly active group has no assignment of that
+name, Records says `This listing is no longer available.` and gives the reason. It is not saved between launches. `assignment list` also opens Records with the assignment names.
 `group list` continues to use the feedback box; `student list` opens the Students table.
 
 ![TAssist displaying attendance for a 20-student tutorial group on the Records screen](images/RecordsUi.png)
@@ -80,8 +83,10 @@ The feedback row below the screen tells you whether your last command worked: a 
 on a red background means it failed. It grows to fit the message, up to four lines (about three in the compact
 layout); only longer messages need scrolling. Long feedback, such as a list, can be scrolled with **PageUp** and
 **PageDown** (**Fn+Up** and **Fn+Down** on a Mac laptop) while you type. When Records is open and the feedback is
-short, these keys scroll its listing instead. The failed input stays in the command box so you can correct it. A command stays on the current screen unless it opens another one, as `view`, `help`, and the attendance, participation, and assignment list
-commands do. Screen contents can be scrolled. Smaller windows use a compact layout.
+short, these keys scroll its listing instead. The failed input stays in the command box so you can correct it.
+A command stays on the current screen unless it opens another one: `view` and `help` open the screen you ask for,
+`student list`, `student find`, and `student sort` open Students, and the attendance, participation, and assignment
+list commands open Records. Screen contents can be scrolled. Smaller windows use a compact layout.
 The footer shows the local file path, reports successful saves or command failures, and reminds you of the F1 and
 Escape shortcuts.
 Opening a screen with `view` does not save or change data.
@@ -100,7 +105,7 @@ On the Students screen, click a student's row with the primary mouse button to f
 and puts the cursor after `w/`. It does not execute a command or save data.
 
 Complete the week and status, for example `attendance mark id/A0123456X w/3 s/present`, then press **Enter**.
-Pressing Enter before completing the template reports `Missing required parameter(s): s/. Include each exactly once. Usage: attendance mark id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/STATUS`
+Pressing Enter before completing the template reports `Missing required parameter(s): s/. Usage: attendance mark id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/STATUS`
 and leaves the text editable.
 You can type the same command yourself; clicking is only a shortcut for entering the ID.
 Clicking the same row again prepares a fresh template, even if that row is already selected.
@@ -118,6 +123,12 @@ Selecting rows with the keyboard does not replace your draft.
 
 * Items in square brackets are optional.<br>
   For example, `help [TOPIC]` can be used as `help student` or as `help`.
+
+* Items followed by `...` can be repeated.<br>
+  For example, `id/STUDENT_ID [id/STUDENT_ID]...` can be used as `id/A0123456X` or as `id/A0123456X id/A0234567Y`.
+
+* Parameters can be in any order.<br>
+  For example, `student add id/A0123456X n/Alice Tan` is the same as `student add n/Alice Tan id/A0123456X`.
 
 * Commands that take no parameters, such as `exit`, `group list`, `student list`, `undo`, and `redo`, reject extra
   input like `exit 123`.
@@ -150,17 +161,15 @@ Opens the **Help** screen, which lists the format, rules, and examples of every 
 The feedback box confirms with `Showing the command reference.`
 
 The reference starts with the general commands (`view`, `help`, `undo`, `redo`, and `exit`), followed by the group,
-student, attendance, participation, and assignment commands, in the same order as their sections in this guide.
-Within a topic, commands appear in the order you would use them. The examples are written to follow on from each other: in a new
-TAssist, you can type the group, student, attendance, participation, and assignment examples in order, and each one
-works.
+student, attendance, participation, and assignment commands. Within a topic, commands appear in the order you would
+use them. The examples on the Help screen follow on from each other: in a new TAssist, you can type them in order, and
+each one works.
 
 Format: `help [TOPIC]`
 
 * `TOPIC` is one of `group`, `student`, `attendance`, `participation`, or `assignment`. It is not case-sensitive.
   The plural forms `groups`, `students`, and `assignments` are also accepted.
 * With a `TOPIC`, the Help screen opens at that topic's commands, for example `Showing student commands.`
-  If no command of that topic exists yet, TAssist says so and opens the Help screen from the top.
 * An unknown topic shows `Unknown help topic. Available topics: group, student, attendance, participation, assignment.`
   and does not change any data.
 
@@ -195,9 +204,9 @@ Format: `group add g/GROUP_NAME`
 
 * Group names contain 1–60 letters, digits, spaces, or hyphens, with at least one letter or digit.
 * Leading and trailing spaces are removed, and repeated spaces inside a name count as one space.
-  The length limit applies after this normalization.
-* Names ignore case when matching, but keep the capitalization entered for display. `T01` and `t01` are duplicates;
-  `Tutorial 1` and ` tutorial   1 ` are also duplicates.
+  The 60-character limit counts the name after these spaces are removed.
+* Names ignore case when matching, but keep the capitalization entered for display. `T01` and `t01` are duplicates,
+  and so are `Tutorial 1` and `tutorial 1` typed with extra spaces before, after, or between the words.
 
 Examples: `group add g/T01`, `group add g/T02`
 
@@ -222,7 +231,7 @@ Active group: T02
 ```
 
 With no groups, the feedback is `No tutorial groups exist. Create one using: group add g/GROUP_NAME`.
-If groups were loaded from a file without an active selection, the final line is `Active group: None`.
+If no group is active, for example after you delete the active group, the final line is `Active group: None`.
 Extra input, such as `group list g/T01`, is rejected. Long lists can be scrolled in the feedback box.
 
 ### Switching tutorial groups: `group use`
@@ -257,7 +266,8 @@ Format: `group export`
   number and display `00123` as `123`. To preserve leading zeros and long IDs, import the CSV using your spreadsheet
   app's import options and set the `Student ID` column to text before loading it, instead of opening the CSV directly.
 
-Example: with T01 active, `group export` shows the full path of the file, for example:
+Example: with T01 active, `group export` shows how many students were exported and the full path of the file, for
+example:
 
 ```text
 Exported the records of 1 student in T01 to:
@@ -274,11 +284,11 @@ The file has a header row, then one row per student in roster order:
   recorded. A group without assignments has no assignment columns.
 
 For example, if Alice Tan was marked absent and given a participation score of 4 in Week 3, and her PS1 submission
-was graded 87, her row reads (with the empty weeks shortened):
+was graded 87, her row reads (other weeks omitted):
 
-Name | Student ID | Week 1 Attendance | Week 2 Attendance | Week 3 Attendance | … | Week 3 Participation | … | PS1 Submitted | PS1 Grade
------|------------|-------------------|-------------------|-------------------|---|----------------------|---|---------------|----------
-Alice Tan | A0123456X | | | Absent | … | 4 | … | Yes | 87
+Name | Student ID | Week 3 Attendance | Week 3 Participation | PS1 Submitted | PS1 Grade
+-----|------------|-------------------|----------------------|---------------|----------
+Alice Tan | A0123456X | Absent | 4 | Yes | 87
 
 An empty group exports only the header row.
 
@@ -315,7 +325,8 @@ Format: `group delete g/GROUP_NAME [f/yes]`
 * TAssist first asks you to confirm. The prompt names the group and how many students and assignments will be deleted.
   Cancel is selected by default, so Enter or Escape leaves the data unchanged. Choose Continue to delete.
   If you cancel, the command stays in the command box so you can edit it.
-* Add `f/yes` to skip the prompt.
+* Add `f/yes` (in any capitalization) to skip the prompt. Any other value, such as `f/no`, is rejected with
+  `Invalid fast-delete option. Use f/yes to skip confirmation.`
 
 Example: `group delete g/T02-Thu` asks whether to delete T02-Thu, its students, and its assignments. After you confirm,
 it shows `Deleted tutorial group T02-Thu and its 0 student(s).` To skip the question, enter
@@ -344,13 +355,15 @@ Create or select a group first with `group add` or `group use`.
 Format: `student add n/NAME id/STUDENT_ID`
 
 * Names contain 1–60 letters (including accented letters), spaces, apostrophes, hyphens, or periods, with at least one
-  letter outside the slash particles. Initials and abbreviations such as `S. Ramanathan`, `Mohd. Ali`, and
-  `John Smith Jr.` are accepted.
-  Leading and trailing spaces are removed and repeated spaces are collapsed; the limit applies after normalization.
+  letter that is not part of `s/o`, `d/o`, `a/l`, or `a/p`. Initials and abbreviations such as `S. Ramanathan`,
+  `Mohd. Ali`, and `John Smith Jr.` are accepted.
+  Leading and trailing spaces are removed and repeated spaces are collapsed; the 60-character limit counts the name
+  after this.
 * Names may also contain `s/o`, `d/o`, `a/l`, or `a/p` (in any case) as a separate word between two parts of the
   name, as on official records. TAssist reads these as part of the name, not as prefixes, as long as there is a space
   before and after them. Other slashes are not allowed.
-* IDs contain 1–20 letters and digits, including at least one digit. IDs ignore case and are displayed in uppercase.
+* IDs contain 1–20 letters A–Z and digits, including at least one digit. IDs ignore case and are displayed in
+  uppercase.
 * An ID must be unique within the active group. The same ID may occur in another group.
   Students with the same name and different IDs are allowed. If the active group already has a student with the same
   name (ignoring case and extra spaces), the student is still added, and the feedback adds a warning so that you can
@@ -375,9 +388,10 @@ Format: `student edit id/STUDENT_ID [n/NEW_NAME] [nid/NEW_ID]`
   `s/o`, `d/o`, `a/l`, or `a/p`.
 * The new ID must not belong to another student in the active group, ignoring case. If it does, the feedback is
   `Student ID A0234567Y already exists in T01.` and nothing changes.
-* Students with the same name are allowed. If another student in the active group already has the new name (ignoring
-  case and extra spaces), the student is still edited and the feedback adds a warning, for example
-  `Warning: T01 already has another student named Ben Lim.`
+* Students with the same name are allowed. If the edit gives the student a name that another student in the active
+  group already has (ignoring case and extra spaces), the student is still edited and the feedback adds a warning, for
+  example `Warning: T01 already has another student named Ben Lim.` Changing only the capitalization of the
+  student's own name gives no warning.
 * Changing only the capitalization of a name counts as an edit. If the new details are the same as the current ones,
   the feedback is `Alice Tan (A0123456X) already has those details. Nothing changed.`
 * Supply each prefix at most once, with a space before each parameter. An active search or sort stays in effect, so
@@ -385,10 +399,9 @@ Format: `student edit id/STUDENT_ID [n/NEW_NAME] [nid/NEW_ID]`
 
 Examples: `student edit id/A0234567Y n/Benjamin Lim` shows
 `Edited Ben Lim (A0234567Y) to Benjamin Lim (A0234567Y) in T01. Their records are kept.`
-To correct only the student ID, enter `student edit id/A0345678Z nid/A0345679Z`. To give both prefixes in
-one command, enter `student edit id/A0345678Z n/Ravi s/o Kumar nid/A0345679Z`, which shows
+`student edit id/A0345678Z nid/A0345679Z` corrects only Ravi's student ID and shows
 `Edited Ravi s/o Kumar (A0345678Z) to Ravi s/o Kumar (A0345679Z) in T01. Their records are kept.`
-Use one or the other: after the first command, the second reports that A0345678Z does not exist.
+To change both details at once, include both prefixes, as in `student edit id/STUDENT_ID n/NEW_NAME nid/NEW_ID`.
 
 ### Listing students: `student list`
 
@@ -418,9 +431,11 @@ is shown as, for example, `2 of 20 students`, even when every student matches.
 Format: `student find [n/NAME_FRAGMENT] [id/ID_FRAGMENT]`
 
 * Include at least one filter. If both are supplied, a student must match **both**.
-* Name fragments match anywhere in the name, including across words. Repeated spaces are treated as one space.
+* Name fragments match anywhere in the name, including across words, ignoring accents: `n/jose` finds `José`.
+  Repeated spaces are treated as one space.
 * Name fragments may contain `s/o`, `d/o`, `a/l`, or `a/p` as a separate word, as names in `student add` do.
-* ID fragments can be incomplete and need not contain a digit. Accents remain significant.
+* ID fragments can be incomplete and need not contain a digit. An ID fragment is a single word, so text after it, as
+  in `student find id/A1 extra`, is reported as extra text.
 * Each search replaces the previous search and keeps the current sort order. Blank, repeated, and unknown filters are rejected.
 * Deleting the last student keeps the search active: the pane shows `No matching students` and `0 of 0 students`.
   Later additions still need to match; use `student list` to clear the search.
@@ -448,8 +463,8 @@ Format: `student sort by/FIELD`
 * `student sort by/name` orders names without considering capitalization. Students with the same name are
   ordered by student ID, since names need not be unique.
 * `student sort by/id` orders IDs alphabetically as text, so `A10` comes before `A2`.
-* Accented letters follow Java's case-insensitive text ordering; sorting does not use a language-specific alphabet.
-* Newly added students appear in the correct sorted position if they match the search. A new search keeps the sort.
+* Accented letters sort with their plain letters, so `Émile` comes before `Zoe`.
+* Newly added students appear in the correct sorted position if they match the search.
 * Sorting affects only the display. Saved roster order, attendance, participation, assignment lists, and CSV export
   are unchanged. Sorting does not write the data file.
 * Use `student list` to clear search and sorting and restore roster order. Switching to a different group or
@@ -459,7 +474,6 @@ For example, enter `student find n/alice`, then `student sort by/id` to order on
 An unsupported or blank field shows `Invalid sort field. Use by/name or by/id.` Text after the field, as in
 `student sort by/id now`, shows `Unexpected extra text after 'by/id': 'now'. This value cannot contain spaces.`
 Sorting zero displayed students reports, for example, `Sorted 0 student(s) in T01 by name.`
-The chosen order remains active for later matches or additions; sorting does not clear an existing search.
 
 ### Deleting a student: `student delete`
 
@@ -473,7 +487,7 @@ mistake, `undo` brings them back.
 Format: `student delete id/STUDENT_ID [f/yes]`
 
 Example: `student delete id/A0234567Y` asks whether to remove Benjamin Lim (A0234567Y) and all their records from T01.
-Enter `f/yes` to skip the prompt, for example `student delete id/A0234567Y f/yes`.
+Enter `f/yes` (in any capitalization) to skip the prompt, for example `student delete id/A0234567Y f/yes`.
 IDs ignore case, so `student delete id/a0234567y` targets the same student.
 
 #### Student command errors
@@ -481,7 +495,7 @@ IDs ignore case, so `student delete id/a0234567y` targets the same student.
 Rejected input leaves the roster and saved file unchanged.
 Missing required parameters are reported before invalid values. For example, `student add n/David/Tan`
 reports the missing-parameter usage because no student ID was supplied. Enter the name with a space and
-supply a separate ID, for example `student add n/David Tan id/A0123456X`.
+supply a separate ID, for example `student add n/David Tan id/A0456789W`.
 
 Problem | Feedback and correction
 --------|------------------------
@@ -493,7 +507,7 @@ Nothing to edit | `Nothing to edit. Include a new name with n/ or a new student 
 Missing parameter | `Missing required parameter. Usage: student add n/NAME id/STUDENT_ID` (or the editing or deletion format). Supply all required prefixes.
 Missing space before a prefix | `Missing space before id/ in 'n/Aliceid/A0123456X'. Put a space before each prefix.` Add a space before the named prefix.
 Invalid or blank value | The feedback identifies the invalid student name or ID and gives its rules.
-Repeated or unknown prefix | The feedback identifies the prefix. Use only the command's documented prefixes, once each, except `id/` in `attendance mark`, `participation set`, and `assignment submit`.
+Repeated or unknown prefix | The feedback identifies the prefix. Use only the command's documented prefixes, once each.
 Extra text after a value | The feedback names the extra text after a single-word value such as `id/A0123456X`, `f/yes`, or `by/id`, and says that value cannot contain spaces. Remove the extra text, or add the prefix it was meant to follow.
 Extra input to `student list` | `This command takes no parameters. Remove the extra input.`
 
@@ -517,11 +531,20 @@ For Alice Tan in active group T01, `attendance mark id/A0123456X w/3 s/present` 
 `Updated Alice Tan's attendance for Week 3: present to absent.` Entering `s/absent` again shows
 `Alice Tan's attendance for Week 3 is already absent. Nothing changed.`
 
-Invalid commands do not change or save data. An invalid week shows `Invalid week. Enter a number from 1 to 13.`;
-an invalid status shows `Invalid attendance status. Use present or absent.` An unknown student shows
-`Student ID A0999999Z does not exist in T01. See students in the active group with: student list` With no active group, use `group add g/GROUP_NAME` or
-`group use g/GROUP_NAME` first. Missing, repeated, or unknown prefixes, and extra text after
-a value such as `w/3 please`, are identified in the feedback.
+#### Attendance command errors
+
+Rejected input leaves the existing attendance and saved data file unchanged. The same errors apply to
+`attendance list` and `attendance clear`.
+
+Problem | Feedback and correction
+--------|------------------------
+No active group | `No active tutorial group. Create or select a group first.` Use `group add` or `group use`.
+Unknown student | `Student ID A0999999Z does not exist in T01. See students in the active group with: student list` Check the ID, or switch to the student's group with `group use`.
+Invalid or blank week | `Invalid week. Enter a number from 1 to 13.` Supply digits only, without a sign or decimal point.
+Invalid or blank status | `Invalid attendance status. Use present or absent.` Supply `present` or `absent` after `s/`.
+Missing parameter | The feedback names the missing prefixes. Include `id/`, `w/`, and `s/` for marking; `w/` for listing; `id/` and `w/` for clearing.
+Repeated or unknown prefix | The feedback names the prefix. Use only the documented prefixes, once each, except `id/` in `attendance mark`.
+Extra text after a value | The feedback names the extra text after a single-word value such as `w/3` in `w/3 please`, and says that value cannot contain spaces. Remove the extra text, or add the prefix it was meant to follow.
 
 ### Listing weekly attendance: `attendance list`
 
@@ -564,7 +587,7 @@ The change is saved automatically, and `attendance list` and `group export` no l
 Invalid weeks, unknown students, and no active group have the same errors as `attendance mark`. Only `id/` and `w/`
 are accepted, so a status such as `s/present` is rejected. For example, `attendance clear id/A0123456X w/3 s/present`
 shows `Unknown prefix 's/'. Allowed prefixes: id/ w/.`, and `attendance clear` with no parameters
-shows `Missing required parameter(s): id/ w/. Include each exactly once. Usage: attendance clear id/STUDENT_ID w/WEEK` Extra text after a value is reported too:
+shows `Missing required parameter(s): id/ w/. Usage: attendance clear id/STUDENT_ID w/WEEK` Extra text after a value is reported too:
 `attendance clear id/A0123456X w/3 now` shows
 `Unexpected extra text after 'w/3': 'now'. This value cannot contain spaces.`
 
@@ -649,9 +672,9 @@ Format: `assignment add a/ASSIGNMENT_NAME`
 * Assignment names contain 1–60 letters, digits, spaces, hyphens, periods, colons, or parentheses, with at least one
   letter or digit. For example, `PS1.5`, `Lab 2 (Graphs)` and `Kattis: Week 3` are valid.
 * Leading and trailing spaces are removed, and repeated spaces inside a name count as one space.
-  The length limit applies after this normalization.
+  The 60-character limit counts the name after these spaces are removed.
 * Names ignore case when matching, but keep the capitalization entered for display. `PS1` and `ps1` are duplicates,
-  and so are `Problem Set 1` and ` problem   set 1 `.
+  and so are `Problem Set 1` and `problem set 1` typed with extra spaces.
 * An assignment belongs to one group. Another group may have an assignment with the same name.
 * Supply `a/` exactly once.
 
@@ -699,7 +722,8 @@ Use PageUp and PageDown to scroll Records from the command box. The listing upda
 
 Format: `assignment list [a/ASSIGNMENT_NAME]`
 
-Example: after `assignment add a/PS1` and `assignment add a/Lab 2 (Graphs)` in T01, `assignment list` shows
+Example: after `assignment add a/PS1`, entering `assignment add a/Lab 2 (Graphs)` and then `assignment list` in T01
+shows
 
 ```text
 Assignments in T01:
@@ -749,7 +773,8 @@ Format: `assignment delete a/ASSIGNMENT_NAME [f/yes]`
 
 * TAssist first asks you to confirm. The prompt names the assignment and the group. Cancel is selected by default,
   so Enter or Escape leaves the data unchanged. Choose Continue to delete.
-* Add `f/yes` to skip the prompt.
+* Add `f/yes` (in any capitalization) to skip the prompt. Any other value, such as `f/no`, is rejected with
+  `Invalid fast-delete option. Use f/yes to skip confirmation.`
 * Names ignore case, so `a/ps1` targets `PS1`. After a deletion, the name can be used again by `assignment add`.
 
 Example: `assignment delete a/Problem Set 1` asks whether to delete Problem Set 1 from T01. After you confirm, it shows
@@ -892,24 +917,27 @@ The file looks like this:
   is read as Week 1, but including both `"1"` and `"01"` in the same map makes the file invalid, even if their
   values match. Remove the duplicate entry while TAssist is closed, keeping the intended value, then restart.
 
-<div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
-If the data file is unreadable or invalid, TAssist opens with no data and shows `Saved data could not be read.`,
-the reason, and `No changes were made to the saved file.` For example:
-`Saved data could not be read. Group T01 has more than one student with ID A1. No changes were made to the saved file.`
-For an invalid student name, ID, attendance week or status, or participation week or score, the reason includes the
-group and student ID, for example `Group T02, student B2: Week must be a whole number from 1 to 13.`
-If the student ID is missing or blank, the reason says `student with missing ID`.
-For a file that is not valid JSON, or a value of the wrong type, the reason names the line where reading stopped.
-The file must contain a single JSON object. Extra text or another JSON value after its closing brace makes the
-file invalid; trailing spaces, tabs, and line breaks are allowed.
-The Students screen and the group bar also say `Saved data could not be read` instead of suggesting that you add a
-group.
-The file is protected for that session: only `help`, `view`, and `exit` work. Every other command, including
-listing commands such as `group list`, is rejected because the data it would show or change was not loaded. The
-feedback repeats the startup message, including the reason, and adds
-`Close TAssist, repair or move the unreadable data file, and restart to see or change your records.` The log file `tassist.log.0` also records the reason loading failed.
-Close TAssist, back up and repair the file, then restart. To start afresh, move the unreadable file to a backup
-location while TAssist is closed, then restart. Repairing the file while the app is open does not re-enable saving.
+<div markdown="block" class="alert alert-warning">
+
+:exclamation: **Caution: if the data file is unreadable or invalid**
+
+* TAssist opens with no data and shows `Saved data could not be read.`, the reason, and
+  `No changes were made to the saved file.` For example:
+  `Saved data could not be read. Group T01 has more than one student with ID A1. No changes were made to the saved file.`
+* For an invalid student name, ID, attendance week or status, or participation week or score, the reason names the
+  group and student ID, for example `Group T02, student B2: Week must be a whole number from 1 to 13.` If the
+  student ID is missing or blank, the reason says `student with missing ID`.
+* For a file that is not valid JSON, or a value of the wrong type, the reason names the line where reading stopped.
+  The file must contain a single JSON object. Extra text after its closing brace makes the file invalid; trailing
+  spaces, tabs, and line breaks are allowed.
+* The Students screen and the group bar say `Saved data could not be read` instead of suggesting that you add a group.
+* The file is protected for that session: only `help`, `view`, and `exit` work. Every other command, including
+  `group list`, is rejected and repeats the reason with
+  `Close TAssist, repair or move the unreadable data file, and restart to see or change your records.`
+  The log file `tassist.log.0` also records the reason.
+* To fix it, close TAssist, back up and repair the file, then restart. To start afresh, move the file to a backup
+  location while TAssist is closed, then restart. Repairing the file while TAssist is open does not re-enable saving.
+
 </div>
 
 --------------------------------------------------------------------------------------------------------------------
@@ -917,7 +945,18 @@ location while TAssist is closed, then restart. Repairing the file while the app
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?<br>
-**A**: Install the app on the other computer, then copy `data/tassist.json` from your previous TAssist home folder into the `data` folder of the new home folder.
+**A**: Close TAssist. Copy `tassist.jar` and the `data` folder from your home folder into a folder on the other
+computer, then start TAssist there with `java -jar tassist.jar`. If TAssist already has a home folder there, close it
+first and replace that folder's `data/tassist.json`. TAssist has no installer.
+
+**Q**: How do I move a student to another tutorial group?<br>
+**A**: There is no move command, and records do not move with the student. Run `group export` on the old group if
+you need a copy of the records, add the student to the new group with `student add`, then remove them from the old
+group with `student delete`.
+
+**Q**: How do I start over with no data?<br>
+**A**: Close TAssist, move `data/tassist.json` out of the home folder as a backup, and start TAssist again. To remove
+only one group, use `group delete`.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -953,9 +992,9 @@ Action | Format, Examples
 **Add group** | `group add g/GROUP_NAME`<br> e.g., `group add g/T01`
 **List groups** | `group list`
 **Switch group** | `group use g/GROUP_NAME`<br> e.g., `group use g/T01`
+**Export group records** | `group export`
 **Rename group** | `group rename g/GROUP_NAME n/NEW_NAME`<br> e.g., `group rename g/T02 n/T02-Thu`
 **Delete group** | `group delete g/GROUP_NAME [f/yes]`<br> e.g., `group delete g/T02-Thu`
-**Export group records** | `group export`
 **Add student** | `student add n/NAME id/STUDENT_ID`<br> e.g., `student add n/Alice Tan id/A0123456X`
 **Edit student** | `student edit id/STUDENT_ID [n/NEW_NAME] [nid/NEW_ID]`<br> e.g., `student edit id/A0234567Y n/Benjamin Lim`
 **List students** | `student list`

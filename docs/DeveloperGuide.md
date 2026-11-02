@@ -669,7 +669,8 @@ replace it.
 
 `StudentFindCommandParser` accepts optional `n/` and `id/` parameters using `TAssistArgumentParser`, requiring
 at least one nonblank fragment. Fragments are not validated as complete names or IDs. `StudentSearchPredicate`
-uses case-insensitive substring matching and combines the supplied filters with AND.
+uses case-insensitive substring matching, ignores accents in names by comparing their `Normalizer` decompositions
+without accent marks, and combines the supplied filters with AND. `id/` takes a single word, like other IDs.
 `StudentFindCommand` checks for an empty roster before applying a new predicate. In that case it reports the
 empty roster and preserves the existing display settings, allowing a later addition to follow those settings.
 
@@ -687,7 +688,8 @@ An active search always shows the matching count against the total, including `0
 
 `StudentSortCommandParser` requires `by/name` or `by/id`, ignoring the field's case. `by/` takes a single word, so
 `by/id now` is reported as extra text rather than as an invalid field. `StudentSortField` supplies
-ascending comparators: names use case-insensitive text comparison with student ID as the tie-breaker; IDs use
+ascending comparators: names use an English `Collator` that ignores case and sorts accented letters with their plain
+letters, with student ID as the tie-breaker; IDs use
 lexicographic comparison of their normalized uppercase values. Sorting is exposed through the CLI; table headers
 remain non-sortable. These transformations keep the original roster order and all record/export commands intact.
 Sort feedback reports the displayed count even when it is zero, without suggesting that the sort be reset.
