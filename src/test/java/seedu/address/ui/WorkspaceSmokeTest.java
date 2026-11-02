@@ -230,6 +230,10 @@ public class WorkspaceSmokeTest {
                 assertTrue(listing.getText().startsWith("PS1 records for T01:"));
                 enter(input, "assignment rename a/PS1 n/Problem Set 1");
                 assertTrue(listing.getText().startsWith("Problem Set 1 records for T01:"));
+                enter(input, "undo");
+                assertTrue(listing.getText().startsWith("PS1 records for T01:"));
+                enter(input, "redo");
+                assertTrue(listing.getText().startsWith("Problem Set 1 records for T01:"));
                 enter(input, "group use g/T02");
                 assertEquals(MainWindow.MESSAGE_LISTING_UNAVAILABLE + "Assignment Problem Set 1 does not exist in T02. "
                         + "See the group's assignments with: assignment list", listing.getText());
