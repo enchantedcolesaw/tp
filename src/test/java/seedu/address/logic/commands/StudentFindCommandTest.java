@@ -28,7 +28,7 @@ public class StudentFindCommandTest {
         TAssist previousData = new TAssist(model.getTAssist());
 
         CommandResult result = new StudentFindCommand(new StudentSearchPredicate("alice", "")).execute(model);
-        assertEquals(new CommandResult("Found 1 matching student(s) in T01.", WorkspaceView.STUDENTS), result);
+        assertEquals(new CommandResult("Found 1 matching student in T01.", WorkspaceView.STUDENTS), result);
         assertEquals(List.of(ALICE), model.getDisplayedStudentList());
 
         result = new StudentFindCommand(new StudentSearchPredicate("missing", "")).execute(model);

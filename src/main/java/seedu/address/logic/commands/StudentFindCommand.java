@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.Messages.MESSAGE_NO_ACTIVE_GROUP;
 
 import seedu.address.commons.core.WorkspaceView;
+import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.group.Group;
@@ -16,7 +17,7 @@ public class StudentFindCommand extends Command {
     public static final String MESSAGE_USAGE = "student find [n/NAME_FRAGMENT] [id/ID_FRAGMENT]";
     public static final String MESSAGE_NO_MATCHES =
             "No matching students in %s. Use student list to show all students.";
-    public static final String MESSAGE_MATCHES = "Found %d matching student(s) in %s.";
+    public static final String MESSAGE_MATCHES = "Found %s in %s.";
 
     private final StudentSearchPredicate predicate;
 
@@ -36,7 +37,7 @@ public class StudentFindCommand extends Command {
         model.filterStudents(predicate);
         int count = model.getDisplayedStudentList().size();
         String feedback = count == 0 ? String.format(MESSAGE_NO_MATCHES, group.getName())
-                : String.format(MESSAGE_MATCHES, count, group.getName());
+                : String.format(MESSAGE_MATCHES, StringUtil.pluralize(count, "matching student"), group.getName());
         return new CommandResult(feedback, WorkspaceView.STUDENTS);
     }
 }

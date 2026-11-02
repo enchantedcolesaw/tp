@@ -62,7 +62,7 @@ public class StudentCommandsIntegrationTest extends AppIntegrationTest {
         Map<String, String> searches = Map.of("student find n/Ravi s/o", "A0345678Z",
                 "student find n/MUTHU A/L raju", "A0456789W");
         for (Map.Entry<String, String> search : searches.entrySet()) {
-            assertEquals("Found 1 matching student(s) in T01.", feedback(search.getKey()), search.getKey());
+            assertEquals("Found 1 matching student in T01.", feedback(search.getKey()), search.getKey());
             assertEquals(List.of(search.getValue()), app.logic.getDisplayedStudentList().stream()
                     .map(student -> student.getStudentId().toString()).toList(), search.getKey());
         }
@@ -333,7 +333,7 @@ public class StudentCommandsIntegrationTest extends AppIntegrationTest {
                 findResult.getFeedbackToUser());
         assertFalse(findResult.hasSavedChanges());
         CommandResult sortResult = app.logic.execute("student sort by/name");
-        assertEquals("Sorted 0 student(s) in T01 by name.", sortResult.getFeedbackToUser());
+        assertEquals("Sorted 0 students in T01 by name.", sortResult.getFeedbackToUser());
         assertFalse(sortResult.hasSavedChanges());
         assertEquals(saved, Files.readString(dataFile));
 

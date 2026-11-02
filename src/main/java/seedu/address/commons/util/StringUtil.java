@@ -94,4 +94,13 @@ public class StringUtil {
         }
         return hash;
     }
+
+    /**
+     * Returns {@code count} followed by {@code noun}, adding "s" unless the count is 1, such as "1 student" or
+     * "3 students".
+     */
+    public static String pluralize(int count, String noun) {
+        requireNonNull(noun);
+        return count + " " + noun + (count == 1 ? "" : "s");
+    }
 }

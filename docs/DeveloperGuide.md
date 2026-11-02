@@ -1867,7 +1867,7 @@ label.
    Add Zoe (Z2), who does not match the attempted search; Zoe must appear immediately.
    Delete Zoe, then repeat the query with an ID fragment and check the same behavior.
    This distinguishes an empty roster from an existing roster with no matching students.
-8. With T04 empty again, enter `student sort by/name`. Expect `Sorted 0 student(s) in T04 by name.`
+8. With T04 empty again, enter `student sort by/name`. Expect `Sorted 0 students in T04 by name.`
    Add Zoe (Z2), then Alice (A1); expect Alice before Zoe on screen, while the saved roster keeps insertion order.
    Run `student find n/missing`, then `student sort by/id`; expect a sort result for zero displayed students.
    The search must remain active, and the sort message must not suggest resetting it.
@@ -1915,7 +1915,7 @@ label.
    Then try `student add n/Ravi s/o id/A5`, `student add n/Ravi s/oKumar id/A5`, and
    `student add n/Ravi x/o Kumar id/A5`. Expect the name rules for the first, an unknown prefix `s/` with a hint to
    put spaces around `s/o` for the second, and an unknown prefix `x/` for the third.
-   Enter `student find n/Ravi s/o`; expect only Ravi s/o Kumar and `Found 1 matching student(s) in T01.`
+   Enter `student find n/Ravi s/o`; expect only Ravi s/o Kumar and `Found 1 matching student in T01.`
 
 ### Managing tutorial groups
 

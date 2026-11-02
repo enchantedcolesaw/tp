@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 import seedu.address.commons.core.LogsCenter;
+import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.group.Group;
@@ -18,9 +19,9 @@ import seedu.address.model.group.GroupName;
  */
 public class GroupDeleteCommand extends Command {
     public static final String MESSAGE_USAGE = "group delete g/GROUP_NAME [f/yes]";
-    public static final String MESSAGE_SUCCESS = "Deleted tutorial group %s and its %d student(s).";
+    public static final String MESSAGE_SUCCESS = "Deleted tutorial group %s and its %s.";
     public static final String MESSAGE_CONFIRMATION =
-            "Delete tutorial group %s, its %d student(s) and %d assignment(s), with all their attendance, "
+            "Delete tutorial group %s, its %s and %s, with all their attendance, "
                     + "participation, submission, and grade records?";
     public static final String MESSAGE_NOW_NO_ACTIVE_GROUP =
             "\nNo group is active now. Select one with: group use g/GROUP_NAME";
@@ -56,8 +57,9 @@ public class GroupDeleteCommand extends Command {
             return Optional.empty();
         }
         Group group = model.getGroup(name);
-        return Optional.of(String.format(MESSAGE_CONFIRMATION, group.getName(), group.getStudentList().size(),
-                group.getAssignmentList().size()));
+        return Optional.of(String.format(MESSAGE_CONFIRMATION, group.getName(),
+                StringUtil.pluralize(group.getStudentList().size(), "student"),
+                StringUtil.pluralize(group.getAssignmentList().size(), "assignment")));
     }
 
     @Override
@@ -70,7 +72,8 @@ public class GroupDeleteCommand extends Command {
         Group removed = model.removeGroup(name);
         assert !model.hasGroup(name) : "The deleted group must no longer exist";
         logger.fine("Deleted a group with " + removed.getStudentList().size() + " student(s)");
-        String feedback = String.format(MESSAGE_SUCCESS, removed.getName(), removed.getStudentList().size());
+        String feedback = String.format(MESSAGE_SUCCESS, removed.getName(),
+                StringUtil.pluralize(removed.getStudentList().size(), "student"));
         if (model.getActiveGroup().isPresent()) {
             return new CommandResult(feedback);
         }

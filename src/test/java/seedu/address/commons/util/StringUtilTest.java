@@ -190,4 +190,10 @@ public class StringUtilTest {
         assertFalse(StringUtil.hashCodeIgnoreCase("PS1") == StringUtil.hashCodeIgnoreCase("PS2"));
     }
 
+    @Test
+    public void pluralize_countOfOneOrOther_addsSOnlyWhenNotOne() {
+        assertEquals("0 students", StringUtil.pluralize(0, "student"));
+        assertEquals("1 student", StringUtil.pluralize(1, "student"));
+        assertEquals("2 matching students", StringUtil.pluralize(2, "matching student"));
+    }
 }

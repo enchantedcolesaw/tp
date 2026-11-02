@@ -26,6 +26,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import seedu.address.commons.util.StringUtil;
 import seedu.address.model.group.Group;
 import seedu.address.model.student.Student;
 
@@ -193,7 +194,7 @@ public class StudentListPanel extends UiPart<Region> {
      */
     static String describeCount(int count) {
         assert count >= 0 : "A group cannot have a negative number of students";
-        return count + (count == 1 ? " student" : " students");
+        return StringUtil.pluralize(count, "student");
     }
 
     /**

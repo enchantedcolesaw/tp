@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.logging.Logger;
 
 import seedu.address.commons.core.LogsCenter;
+import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.group.Group;
@@ -52,8 +53,7 @@ public class GroupExportCommand extends Command {
      * Returns the number of students in {@code group} with a noun that agrees, such as "1 student".
      */
     private static String describeStudentCount(Group group) {
-        int count = group.getStudentList().size();
-        return count + (count == 1 ? " student" : " students");
+        return StringUtil.pluralize(group.getStudentList().size(), "student");
     }
 
     @Override

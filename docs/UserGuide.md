@@ -329,7 +329,7 @@ Format: `group delete g/GROUP_NAME [f/yes]`
   `Invalid fast-delete option. Use f/yes to skip confirmation.`
 
 Example: `group delete g/T02-Thu` asks whether to delete T02-Thu, its students, and its assignments. After you confirm,
-it shows `Deleted tutorial group T02-Thu and its 0 student(s).` To skip the question, enter
+it shows `Deleted tutorial group T02-Thu and its 0 students.` To skip the question, enter
 `group delete g/T02-Thu f/yes`.
 
 #### Tutorial-group command errors
@@ -473,7 +473,7 @@ Format: `student sort by/FIELD`
 For example, enter `student find n/alice`, then `student sort by/id` to order only matching students by ID.
 An unsupported or blank field shows `Invalid sort field. Use by/name or by/id.` Text after the field, as in
 `student sort by/id now`, shows `Unexpected extra text after 'by/id': 'now'. This value cannot contain spaces.`
-Sorting zero displayed students reports, for example, `Sorted 0 student(s) in T01 by name.`
+Sorting zero displayed students reports, for example, `Sorted 0 students in T01 by name.`
 
 ### Deleting a student: `student delete`
 
