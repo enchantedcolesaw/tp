@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -51,8 +50,6 @@ public class MainWindow extends UiPart<Stage> {
     private ResultDisplay resultDisplay;
     /** The last list command shown on Records, rerun when data changes so its listing stays current. */
     private String recordListingCommand;
-    /** The last assignment rename that Records followed, so that undo and redo can follow it back. */
-    private Map.Entry<String, String> followedRename;
     private CommandBox commandBox;
     private StatusBarFooter statusBarFooter;
 
@@ -179,33 +176,42 @@ public class MainWindow extends UiPart<Stage> {
 
     /**
      * Reruns the list command shown on Records. If it fails after an undone or redone assignment rename, reruns it
-     * with the assignment's name from the other side of that rename, only when that name appeared in the same group.
+     * with the assignment's new name, identified from the previous and current states of the same group.
      */
     private CommandResult executeListing(Optional<Group> previousGroup) throws CommandException, ParseException {
         try {
             return logic.execute(recordListingCommand);
         } catch (CommandException e) {
-            if (followedRename == null || previousGroup.isEmpty()
-                    || !previousGroup.map(Group::getName)
-                            .equals(logic.activeGroupProperty().get().map(Group::getName))) {
-                throw e;
-            }
-            String otherSide = followedRename.getValue().equalsIgnoreCase(recordListingCommand)
-                    ? followedRename.getKey() : followedRename.getValue();
-            List<String> previousListings = previousGroup.get().getAssignmentList().stream()
-                    .map(assignment -> AssignmentListCommand.getListCommand(assignment.getName())).toList();
-            if (!previousListings.stream().anyMatch(recordListingCommand::equalsIgnoreCase)
-                    || previousListings.stream().anyMatch(otherSide::equalsIgnoreCase)) {
-                throw e;
-            }
+            String renamedListing = findRenamedListing(previousGroup).orElseThrow(() -> e);
             try {
-                CommandResult listing = logic.execute(otherSide);
-                recordListingCommand = otherSide;
+                CommandResult listing = logic.execute(renamedListing);
+                recordListingCommand = renamedListing;
                 return listing;
             } catch (CommandException | ParseException otherSideError) {
                 throw e;
             }
         }
+    }
+
+    /**
+     * Finds the single new assignment name when the listed assignment disappeared from the same group.
+     */
+    private Optional<String> findRenamedListing(Optional<Group> previousGroup) {
+        Optional<Group> currentGroup = logic.activeGroupProperty().get();
+        if (previousGroup.isEmpty()
+                || !previousGroup.map(Group::getName).equals(currentGroup.map(Group::getName))) {
+            return Optional.empty();
+        }
+        boolean wasListed = previousGroup.get().getAssignmentList().stream()
+                .map(assignment -> AssignmentListCommand.getListCommand(assignment.getName()))
+                .anyMatch(recordListingCommand::equalsIgnoreCase);
+        if (!wasListed) {
+            return Optional.empty();
+        }
+        List<String> addedListings = currentGroup.orElseThrow().getAssignmentList().stream()
+                .filter(assignment -> !previousGroup.get().hasAssignment(assignment.getName()))
+                .map(assignment -> AssignmentListCommand.getListCommand(assignment.getName())).toList();
+        return addedListings.size() == 1 ? Optional.of(addedListings.getFirst()) : Optional.empty();
     }
 
     private void setWindowDefaultSize(GuiSettings guiSettings) {
@@ -301,10 +307,7 @@ public class MainWindow extends UiPart<Stage> {
                 workspacePanel.setRecordListing(result.getFeedbackToUser());
             } else if (result.hasSavedChanges()) {
                 result.getListingRename().filter(rename -> rename.getKey().equalsIgnoreCase(recordListingCommand))
-                        .ifPresent(rename -> {
-                            recordListingCommand = rename.getValue();
-                            followedRename = rename;
-                        });
+                        .ifPresent(rename -> recordListingCommand = rename.getValue());
                 refreshRecordListing(previousGroup);
             }
             resultDisplay.setFeedbackToUser(result.isRecordListing()

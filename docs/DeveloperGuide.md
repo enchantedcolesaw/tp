@@ -141,9 +141,12 @@ command with saved changes, such as a mark, a group switch, or `undo`, so Record
 list command changes no data, so rerunning it saves nothing and adds nothing to the undo history. Restarting
 clears the listing. An assignment listing keeps `assignment list a/NAME` with the stored name
 (`CommandResult#getListingCommand()`), and `assignment rename` returns the old and new form of that command
-(`CommandResult#getListingRename()`), so a listing of the renamed assignment moves to its new name. If rerunning
-fails, for example because the active group has no assignment of that name, Records says that the listing is no
-longer available and gives the first line of the reason, without the advice to create the assignment again.
+(`CommandResult#getListingRename()`), so a listing of the renamed assignment moves to its new name. On undo or redo,
+the previous and current group snapshots identify the renamed assignment, including repeated renames. Recovery
+stays within the same group and requires exactly one new assignment name; deleting an assignment or changing groups
+does not select an unrelated listing. If rerunning fails, for example because the active group has no assignment of
+that name, Records says that the listing is no longer available and gives the first line of the reason, without the
+advice to create the assignment again.
 
 The command reference is shown only on the Help screen. `help` returns `CommandResult.forHelp(...)` with a one-line
 confirmation and, for `help TOPIC`, the topic. `MainWindow` then asks `WorkspacePanel` to open Help, which scrolls
