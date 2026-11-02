@@ -28,9 +28,8 @@ public class StudentName {
     public static final List<String> SLASH_PARTICLES = List.of("s/o", "d/o", "a/l", "a/p");
 
     public static final String MESSAGE_CONSTRAINTS = "Invalid student name. Use 1-" + MAX_LENGTH
-            + " letters, spaces, apostrophes, hyphens, or periods, with at least one letter outside the slash "
-            + "particles. Between two parts of a name, you may also use "
-            + "s/o, d/o, a/l, or a/p.";
+            + " letters, spaces, apostrophes, hyphens, or periods, with at least one letter besides s/o, d/o, a/l, "
+            + "or a/p. Between two parts of a name, you may also use s/o, d/o, a/l, or a/p.";
 
     /** One word: letters (including accented letters), apostrophes (straight or curly), hyphens and periods. */
     private static final String WORD_REGEX = "[\\p{L}\\p{M}'’.-]+";

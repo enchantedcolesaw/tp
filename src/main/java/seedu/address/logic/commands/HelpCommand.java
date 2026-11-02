@@ -21,7 +21,7 @@ public class HelpCommand extends Command {
             + "Add a topic to open it at that topic's commands.\n"
             + "Parameters: [TOPIC]\n"
             + "Topics: " + String.join(", ", HelpCatalog.TOPICS) + "\n"
-            + "Groups, students, and assignments are also accepted.\n"
+            + "The plural forms groups, students, and assignments are also accepted.\n"
             + "Example: " + COMMAND_WORD + " student";
 
     public static final String MESSAGE_UNKNOWN_TOPIC =

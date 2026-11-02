@@ -12,7 +12,7 @@ public class ViewCommand extends Command {
     public static final String COMMAND_WORD = "view";
     public static final String MESSAGE_USAGE = "view: Opens a screen.\n"
             + "Parameters: students | records | help | storage\n"
-            + "Student is also accepted.\n"
+            + "The singular form student is also accepted.\n"
             + "Example: view storage";
     public static final String MESSAGE_UNKNOWN_SCREEN = "Unknown screen: %s.\n" + MESSAGE_USAGE;
 

@@ -29,7 +29,7 @@ public final class StudentCommandRegistration {
                 new HelpEntry("student", StudentAddCommand.MESSAGE_USAGE,
                         "Add a student to the active group. Names: 1-60 letters, spaces, apostrophes, hyphens "
                                 + "or periods, and s/o, d/o, a/l or a/p between two parts, as in Ravi s/o Kumar. "
-                                + "Include at least one letter outside the slash particles. "
+                                + "Include at least one letter besides s/o, d/o, a/l or a/p. "
                                 + "IDs: 1-20 letters and digits, at least one digit; unique per group, ignoring case.",
                         List.of("student add n/Alice Tan id/A0123456X", "student add n/Ben Lim id/A0234567Y")));
         registry.register("student", "edit", new StudentEditCommandParser(),

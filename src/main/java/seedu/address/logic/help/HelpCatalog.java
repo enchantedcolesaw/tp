@@ -19,12 +19,13 @@ public final class HelpCatalog {
 
     private static final List<HelpEntry> BUILT_IN_ENTRIES = List.of(
             new HelpEntry("", "view SCREEN",
-                    "Open a screen: students, records, help, or storage. Student is also accepted. "
+                    "Open a screen: students, records, help, or storage. The singular form student is also accepted. "
                             + "Screen names ignore case. Opening a screen does not change any data.",
                     List.of("view storage")),
             new HelpEntry("", "help [TOPIC]",
                     "Open this reference, or open it at the commands of one topic: "
-                            + String.join(", ", TOPICS) + ". Groups, students, and assignments are also accepted. "
+                            + String.join(", ", TOPICS)
+                            + ". The plural forms groups, students, and assignments are also accepted. "
                             + "F1 also opens Help; Escape returns to the command box.",
                     List.of("help", "help student")),
             new HelpEntry("", "undo",
