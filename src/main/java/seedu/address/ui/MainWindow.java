@@ -3,6 +3,7 @@ package seedu.address.ui;
 import static java.util.Objects.requireNonNull;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -25,10 +26,12 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.core.WorkspaceView;
 import seedu.address.logic.Logic;
+import seedu.address.logic.commands.AssignmentListCommand;
 import seedu.address.logic.commands.AttendanceMarkCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.group.Group;
 
 /**
  * Connects the TAssist workspace, command input and feedback to application logic.
@@ -158,12 +161,12 @@ public class MainWindow extends UiPart<Stage> {
     /**
      * Reruns the list command shown on Records, so that it shows the records as they are after a change.
      */
-    private void refreshRecordListing() {
+    private void refreshRecordListing(Optional<Group> previousGroup) {
         if (recordListingCommand == null) {
             return;
         }
         try {
-            CommandResult listing = executeListing();
+            CommandResult listing = executeListing(previousGroup);
             // The listed assignment may now have other capitals, as in another group, so keep its stored name.
             recordListingCommand = listing.getListingCommand().orElse(recordListingCommand);
             workspacePanel.refreshRecordListing(listing.getFeedbackToUser());
@@ -176,17 +179,25 @@ public class MainWindow extends UiPart<Stage> {
 
     /**
      * Reruns the list command shown on Records. If it fails after an undone or redone assignment rename, reruns it
-     * with the assignment's name from the other side of that rename.
+     * with the assignment's name from the other side of that rename, only when that name appeared in the same group.
      */
-    private CommandResult executeListing() throws CommandException, ParseException {
+    private CommandResult executeListing(Optional<Group> previousGroup) throws CommandException, ParseException {
         try {
             return logic.execute(recordListingCommand);
         } catch (CommandException e) {
-            if (followedRename == null) {
+            if (followedRename == null || previousGroup.isEmpty()
+                    || !previousGroup.map(Group::getName)
+                            .equals(logic.activeGroupProperty().get().map(Group::getName))) {
                 throw e;
             }
             String otherSide = followedRename.getValue().equalsIgnoreCase(recordListingCommand)
                     ? followedRename.getKey() : followedRename.getValue();
+            List<String> previousListings = previousGroup.get().getAssignmentList().stream()
+                    .map(assignment -> AssignmentListCommand.getListCommand(assignment.getName())).toList();
+            if (!previousListings.stream().anyMatch(recordListingCommand::equalsIgnoreCase)
+                    || previousListings.stream().anyMatch(otherSide::equalsIgnoreCase)) {
+                throw e;
+            }
             try {
                 CommandResult listing = logic.execute(otherSide);
                 recordListingCommand = otherSide;
@@ -282,6 +293,7 @@ public class MainWindow extends UiPart<Stage> {
                 return CommandResult.forCancelled(MESSAGE_CANCELLED);
             }
 
+            Optional<Group> previousGroup = logic.activeGroupProperty().get().map(Group::new);
             CommandResult result = logic.execute(commandText);
             logger.info("Result: " + result.getFeedbackToUser());
             if (result.isRecordListing()) {
@@ -293,7 +305,7 @@ public class MainWindow extends UiPart<Stage> {
                             recordListingCommand = rename.getValue();
                             followedRename = rename;
                         });
-                refreshRecordListing();
+                refreshRecordListing(previousGroup);
             }
             resultDisplay.setFeedbackToUser(result.isRecordListing()
                     ? result.getFeedbackToUser().lines().findFirst().orElse("") : result.getFeedbackToUser());
