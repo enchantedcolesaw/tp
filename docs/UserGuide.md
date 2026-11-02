@@ -698,7 +698,7 @@ Format: `assignment submit a/ASSIGNMENT_NAME id/STUDENT_ID [id/STUDENT_ID]... s/
 Example: because Alice has not submitted PS1 yet, `assignment submit a/PS1 id/A0123456X s/no` shows
 `Alice Tan's PS1 submission status is already not submitted. Nothing changed.`
 Running `assignment submit a/PS1 id/A0123456X s/yes` then shows
-`Updated Alice Tan's PS1 submission status to submitted.`
+`Recorded Alice Tan's PS1 submission status as submitted.`
 
 ### Recording a grade: `assignment grade`
 

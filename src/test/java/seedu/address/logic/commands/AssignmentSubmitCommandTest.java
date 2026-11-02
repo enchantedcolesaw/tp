@@ -46,7 +46,7 @@ public class AssignmentSubmitCommandTest {
         expected.setAssignment(NAME_T01, PS1.withSubmissionStatus(ALICE_ID, true));
 
         assertCommandSuccess(new AssignmentSubmitCommand(NAME_PS1, ALICE_ID, true), model,
-                "Updated Alice Tan's PS1 submission status to submitted.", expected);
+                "Recorded Alice Tan's PS1 submission status as submitted.", expected);
     }
 
     @Test
@@ -59,7 +59,7 @@ public class AssignmentSubmitCommandTest {
             expected.setAssignment(NAME_T01, prior.withSubmissionStatus(ALICE_ID, false));
 
             assertCommandSuccess(new AssignmentSubmitCommand(NAME_PS1, ALICE_ID, false), model,
-                    "Updated Alice Tan's PS1 submission status to not submitted; the recorded grade was cleared.",
+                    "Recorded Alice Tan's PS1 submission status as not submitted; the recorded grade was cleared.",
                     expected);
         }
     }
@@ -103,7 +103,7 @@ public class AssignmentSubmitCommandTest {
         expected.setAssignment(NAME_T01, prior.withSubmissionStatus(ALICE_ID, false));
 
         assertCommandSuccess(new AssignmentSubmitCommand(NAME_PS1, ALICE_ID, false), model,
-                "Updated Alice Tan's PS1 submission status to not submitted.", expected);
+                "Recorded Alice Tan's PS1 submission status as not submitted.", expected);
     }
 
     @Test
@@ -117,9 +117,9 @@ public class AssignmentSubmitCommandTest {
                 .withSubmissionStatus(CARL_ID, false));
 
         assertCommandSuccess(new AssignmentSubmitCommand(NAME_PS1, List.of(CARL_ID, ALICE_ID, BEN_ID), false), model,
-                "Updated Carl Goh's PS1 submission status to not submitted.\n"
+                "Recorded Carl Goh's PS1 submission status as not submitted.\n"
                         + "Alice Tan's PS1 submission status is already not submitted. Nothing changed.\n"
-                        + "Updated Ben Lim's PS1 submission status to not submitted; the recorded grade was cleared.",
+                        + "Recorded Ben Lim's PS1 submission status as not submitted; the recorded grade was cleared.",
                 expected);
     }
 
