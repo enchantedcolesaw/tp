@@ -17,8 +17,8 @@ import seedu.address.model.student.StudentName;
  * Name particles such as {@code s/o} are part of the name, not prefixes.
  */
 public class StudentEditCommandParser implements Parser<StudentEditCommand> {
-    public static final String MESSAGE_MISSING_ID =
-            "Missing required parameter. Usage: " + StudentEditCommand.MESSAGE_USAGE;
+    public static final String MESSAGE_MISSING_ID = StudentCommandParserUtil.getMissingParametersMessage(
+            StudentEditCommand.MESSAGE_USAGE, List.of(PREFIX_ID));
     public static final String MESSAGE_NOTHING_TO_EDIT =
             "Nothing to edit. Include a new name with n/ or a new student ID with nid/. Usage: "
                     + StudentEditCommand.MESSAGE_USAGE;

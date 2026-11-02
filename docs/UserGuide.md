@@ -494,7 +494,7 @@ IDs ignore case, so `student delete id/a0234567y` targets the same student.
 
 Rejected input leaves the roster and saved file unchanged.
 Missing required parameters are reported before invalid values. For example, `student add n/David/Tan`
-reports the missing-parameter usage because no student ID was supplied. Enter the name with a space and
+reports `Missing required parameter(s): id/.` with the usage, because no student ID was supplied. Enter the name with a space and
 supply a separate ID, for example `student add n/David Tan id/A0456789W`.
 
 Problem | Feedback and correction
@@ -504,7 +504,7 @@ Duplicate ID when adding | `Student ID A0123456X already exists in T01.` Check `
 Unknown ID when editing or deleting | `Student ID A0123456X does not exist in T01. See students in the active group with: student list` Check the ID and active group.
 Duplicate ID when editing | `Student ID A0234567Y already exists in T01.` Choose a new ID that no other student in the group has.
 Nothing to edit | `Nothing to edit. Include a new name with n/ or a new student ID with nid/. Usage: student edit id/STUDENT_ID [n/NEW_NAME] [nid/NEW_ID]` Add `n/`, `nid/`, or both.
-Missing parameter | `Missing required parameter. Usage: student add n/NAME id/STUDENT_ID` (or the editing or deletion format). Supply all required prefixes.
+Missing parameter | `Missing required parameter(s): id/. Usage: student add n/NAME id/STUDENT_ID` names the missing prefixes, followed by the command's format. Supply all required prefixes.
 Missing space before a prefix | `Missing space before id/ in 'n/Aliceid/A0123456X'. Put a space before each prefix.` Add a space before the named prefix.
 Invalid or blank value | The feedback identifies the invalid student name or ID and gives its rules.
 Repeated or unknown prefix | The feedback identifies the prefix. Use only the command's documented prefixes, once each.

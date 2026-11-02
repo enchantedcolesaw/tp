@@ -47,7 +47,8 @@ public class StudentEditCommandParserTest {
 
     @Test
     public void parse_missingStudentId_reportsUsage() {
-        String usage = "Missing required parameter. Usage: " + StudentEditCommand.MESSAGE_USAGE;
+        String usage = String.format(TAssistArgumentParser.MESSAGE_MISSING_PARAMETERS, "id/") + " Usage: "
+                + StudentEditCommand.MESSAGE_USAGE;
         assertParseFailure(parser, "", usage);
         assertParseFailure(parser, "n/Alicia Tan", usage);
         assertParseFailure(parser, "nid/A0123457X", usage);

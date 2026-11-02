@@ -2096,7 +2096,7 @@ parameter errors, empty groups, week boundaries, and display formatting.
 3. Click an empty table row or use the secondary or middle mouse button. The draft must stay unchanged.
    Selecting another row with the keyboard must also leave the command box alone.
 4. Submit the incomplete template with Enter. Expect the missing-parameter error
-   `Missing required parameter(s): s/. Include each exactly once. Usage: attendance mark id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/STATUS`,
+   `Missing required parameter(s): s/. Usage: attendance mark id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/STATUS`,
    retained text, and unchanged records.
    Complete it with a valid week and status, then press Enter; only then should attendance be saved.
 5. Switch groups and click a student. Verify the ID comes from the current group and the current row after deletion.

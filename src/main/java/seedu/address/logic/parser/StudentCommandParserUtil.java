@@ -1,7 +1,9 @@
 package seedu.address.logic.parser;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -38,16 +40,28 @@ final class StudentCommandParserUtil {
         TAssistArgumentParser parser = new TAssistArgumentParser(List.of(), List.of(prefixes), singleWordPrefixes,
                 literalWords);
         ArgumentMultimap values = parser.parseWithoutExtraTextCheck(arguments);
+        List<Prefix> missingPrefixes = new ArrayList<>();
         for (Prefix prefix : prefixes) {
             if (values.getValue(prefix).isEmpty()) {
                 if (!PREFIX_ID.equals(prefix) || hasJoinedStudentId(values)) {
                     parser.verifyNoMissingSpaceBefore(values, prefix);
                 }
-                throw new ParseException("Missing required parameter. Usage: " + usage);
+                missingPrefixes.add(prefix);
             }
+        }
+        if (!missingPrefixes.isEmpty()) {
+            throw new ParseException(getMissingParametersMessage(usage, missingPrefixes));
         }
         parser.verifyNoExtraText(values);
         return values;
+    }
+
+    /**
+     * Returns the error naming {@code missingPrefixes}, followed by the command's {@code usage}.
+     */
+    static String getMissingParametersMessage(String usage, List<Prefix> missingPrefixes) {
+        String prefixes = missingPrefixes.stream().map(Prefix::toString).collect(Collectors.joining(" "));
+        return String.format(TAssistArgumentParser.MESSAGE_MISSING_PARAMETERS, prefixes) + " Usage: " + usage;
     }
 
     /**

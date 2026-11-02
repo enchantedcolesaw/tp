@@ -12,6 +12,9 @@ import seedu.address.logic.commands.StudentDeleteCommand;
 import seedu.address.model.student.StudentId;
 
 public class StudentDeleteCommandParserTest {
+    private static final String MISSING_ID = String.format(TAssistArgumentParser.MESSAGE_MISSING_PARAMETERS, "id/")
+            + " Usage: " + StudentDeleteCommand.MESSAGE_USAGE;
+
     private final StudentDeleteCommandParser parser = new StudentDeleteCommandParser();
 
     @Test
@@ -28,7 +31,7 @@ public class StudentDeleteCommandParserTest {
 
     @Test
     public void parse_missingOrInvalidId_reportsSpecificError() {
-        assertParseFailure(parser, "", "Missing required parameter. Usage: " + StudentDeleteCommand.MESSAGE_USAGE);
+        assertParseFailure(parser, "", MISSING_ID);
         for (String id : new String[] {"", "ABC", "A1!", "1".repeat(21)}) {
             assertParseFailure(parser, "id/" + id, StudentId.MESSAGE_CONSTRAINTS);
         }
@@ -72,7 +75,6 @@ public class StudentDeleteCommandParserTest {
 
     @Test
     public void parse_missingIdBeforeExtraText_reportsMissingParameter() {
-        assertParseFailure(parser, "f/yes A0123456X",
-                "Missing required parameter. Usage: " + StudentDeleteCommand.MESSAGE_USAGE);
+        assertParseFailure(parser, "f/yes A0123456X", MISSING_ID);
     }
 }
