@@ -529,7 +529,8 @@ Format: `attendance mark id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/STATUS`
 * Student IDs ignore case. Supply `w/` and `s/` exactly once, in any order, separated by spaces.
 * To mark several students at once, repeat `id/`, for example `attendance mark id/A0123456X id/A0234567Y w/3 s/present`.
   The feedback has one line for each student, in the order you typed them. A student typed twice is marked once.
-  If any ID is invalid or not in the active group, nobody is marked, and the error names the first such ID.
+  ID formats are checked first, and the error names the first malformed ID in input order. If all formats are valid,
+  the error names the first ID not in the active group. Either error leaves everyone's records unchanged.
 * Repeating a mark for the same student and week replaces the earlier mark, and the feedback shows the old and
   new status. Other students, weeks, and participation records are preserved.
 * Marking a student absent for a week in which they have a participation score above 0 still records the mark, and
@@ -619,8 +620,9 @@ Format: `participation set id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/SCORE`
 * Supply `w/` and `s/` exactly once, in any order, with spaces between parameters.
 * To give several students the same score, repeat `id/`, for example
   `participation set id/A0123456X id/A0234567Y w/3 s/2`. The feedback has one line for each student, in the order you
-  typed them. A student typed twice is set once. If any ID is invalid or not in the active group, nobody is changed, and the error names the
-  first such ID.
+  typed them. A student typed twice is set once. ID formats are checked first, and the error names the first
+  malformed ID in input order. If all formats are valid, the error names the first ID not in the active group.
+  Either error leaves everyone's records unchanged.
 * Setting the same student and week again replaces the score, and the feedback shows the old and new score.
   Other weeks, other students, and other groups are unaffected.
 * A score above 0 for a student marked absent that week is still recorded, and the feedback adds a warning, such as
@@ -719,8 +721,9 @@ Format: `assignment submit a/ASSIGNMENT_NAME id/STUDENT_ID [id/STUDENT_ID]... s/
 * Student IDs ignore case. Each ID must belong to the active group. Supply `a/` and `s/` exactly once, in any order.
 * To give several students the same status, repeat `id/`, for example
   `assignment submit a/PS1 id/A0123456X id/A0234567Y s/yes`. The feedback has one line for each student, in the order
-  you typed them. A student typed twice is updated once. If any ID is invalid or not in the active group, nobody is changed, and
-  the error names the first such ID.
+  you typed them. A student typed twice is updated once. ID formats are checked first, and the error names the first
+  malformed ID in input order. If all formats are valid, the error names the first ID not in the active group.
+  Either error leaves everyone's records unchanged.
 
 Example: because Alice has not submitted PS1 yet, `assignment submit a/PS1 id/A0123456X s/no` shows
 `Alice Tan's PS1 submission status is already not submitted. Nothing changed.`
