@@ -3,6 +3,7 @@ package seedu.address.model.student;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
+import java.text.Normalizer;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -67,12 +68,14 @@ public class StudentName {
     }
 
     /**
-     * Returns true if both names are the same after ignoring capitalization and the kind of apostrophe.
+     * Returns true if both names are canonically equivalent after ignoring capitalization and the kind of apostrophe.
      * Spaces are already normalized, so extra spaces do not make names differ.
      */
     public boolean isSameName(StudentName otherName) {
         requireNonNull(otherName);
-        return withStraightApostrophes(fullName).equalsIgnoreCase(withStraightApostrophes(otherName.fullName));
+        return Normalizer.normalize(withStraightApostrophes(fullName), Normalizer.Form.NFC)
+                .equalsIgnoreCase(Normalizer.normalize(withStraightApostrophes(otherName.fullName),
+                        Normalizer.Form.NFC));
     }
 
     /**

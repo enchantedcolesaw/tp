@@ -44,6 +44,26 @@ public class StudentCommandsIntegrationTest extends AppIntegrationTest {
     }
 
     @Test
+    public void execute_unicodeEquivalentNames_warnAndKeepSpellingAcrossUndoRedoAndRestart() throws Exception {
+        String decomposedName = "Jose\u0301 Tan";
+        feedback("student add n/José Tan id/J1");
+        assertEquals("Added " + decomposedName + " to T01. Warning: T01 already has a student named José Tan (J1). "
+                + "Check that the student ID is correct.", feedback("student add n/" + decomposedName + " id/J2"));
+        feedback("student add n/Ben Lim id/J3");
+        assertEquals("Edited Ben Lim (J3) to " + decomposedName + " (J3) in T01. Their records are kept."
+                + " Warning: T01 already has another student named " + decomposedName + ".",
+                feedback("student edit id/J3 n/" + decomposedName));
+
+        feedback("undo");
+        assertTrue(feedback("student list").endsWith("Ben Lim | J3"));
+        feedback("redo");
+        restart();
+        assertEquals(List.of("José Tan", decomposedName, decomposedName), app.logic.getActiveGroupStudentList().stream()
+                .map(student -> student.getName().fullName).toList());
+        assertEquals("Added Jose Tan to T01.", feedback("student add n/Jose Tan id/J4"));
+    }
+
+    @Test
     public void execute_namesWithSlashParticles_addedAndRestored() throws Exception {
         assertEquals("Added Ravi s/o Kumar to T01.", feedback("student add n/Ravi s/o Kumar id/A0345678Z"));
         assertEquals("Added Siti D/O Ahmad to T01.", feedback("student add n/Siti D/O Ahmad id/A0456789W"));

@@ -28,6 +28,7 @@ import seedu.address.model.assignment.Assignment;
 import seedu.address.model.student.Student;
 import seedu.address.model.student.StudentId;
 import seedu.address.model.student.StudentName;
+import seedu.address.testutil.StudentBuilder;
 import seedu.address.testutil.TypicalGroups;
 
 public class StudentEditCommandTest {
@@ -108,6 +109,42 @@ public class StudentEditCommandTest {
         assertCommandSuccess(new StudentEditCommand(ALICE.getStudentId(), Optional.of(benName), Optional.empty()),
                 model, "Edited Alice Tan (A0123456X) to ben LIM (A0123456X) in T01. Their records are kept."
                         + " Warning: T01 already has another student named ben LIM.", modelWithEditedAlice(edited));
+    }
+
+    @Test
+    public void execute_canonicalNameOfAnotherStudent_editsWithWarningAndPreservesSpelling() {
+        for (String[] names : new String[][] {{"José Tan", "Jose\u0301 Tan"}, {"Jose\u0301 Tan", "José Tan"}}) {
+            Model actual = new ModelManager(model.getTAssist(), new UserPrefs());
+            actual.setStudent(NAME_T01, new StudentBuilder(BEN).withName(names[0]).build());
+            StudentName newName = new StudentName(names[1]);
+            Student edited = recordedAlice.withNameAndId(newName, ALICE.getStudentId());
+            Model expected = new ModelManager(actual.getTAssist(), new UserPrefs());
+            expected.replaceStudent(NAME_T01, ALICE.getStudentId(), edited);
+            String message = "Edited Alice Tan (A0123456X) to " + names[1]
+                    + " (A0123456X) in T01. Their records are kept."
+                    + " Warning: T01 already has another student named " + names[1] + ".";
+
+            assertCommandSuccess(new StudentEditCommand(ALICE.getStudentId(), Optional.of(newName), Optional.empty()),
+                    actual, message, expected);
+            assertEquals(names[1], actual.getGroup(NAME_T01).findStudent(ALICE.getStudentId()).orElseThrow()
+                    .getName().fullName);
+            assertEquals(gradedPs1, actual.getGroup(NAME_T01).findAssignment(NAME_PS1).orElseThrow());
+        }
+    }
+
+    @Test
+    public void execute_ownNameUnicodeFormChanges_editsSpellingWithoutWarning() {
+        StudentName originalName = new StudentName("José Tan");
+        StudentName newName = new StudentName("Jose\u0301 Tan");
+        model.setStudent(NAME_T01, recordedAlice.withNameAndId(originalName, ALICE.getStudentId()));
+        model.setStudent(NAME_T01, new StudentBuilder(BEN).withName(originalName.fullName).build());
+        Student edited = recordedAlice.withNameAndId(newName, ALICE.getStudentId());
+
+        assertCommandSuccess(new StudentEditCommand(ALICE.getStudentId(), Optional.of(newName), Optional.empty()),
+                model, "Edited José Tan (A0123456X) to Jose\u0301 Tan (A0123456X) in T01. Their records are kept.",
+                modelWithEditedAlice(edited));
+        assertEquals(newName.fullName, model.getGroup(NAME_T01).findStudent(ALICE.getStudentId()).orElseThrow()
+                .getName().fullName);
     }
 
     @Test
