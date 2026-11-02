@@ -27,6 +27,8 @@ public class StudentSearchPredicateTest {
         assertTrue(new StudentSearchPredicate("elodie", "").test(student));
         assertTrue(new StudentSearchPredicate("José", "").test(new StudentBuilder().withName("Jose Lim").build()));
         assertFalse(new StudentSearchPredicate("elodia", "").test(student));
+        Student curlyApostrophe = new StudentBuilder().withName("Sean O’Brien").build();
+        assertTrue(new StudentSearchPredicate("o'brien", "").test(curlyApostrophe));
     }
 
     @Test

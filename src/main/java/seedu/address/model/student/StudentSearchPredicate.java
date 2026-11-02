@@ -33,9 +33,13 @@ public class StudentSearchPredicate implements Predicate<Student> {
                 && containsIgnoreCase(student.getStudentId().toString(), idFragment);
     }
 
-    /** Returns {@code value} without accent marks, so that {@code José} contains {@code jose}. */
+    /**
+     * Returns {@code value} without accent marks and with straight apostrophes, so that {@code José O’Neil} contains
+     * {@code jose o'neil}.
+     */
     private static String removeAccents(String value) {
-        return Normalizer.normalize(value, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        String plain = StudentName.withStraightApostrophes(value);
+        return Normalizer.normalize(plain, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
     }
 
     private boolean containsIgnoreCase(String value, String fragment) {

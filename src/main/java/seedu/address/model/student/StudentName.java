@@ -67,12 +67,19 @@ public class StudentName {
     }
 
     /**
-     * Returns true if both names are the same after ignoring capitalization.
+     * Returns true if both names are the same after ignoring capitalization and the kind of apostrophe.
      * Spaces are already normalized, so extra spaces do not make names differ.
      */
     public boolean isSameName(StudentName otherName) {
         requireNonNull(otherName);
-        return fullName.equalsIgnoreCase(otherName.fullName);
+        return withStraightApostrophes(fullName).equalsIgnoreCase(withStraightApostrophes(otherName.fullName));
+    }
+
+    /**
+     * Returns {@code text} with each curly apostrophe, as pasted from documents, replaced by a straight one.
+     */
+    public static String withStraightApostrophes(String text) {
+        return text.replace('’', '\'');
     }
 
     @Override
