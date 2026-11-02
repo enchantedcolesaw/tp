@@ -23,6 +23,21 @@ public class CommandResultTest {
     }
 
     @Test
+    public void listingCommands_keptWhenSavedAndCompared() {
+        CommandResult listing = CommandResult.forRecordListing("PS1 records", "assignment list a/PS1");
+        assertEquals("assignment list a/PS1", listing.getListingCommand().orElseThrow());
+        assertNotEquals(CommandResult.forRecordListing("PS1 records"), listing);
+        assertTrue(CommandResult.forRecordListing("PS1 records").getListingCommand().isEmpty());
+
+        CommandResult rename = CommandResult.forListingRename("Renamed", "assignment list a/PS1",
+                "assignment list a/PS2");
+        assertEquals(rename.getListingRename(), rename.withSavedChanges().getListingRename());
+        assertEquals("assignment list a/PS2", rename.getListingRename().orElseThrow().getValue());
+        assertFalse(rename.isRecordListing());
+        assertNotEquals(new CommandResult("Renamed"), rename);
+    }
+
+    @Test
     public void equals() {
         CommandResult commandResult = new CommandResult("feedback");
 
@@ -122,7 +137,7 @@ public class CommandResultTest {
         String expected = CommandResult.class.getCanonicalName() + "{feedbackToUser="
                 + commandResult.getFeedbackToUser() + ", showHelp=" + commandResult.isShowHelp()
                 + ", exit=" + commandResult.isExit() + ", view=null, helpTopic=, hasSavedChanges=false, "
-                + "isCancelled=false, isRecordListing=false}";
+                + "isCancelled=false, isRecordListing=false, listingCommand=null, listingRename=null}";
         assertEquals(expected, commandResult.toString());
     }
 }

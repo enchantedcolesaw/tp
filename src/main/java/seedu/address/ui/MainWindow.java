@@ -34,6 +34,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
  */
 public class MainWindow extends UiPart<Stage> {
     static final String MESSAGE_CANCELLED = "Command cancelled. No changes were made.";
+    static final String MESSAGE_LISTING_UNAVAILABLE = "This listing is no longer available. ";
     private static final String FXML = "MainWindow.fxml";
     private final Logger logger = LogsCenter.getLogger(getClass());
     private final Stage primaryStage;
@@ -162,7 +163,8 @@ public class MainWindow extends UiPart<Stage> {
             workspacePanel.setRecordListing(logic.execute(recordListingCommand).getFeedbackToUser());
         } catch (CommandException | ParseException e) {
             logger.fine("Records could not be refreshed: " + e.getMessage());
-            workspacePanel.setRecordListing(e.getMessage());
+            String reason = e.getMessage().lines().findFirst().orElse("");
+            workspacePanel.setRecordListing(MESSAGE_LISTING_UNAVAILABLE + reason);
         }
     }
 
@@ -254,9 +256,11 @@ public class MainWindow extends UiPart<Stage> {
             CommandResult result = logic.execute(commandText);
             logger.info("Result: " + result.getFeedbackToUser());
             if (result.isRecordListing()) {
-                recordListingCommand = commandText;
+                recordListingCommand = result.getListingCommand().orElse(commandText);
                 workspacePanel.setRecordListing(result.getFeedbackToUser());
             } else if (result.hasSavedChanges()) {
+                result.getListingRename().filter(rename -> rename.getKey().equals(recordListingCommand))
+                        .ifPresent(rename -> recordListingCommand = rename.getValue());
                 refreshRecordListing();
             }
             resultDisplay.setFeedbackToUser(result.isRecordListing()

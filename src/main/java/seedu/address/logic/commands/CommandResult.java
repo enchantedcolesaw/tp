@@ -2,6 +2,7 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -33,6 +34,12 @@ public class CommandResult {
 
     private final boolean isRecordListing;
 
+    /** The command that shows this listing again, or null to rerun the command as typed. */
+    private final String listingCommand;
+
+    /** A listing command to replace with another after this command, or null if listings are unaffected. */
+    private final Map.Entry<String, String> listingRename;
+
     /**
      * Constructs a {@code CommandResult} with the specified fields.
      */
@@ -57,6 +64,13 @@ public class CommandResult {
 
     private CommandResult(String feedbackToUser, boolean showHelp, boolean exit, WorkspaceView view,
             String helpTopic, boolean hasSavedChanges, boolean isCancelled, boolean isRecordListing) {
+        this(feedbackToUser, showHelp, exit, view, helpTopic, hasSavedChanges, isCancelled, isRecordListing,
+                null, null);
+    }
+
+    private CommandResult(String feedbackToUser, boolean showHelp, boolean exit, WorkspaceView view,
+            String helpTopic, boolean hasSavedChanges, boolean isCancelled, boolean isRecordListing,
+            String listingCommand, Map.Entry<String, String> listingRename) {
         this.feedbackToUser = requireNonNull(feedbackToUser);
         this.showHelp = showHelp;
         this.exit = exit;
@@ -65,6 +79,8 @@ public class CommandResult {
         this.hasSavedChanges = hasSavedChanges;
         this.isCancelled = isCancelled;
         this.isRecordListing = isRecordListing;
+        this.listingCommand = listingCommand;
+        this.listingRename = listingRename;
     }
 
     /**
@@ -95,6 +111,23 @@ public class CommandResult {
      */
     public static CommandResult forRecordListing(String listing) {
         return new CommandResult(listing, false, false, WorkspaceView.RECORDS, "", false, false, true);
+    }
+
+    /**
+     * Returns a complete listing to display in the main records workspace, which {@code listingCommand} shows again.
+     */
+    public static CommandResult forRecordListing(String listing, String listingCommand) {
+        return new CommandResult(listing, false, false, WorkspaceView.RECORDS, "", false, false, true,
+                requireNonNull(listingCommand), null);
+    }
+
+    /**
+     * Returns a result after which a listing shown by {@code oldListingCommand} is shown by {@code newListingCommand}.
+     */
+    public static CommandResult forListingRename(String feedbackToUser, String oldListingCommand,
+            String newListingCommand) {
+        return new CommandResult(feedbackToUser, false, false, null, "", false, false, false, null,
+                Map.entry(oldListingCommand, newListingCommand));
     }
 
     /**
@@ -137,11 +170,20 @@ public class CommandResult {
         return isCancelled;
     }
 
+    public Optional<String> getListingCommand() {
+        return Optional.ofNullable(listingCommand);
+    }
+
+    public Optional<Map.Entry<String, String>> getListingRename() {
+        return Optional.ofNullable(listingRename);
+    }
+
     /**
      * Returns a copy confirming that this command's data changes have been saved.
      */
     public CommandResult withSavedChanges() {
-        return new CommandResult(feedbackToUser, showHelp, exit, view, helpTopic, true, isCancelled, isRecordListing);
+        return new CommandResult(feedbackToUser, showHelp, exit, view, helpTopic, true, isCancelled, isRecordListing,
+                listingCommand, listingRename);
     }
 
     @Override
@@ -162,13 +204,15 @@ public class CommandResult {
                 && helpTopic.equals(otherCommandResult.helpTopic)
                 && hasSavedChanges == otherCommandResult.hasSavedChanges
                 && isCancelled == otherCommandResult.isCancelled
-                && isRecordListing == otherCommandResult.isRecordListing;
+                && isRecordListing == otherCommandResult.isRecordListing
+                && Objects.equals(listingCommand, otherCommandResult.listingCommand)
+                && Objects.equals(listingRename, otherCommandResult.listingRename);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(feedbackToUser, showHelp, exit, view, helpTopic, hasSavedChanges, isCancelled,
-                isRecordListing);
+                isRecordListing, listingCommand, listingRename);
     }
 
     @Override
@@ -182,6 +226,8 @@ public class CommandResult {
                 .add("hasSavedChanges", hasSavedChanges)
                 .add("isCancelled", isCancelled)
                 .add("isRecordListing", isRecordListing)
+                .add("listingCommand", listingCommand)
+                .add("listingRename", listingRename)
                 .toString();
     }
 

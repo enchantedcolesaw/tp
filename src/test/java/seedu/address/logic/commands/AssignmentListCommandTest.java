@@ -3,6 +3,7 @@ package seedu.address.logic.commands;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
+import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static seedu.address.logic.commands.CommandTestUtil.assertRecordListingSuccess;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalAssignments.NAME_PS1;
@@ -33,11 +34,17 @@ public class AssignmentListCommandTest {
         return model;
     }
 
+    private static void assertPs1ListingSuccess(AssignmentName typedName, Model model, String listing,
+            Model expected) {
+        assertCommandSuccess(new AssignmentListCommand(typedName), model,
+                CommandResult.forRecordListing(listing, "assignment list a/PS1"), expected);
+    }
+
     @Test
     public void execute_existingAssignment_listsEveryStudentAsNotSubmittedWithoutChangingData() {
         Model model = modelWithActiveGroup(NAME_T01);
         Model expected = modelWithActiveGroup(NAME_T01);
-        assertRecordListingSuccess(new AssignmentListCommand(NAME_PS1), model,
+        assertPs1ListingSuccess(NAME_PS1, model,
                 "PS1 records for T01:\nAlice Tan | A0123456X | Not submitted | -"
                         + "\nBen Lim | A0234567Y | Not submitted | -"
                         + "\nCarl Goh | A0345678Z | Not submitted | -", expected);
@@ -47,7 +54,7 @@ public class AssignmentListCommandTest {
     public void execute_nameInDifferentCase_showsStoredNameAndFindsAssignment() {
         Model model = modelWithActiveGroup(NAME_T01);
         Model expected = modelWithActiveGroup(NAME_T01);
-        assertRecordListingSuccess(new AssignmentListCommand(new AssignmentName("ps1")), model,
+        assertPs1ListingSuccess(new AssignmentName("ps1"), model,
                 "PS1 records for T01:\nAlice Tan | A0123456X | Not submitted | -"
                         + "\nBen Lim | A0234567Y | Not submitted | -"
                         + "\nCarl Goh | A0345678Z | Not submitted | -", expected);
@@ -66,7 +73,7 @@ public class AssignmentListCommandTest {
         expected.setActiveGroup(NAME_T01);
         expected.addAssignment(NAME_T01, assignment);
 
-        assertRecordListingSuccess(new AssignmentListCommand(NAME_PS1), model,
+        assertPs1ListingSuccess(NAME_PS1, model,
                 "PS1 records for T01:\nAlice Tan | A0123456X | Submitted | 87"
                         + "\nBen Lim | A0234567Y | Submitted | -"
                         + "\nCarl Goh | A0345678Z | Not submitted | -", expected);
@@ -78,7 +85,7 @@ public class AssignmentListCommandTest {
         model.addAssignment(NAME_T03, PS1);
         Model expected = modelWithActiveGroup(NAME_T03);
         expected.addAssignment(NAME_T03, PS1);
-        assertRecordListingSuccess(new AssignmentListCommand(NAME_PS1), model, "No students in T03.", expected);
+        assertPs1ListingSuccess(NAME_PS1, model, "No students in T03.", expected);
     }
 
     @Test
