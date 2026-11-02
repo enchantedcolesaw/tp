@@ -522,7 +522,7 @@ Format: `attendance mark id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/STATUS`
 * Student IDs ignore case. Supply `w/` and `s/` exactly once, in any order, separated by spaces.
 * To mark several students at once, repeat `id/`, for example `attendance mark id/A0123456X id/A0234567Y w/3 s/present`.
   The feedback has one line for each student, in the order you typed them. A student typed twice is marked once.
-  If any ID is not in the active group, nobody is marked, and the error names the first such ID.
+  If any ID is invalid or not in the active group, nobody is marked, and the error names the first such ID.
 * Repeating a mark for the same student and week replaces the earlier mark, and the feedback shows the old and
   new status. Other students, weeks, and participation records are preserved.
 
@@ -602,7 +602,7 @@ Format: `participation set id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/SCORE`
 * Supply `w/` and `s/` exactly once, in any order, with spaces between parameters.
 * To give several students the same score, repeat `id/`, for example
   `participation set id/A0123456X id/A0234567Y w/3 s/2`. The feedback has one line for each student, in the order you
-  typed them. A student typed twice is set once. If any ID is not in the active group, nobody is changed, and the error names the
+  typed them. A student typed twice is set once. If any ID is invalid or not in the active group, nobody is changed, and the error names the
   first such ID.
 * Setting the same student and week again replaces the score, and the feedback shows the old and new score.
   Other weeks, other students, and other groups are unaffected.
@@ -692,7 +692,7 @@ Format: `assignment submit a/ASSIGNMENT_NAME id/STUDENT_ID [id/STUDENT_ID]... s/
 * Student IDs ignore case. Each ID must belong to the active group. Supply `a/` and `s/` exactly once, in any order.
 * To give several students the same status, repeat `id/`, for example
   `assignment submit a/PS1 id/A0123456X id/A0234567Y s/yes`. The feedback has one line for each student, in the order
-  you typed them. A student typed twice is updated once. If any ID is not in the active group, nobody is changed, and
+  you typed them. A student typed twice is updated once. If any ID is invalid or not in the active group, nobody is changed, and
   the error names the first such ID.
 
 Example: because Alice has not submitted PS1 yet, `assignment submit a/PS1 id/A0123456X s/no` shows
