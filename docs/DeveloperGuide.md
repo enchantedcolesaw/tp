@@ -2137,7 +2137,7 @@ The smoke test covers all four screens at normal and compact sizes, F1 and Escap
 the group strip, the navigation bar highlighting the current screen and keeping focus in the command box, the Students
 screen following the active group and its students, group creation/listing/switching through the command box,
 both empty states, long group and student names, row numbering after a removal, `help TOPIC` scrolling to its topic, commands that
-do not open a screen keeping the current screen, a usage message fitting the feedback box, invalid-input retention, and
+do not open a screen keeping the current screen, a short `view` error fitting the feedback box, long error feedback scrolling within its cap, invalid-input retention, and
 recalling and editing earlier commands with Up and Down, including after a recalled command fails. Normal unit tests cover screen
 parsing, result identity, navigation with unavailable storage, the Students screen's captions and empty states, and
 `CommandHistory`.
@@ -2162,7 +2162,9 @@ For manual testing, build with `./gradlew shadowJar` and launch the JAR in an em
    at once. Click each screen in the
    navigation bar and check that the tooltip names the matching `view` command and that the command box keeps focus.
 4. Enter `view nowhere`. Verify that the command remains editable and the feedback names the valid screens.
-   Enter `view` and verify that the whole usage message is readable without scrolling.
+   Enter `view` and verify that the one-line message `Missing screen name. Use one of: students, records, help,
+   storage. Example: view storage` is readable without scrolling. Enter `view storage now` and verify that the
+   feedback names `now` as extra text.
 5. Enter `view student` and `view students`, and verify that both open the Students screen.
    Enter `help group`, `help student`, and `help assignment`, then repeat with their plural forms. Verify that each pair opens Help at the same topic and shows the same feedback.
 6. Check F1 and Escape while typing. Enter `view help` and `view nowhere`, type `view st`, and press Up twice:

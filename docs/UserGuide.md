@@ -187,8 +187,9 @@ Format: `view SCREEN`
 `SCREEN` is one of `students`, `records`, `help`, or `storage`.
 Screen names ignore case. Specify exactly one screen name. Opening a screen does not change any data.
 The singular forms `student` and `record` open the Students and Records screens.
-An unknown screen name reports `Unknown screen` and lists the valid names. Missing or multiple screen names report
-an invalid command format and show the expected syntax.
+An unknown screen name, such as `view nowhere`, reports `Unknown screen 'nowhere'.` and lists the valid names.
+`view` alone reports `Missing screen name.` with the valid names, and extra words, as in `view storage now`, report
+`Unexpected extra text after 'storage': 'now'. Enter one screen name.`
 
 Examples: `view students`, `view records`, `view help`, `view storage`.
 

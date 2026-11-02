@@ -404,11 +404,12 @@ public class WorkspaceSmokeTest {
             verifyCommands();
             verifyFailure();
             runOnFx(() -> render(root, "error", 853, 440));
-            runOnFx(() -> enter(input, "view"));
+            String longCommand = "unknown" + "x".repeat(600);
+            runOnFx(() -> enter(input, longCommand));
             runOnFx(() -> {
                 render(root, "error-usage", 1280, 680);
                 TextArea feedback = (TextArea) root.lookup("#resultDisplay");
-                assertTrue(feedback.getText().contains(ViewCommand.MESSAGE_USAGE));
+                assertTrue(feedback.getText().startsWith("Unknown command"));
                 assertTrue(hasVisibleVerticalScrollBar(feedback), "Long usage feedback scrolls within its cap");
                 assertTrue(feedback.getPrefRowCount() <= ResultDisplay.MAX_VISIBLE_LINES);
                 String completeFeedback = feedback.getText();
@@ -426,9 +427,16 @@ public class WorkspaceSmokeTest {
                 }
                 assertEquals(vertical.getMin(), vertical.getValue(), 0.001);
                 assertEquals(completeFeedback, feedback.getText());
-                assertEquals("view", input.getText());
+                assertEquals(longCommand, input.getText());
                 assertTrue(input.getStyleClass().contains(CommandBox.ERROR_STYLE_CLASS));
                 assertEquals(input, stage.getScene().getFocusOwner());
+            });
+            runOnFx(() -> enter(input, "view"));
+            runOnFx(() -> {
+                render(root, "view-missing-screen", 1280, 680);
+                TextArea feedback = (TextArea) root.lookup("#resultDisplay");
+                assertEquals(ViewCommand.MESSAGE_MISSING_SCREEN, feedback.getText());
+                assertFalse(hasVisibleVerticalScrollBar(feedback), "The view usage error fits without scrolling");
             });
             runOnFx(() -> {
                 enter(input, "view storage");
