@@ -21,10 +21,18 @@ Class JsonAdaptedStudent
 Class JsonAdaptedAssignmentRecord
 }
 
+package "Export" #F4F6F6{
+Class GroupRecordsCsvExporter
+}
+
 }
 
 Class HiddenOutside #FFFFFF
 HiddenOutside ..> Storage
+
+package Model as ModelPackage <<Rectangle>> {
+Class HiddenModel #FFFFFF
+}
 
 StorageManager .up.|> Storage
 StorageManager -down-> "1" JsonUserPrefsStorage
@@ -34,5 +42,8 @@ JsonTAssistStorage ..> JsonSerializableTAssist
 JsonSerializableTAssist --> "*" JsonAdaptedGroup
 JsonAdaptedGroup --> "*" JsonAdaptedStudent
 JsonAdaptedGroup --> "*" JsonAdaptedAssignmentRecord
+
+JsonSerializableTAssist ..> ModelPackage
+GroupRecordsCsvExporter ..> ModelPackage
 
 @enduml
