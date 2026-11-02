@@ -160,6 +160,14 @@ public class StringUtilTest {
         // Leading, trailing and repeated internal whitespace, including tabs
         assertEquals("Alice Tan", StringUtil.normalizeSpaces("  Alice   Tan  "));
         assertEquals("Alice Tan Wei", StringUtil.normalizeSpaces("Alice\tTan \t Wei"));
+
+        // Unicode spaces from pasted text, such as non-breaking, em, and ideographic spaces
+        assertEquals("Ben Lim", StringUtil.normalizeSpaces("\u00A0Ben\u00A0Lim\u2003"));
+        assertEquals("Ben Lim Wei", StringUtil.normalizeSpaces("Ben\u3000Lim\u2028Wei"));
+        assertEquals("", StringUtil.normalizeSpaces("\u00A0\u3000"));
+
+        // Zero-width characters are not spaces
+        assertEquals("Ben\u200BLim", StringUtil.normalizeSpaces("Ben\u200BLim"));
     }
 
     //---------------- Tests for hashCodeIgnoreCase --------------------------------------

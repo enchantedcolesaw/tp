@@ -340,6 +340,9 @@ with a normal space. Text pasted from a web page, a PDF, or a chat app often con
 like a space or a line break, but Java's `\s` and `String#trim` do not treat them as whitespace, so a command such as
 `group add` followed by a non-breaking space would otherwise be read as one unknown subcommand. Tabs and ASCII line
 breaks are left to the existing whitespace rules.
+Names read from the data file do not pass through `TAssistParser`, so `StringUtil#normalizeSpaces`, which
+`GroupName`, `StudentName`, and `AssignmentName` use, also treats Unicode whitespace (`(?U)\s`) as a space. A name
+saved with a non-breaking space therefore loads the same way as the typed command would.
 
 Zero-width characters, such as the zero-width space U+200B, the word joiner U+2060, and the byte order mark U+FEFF,
 are not changed. Unlike the characters above, they do not separate words: replacing one with a space would split
@@ -2098,6 +2101,8 @@ parameter errors, empty groups, week boundaries, and display formatting.
    1. Paste and enter `group add g/T04`, then `group add g/T03`. Expected: T04 and then T03 are created, as when the
       commands are typed with normal spaces. `group add` makes each new group active, so T03 is now active.
    1. Paste and enter `student add n/Ann Lee id/N1`. Expected: `Added Ann Lee to T03.`
+   1. Close TAssist. In `data/tassist.json`, replace the space in `Ann Lee` with a non-breaking space (or the
+      escape `\u00a0`), save, and relaunch. Expected: the file loads, and `student list` shows `Ann Lee`.
 
 1. Zero-width characters are not treated as spaces
 

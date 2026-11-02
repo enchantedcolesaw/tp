@@ -924,7 +924,9 @@ The file looks like this:
   Weeks must be 1–13 and scores must be whole numbers from 0 to 5. A fractional score such as `4.5`, or a week or
   score outside that range, makes the file invalid. A score such as `4.0` is read as `4`. An omitted map means no
   scores have been recorded.
-* Group names, student names, and student IDs follow the same rules as when you type them in a command.
+* Group names, student names, and student IDs follow the same rules as when you type them in a command. As in
+  commands, non-breaking and other Unicode spaces in a name, such as those copied from a web page, are read as
+  normal spaces.
 * `attendance` maps week numbers (`"1"` through `"13"`) to `"PRESENT"` or `"ABSENT"`.
   Status values ignore case and surrounding spaces when loaded. An omitted attendance map means no attendance
   records for that student. Invalid weeks or statuses make the file invalid.
