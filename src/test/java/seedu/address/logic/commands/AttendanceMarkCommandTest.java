@@ -34,6 +34,22 @@ public class AttendanceMarkCommandTest {
     }
 
     @Test
+    public void execute_absentWithPositiveScore_warnsButRecords() {
+        model.setStudent(TypicalGroups.NAME_T01, ALICE.withParticipationRecord(3, 5).withParticipationRecord(4, 0));
+        Model expected = new ModelManager(model.getTAssist(), new UserPrefs());
+        expected.setStudent(TypicalGroups.NAME_T01, ALICE.withParticipationRecord(3, 5).withParticipationRecord(4, 0)
+                .withAttendanceRecord(3, "ABSENT"));
+
+        assertCommandSuccess(new AttendanceMarkCommand(ALICE.getStudentId(), 3, AttendanceStatus.ABSENT), model,
+                "Recorded Alice Tan as absent for Week 3."
+                        + String.format(AttendanceMarkCommand.MESSAGE_SCORE_WARNING, "Alice Tan", 5, 3), expected);
+        expected.setStudent(TypicalGroups.NAME_T01, ALICE.withParticipationRecord(3, 5).withParticipationRecord(4, 0)
+                .withAttendanceRecord(3, "ABSENT").withAttendanceRecord(4, "ABSENT"));
+        assertCommandSuccess(new AttendanceMarkCommand(ALICE.getStudentId(), 4, AttendanceStatus.ABSENT), model,
+                "Recorded Alice Tan as absent for Week 4.", expected);
+    }
+
+    @Test
     public void buildTemplate_studentId_endsAtWeekPrefix() {
         assertEquals("attendance mark id/A0123456X w/", AttendanceMarkCommand.buildTemplate(ALICE.getStudentId()));
         assertThrows(NullPointerException.class, () -> AttendanceMarkCommand.buildTemplate(null));
@@ -61,10 +77,11 @@ public class AttendanceMarkCommandTest {
         expected.setStudent(TypicalGroups.NAME_T01, recorded.withAttendanceRecord(3, "ABSENT"));
 
         AttendanceMarkCommand command = new AttendanceMarkCommand(ALICE.getStudentId(), 3, AttendanceStatus.ABSENT);
-        assertCommandSuccess(command, model, "Updated Alice Tan's attendance for Week 3: present to absent.",
+        String warning = String.format(AttendanceMarkCommand.MESSAGE_SCORE_WARNING, "Alice Tan", 4, 3);
+        assertCommandSuccess(command, model, "Updated Alice Tan's attendance for Week 3: present to absent." + warning,
                 expected);
-        assertCommandSuccess(command, model, "Alice Tan's attendance for Week 3 is already absent. Nothing changed.",
-                expected);
+        assertCommandSuccess(command, model,
+                "Alice Tan's attendance for Week 3 is already absent. Nothing changed." + warning, expected);
     }
 
     @Test

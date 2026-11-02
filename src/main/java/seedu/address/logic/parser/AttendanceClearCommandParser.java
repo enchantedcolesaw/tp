@@ -14,13 +14,13 @@ public class AttendanceClearCommandParser implements Parser<AttendanceClearComma
 
     private final TAssistArgumentParser argumentParser = new TAssistArgumentParser(
             List.of(PREFIX_STUDENT_ID, PREFIX_WEEK), List.of(),
-            List.of(PREFIX_STUDENT_ID, PREFIX_WEEK));
+            List.of(PREFIX_STUDENT_ID, PREFIX_WEEK)).allowRepeated(PREFIX_STUDENT_ID);
 
     @Override
     public AttendanceClearCommand parse(String arguments) throws ParseException {
         ArgumentMultimap values = argumentParser.parse(arguments, AttendanceClearCommand.MESSAGE_USAGE);
         return new AttendanceClearCommand(
-                TAssistParserUtil.parseStudentId(values.getValue(PREFIX_STUDENT_ID).orElseThrow()),
+                TAssistParserUtil.parseStudentIds(values.getAllValues(PREFIX_STUDENT_ID)),
                 AttendanceCommandParserUtil.parseWeek(values.getValue(PREFIX_WEEK).orElseThrow()));
     }
 }

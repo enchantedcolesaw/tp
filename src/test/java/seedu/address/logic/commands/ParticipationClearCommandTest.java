@@ -9,7 +9,10 @@ import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalStudents.ALICE;
 import static seedu.address.testutil.TypicalStudents.BEN;
+import static seedu.address.testutil.TypicalStudents.CARL;
 import static seedu.address.testutil.TypicalStudents.DANIEL;
+
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +21,7 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.student.Student;
+import seedu.address.model.student.StudentId;
 import seedu.address.testutil.TypicalGroups;
 
 public class ParticipationClearCommandTest {
@@ -79,6 +83,27 @@ public class ParticipationClearCommandTest {
     }
 
     @Test
+    public void execute_severalStudents_clearsEachAndReportsEachInOrder() {
+        model.setStudent(TypicalGroups.NAME_T01, ALICE.withParticipationRecord(3, 0));
+        model.setStudent(TypicalGroups.NAME_T01, BEN.withParticipationRecord(3, 5).withParticipationRecord(4, 2));
+        Model expected = new ModelManager(model.getTAssist(), new UserPrefs());
+        expected.setStudent(TypicalGroups.NAME_T01, ALICE);
+        expected.setStudent(TypicalGroups.NAME_T01, BEN.withParticipationRecord(4, 2));
+
+        assertCommandSuccess(new ParticipationClearCommand(List.of(BEN.getStudentId(), CARL.getStudentId(),
+                ALICE.getStudentId()), 3), model, "Cleared Ben Lim's participation score for Week 3: 5 to Not "
+                + "recorded.\nCarl Goh has no participation score recorded for Week 3. Nothing changed.\n"
+                + "Cleared Alice Tan's participation score for Week 3: 0 to Not recorded.", expected);
+    }
+
+    @Test
+    public void execute_severalStudentsWithUnknownLast_failsWithoutClearingAny() {
+        model.setStudent(TypicalGroups.NAME_T01, ALICE.withParticipationRecord(3, 4));
+        assertCommandFailure(new ParticipationClearCommand(List.of(ALICE.getStudentId(), DANIEL.getStudentId()), 3),
+                model, String.format(MESSAGE_UNKNOWN_STUDENT, DANIEL.getStudentId(), TypicalGroups.NAME_T01));
+    }
+
+    @Test
     public void execute_studentInAnotherGroup_failsWithoutChangingData() {
         assertCommandFailure(new ParticipationClearCommand(DANIEL.getStudentId(), 3), model,
                 String.format(MESSAGE_UNKNOWN_STUDENT, DANIEL.getStudentId(), TypicalGroups.NAME_T01));
@@ -92,7 +117,9 @@ public class ParticipationClearCommandTest {
 
     @Test
     public void invalidConstruction_throwsException() {
-        assertThrows(NullPointerException.class, () -> new ParticipationClearCommand(null, 3));
+        assertThrows(NullPointerException.class, () -> new ParticipationClearCommand((StudentId) null, 3));
+        assertThrows(NullPointerException.class, () -> new ParticipationClearCommand((List<StudentId>) null, 3));
+        assertThrows(IllegalArgumentException.class, () -> new ParticipationClearCommand(List.of(), 3));
         assertThrows(IllegalArgumentException.class, () -> new ParticipationClearCommand(ALICE.getStudentId(), 0));
         assertThrows(IllegalArgumentException.class, () -> new ParticipationClearCommand(ALICE.getStudentId(), 14));
     }
@@ -106,6 +133,8 @@ public class ParticipationClearCommandTest {
         assertEquals(command.hashCode(), equal.hashCode());
         assertNotEquals(command, new ParticipationClearCommand(DANIEL.getStudentId(), 3));
         assertNotEquals(command, new ParticipationClearCommand(ALICE.getStudentId(), 4));
+        assertEquals(command, new ParticipationClearCommand(List.of(ALICE.getStudentId()), 3));
+        assertNotEquals(command, new ParticipationClearCommand(List.of(ALICE.getStudentId(), BEN.getStudentId()), 3));
         assertNotEquals(command, null);
         assertNotEquals(command, "participation clear");
     }

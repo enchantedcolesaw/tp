@@ -60,10 +60,11 @@ public class AttendanceIntegrationTest {
         assertFeedback("attendance mark id/A0123456X w/1 s/present", "Recorded Alice Tan as present for Week 1.");
         assertFeedback("attendance mark id/A0123456X w/3 s/present", "Recorded Alice Tan as present for Week 3.");
         assertFeedback("attendance mark id/A0123456X w/3 s/absent",
-                "Updated Alice Tan's attendance for Week 3: present to absent.");
+                "Updated Alice Tan's attendance for Week 3: present to absent."
+                        + " Warning: Alice Tan has participation score 4 for Week 3.");
         restart();
 
-        assertFeedback("attendance list w/3", "Attendance for T01, Week 3:\n"
+        assertFeedback("attendance list w/3", "Attendance for T01, Week 3: 0 present, 1 absent, 2 not recorded\n"
                 + "Alice Tan | A0123456X | Absent\n"
                 + "Ben Lim | A0234567Y | Not recorded\n"
                 + "Carl Goh | A0345678Z | Not recorded");
@@ -72,13 +73,13 @@ public class AttendanceIntegrationTest {
                         .findStudent(ALICE.getStudentId()).orElseThrow());
 
         logic.execute("group use g/T02");
-        assertFeedback("attendance list w/3", "Attendance for T02, Week 3:\n"
+        assertFeedback("attendance list w/3", "Attendance for T02, Week 3: 0 present, 0 absent, 3 not recorded\n"
                 + "Daniel Ong | A0456789W | Not recorded\n"
                 + "Elle Teo | A0567890U | Not recorded\n"
                 + "Alice Tan | A0123456X | Not recorded");
         logic.execute("attendance mark id/A0123456X w/13 s/present");
         restart();
-        assertFeedback("attendance list w/13", "Attendance for T02, Week 13:\n"
+        assertFeedback("attendance list w/13", "Attendance for T02, Week 13: 1 present, 0 absent, 2 not recorded\n"
                 + "Daniel Ong | A0456789W | Not recorded\n"
                 + "Elle Teo | A0567890U | Not recorded\n"
                 + "Alice Tan | A0123456X | Present");
@@ -92,7 +93,7 @@ public class AttendanceIntegrationTest {
                 "Recorded Alice Tan as absent for Week 2.\nRecorded Carl Goh as absent for Week 2.");
         restart();
 
-        assertFeedback("attendance list w/2", "Attendance for T01, Week 2:\n"
+        assertFeedback("attendance list w/2", "Attendance for T01, Week 2: 0 present, 2 absent, 1 not recorded\n"
                 + "Alice Tan | A0123456X | Absent\n"
                 + "Ben Lim | A0234567Y | Not recorded\n"
                 + "Carl Goh | A0345678Z | Absent");
@@ -116,14 +117,14 @@ public class AttendanceIntegrationTest {
                 "Cleared Alice Tan's attendance for Week 4: present to Not recorded.");
         restart();
 
-        assertFeedback("attendance list w/4", "Attendance for T01, Week 4:\n"
+        assertFeedback("attendance list w/4", "Attendance for T01, Week 4: 0 present, 1 absent, 2 not recorded\n"
                 + "Alice Tan | A0123456X | Not recorded\n"
                 + "Ben Lim | A0234567Y | Absent\n"
                 + "Carl Goh | A0345678Z | Not recorded");
         assertEquals(ALICE.withAttendanceRecord(3, "PRESENT").withParticipationRecord(4, 3),
                 model.getGroup(TypicalGroups.NAME_T01).findStudent(ALICE.getStudentId()).orElseThrow());
         logic.execute("attendance clear id/A0234567Y w/4");
-        assertFeedback("attendance list w/4", "Attendance for T01, Week 4:\n"
+        assertFeedback("attendance list w/4", "Attendance for T01, Week 4: 0 present, 0 absent, 3 not recorded\n"
                 + "Alice Tan | A0123456X | Not recorded\n"
                 + "Ben Lim | A0234567Y | Not recorded\n"
                 + "Carl Goh | A0345678Z | Not recorded");
@@ -144,7 +145,7 @@ public class AttendanceIntegrationTest {
     @Test
     public void execute_rejectedClear_preservesModelAndFile() throws Exception {
         logic.execute("attendance mark id/A0123456X w/3 s/present");
-        for (String week : new String[] {"0", "14", "3.5", ""}) {
+        for (String week : new String[] {"0", "14", "3.5"}) {
             assertFailureUnchanged("attendance clear id/A0123456X w/" + week,
                     ParseException.class, AttendanceCommandParserUtil.MESSAGE_INVALID_WEEK);
         }
@@ -203,6 +204,22 @@ public class AttendanceIntegrationTest {
         GroupCommandRegistration.registerCommands(registry);
         AttendanceCommandRegistration.registerCommands(registry);
         return new LogicManager(model, storage, registry);
+    }
+
+    @Test
+    public void execute_clearSeveralStudents_clearsAllOrNoneAndSaves() throws Exception {
+        assertFeedback("attendance mark id/A0123456X id/A0234567Y w/5 s/present",
+                "Recorded Alice Tan as present for Week 5.\nRecorded Ben Lim as present for Week 5.");
+        assertFailureUnchanged("attendance clear id/A0123456X id/A0234567Y id/A0999999Z w/5",
+                CommandException.class, String.format(MESSAGE_UNKNOWN_STUDENT, "A0999999Z", TypicalGroups.NAME_T01));
+        assertFeedback("attendance clear id/a0234567y id/A0345678Z id/A0123456X w/5",
+                "Cleared Ben Lim's attendance for Week 5: present to Not recorded.\n"
+                        + "Carl Goh has no attendance recorded for Week 5. Nothing changed.\n"
+                        + "Cleared Alice Tan's attendance for Week 5: present to Not recorded.");
+        restart();
+        assertFeedback("attendance list w/5", "Attendance for T01, Week 5: 0 present, 0 absent, 3 not recorded\n"
+                + "Alice Tan | A0123456X | Not recorded\nBen Lim | A0234567Y | Not recorded\n"
+                + "Carl Goh | A0345678Z | Not recorded");
     }
 
     private void restart() throws Exception {

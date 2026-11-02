@@ -13,6 +13,7 @@ import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.group.Group;
+import seedu.address.model.student.AttendanceStatus;
 import seedu.address.model.student.Student;
 import seedu.address.model.student.StudentId;
 import seedu.address.model.student.WeeklyRecord;
@@ -26,6 +27,7 @@ public class ParticipationSetCommand extends Command {
     public static final String MESSAGE_UPDATED = "Updated %s's participation score for Week %s: %s to %s.";
     public static final String MESSAGE_UNCHANGED =
             "%s's participation score for Week %s is already %s. Nothing changed.";
+    public static final String MESSAGE_ABSENT_WARNING = " Warning: %s is marked absent for Week %d.";
 
     private static final Logger logger = LogsCenter.getLogger(ParticipationSetCommand.class);
     private final List<StudentId> studentIds;
@@ -65,7 +67,7 @@ public class ParticipationSetCommand extends Command {
             model.setStudent(group.getName(), updated);
             assert updated.getParticipationRecord(week).orElseThrow() == score
                     : "The new score must replace this week's value";
-            feedback.add(createFeedback(student, oldScore));
+            feedback.add(createFeedback(student, oldScore) + warnIfAbsent(student));
         }
         logger.fine("Set participation for " + students.size() + " student(s) in Week " + week
                 + " in " + group.getName());
@@ -83,6 +85,14 @@ public class ParticipationSetCommand extends Command {
             return String.format(MESSAGE_UNCHANGED, student.getName(), week, score);
         }
         return String.format(MESSAGE_UPDATED, student.getName(), week, oldScore.get(), score);
+    }
+
+    /**
+     * Returns a warning if a positive score is given to a student marked absent for the week, or an empty string.
+     */
+    private String warnIfAbsent(Student student) {
+        boolean isAbsent = student.getAttendanceRecord(week).filter(AttendanceStatus.ABSENT.name()::equals).isPresent();
+        return isAbsent && score > 0 ? String.format(MESSAGE_ABSENT_WARNING, student.getName(), week) : "";
     }
 
     @Override

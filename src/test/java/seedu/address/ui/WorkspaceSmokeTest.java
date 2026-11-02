@@ -404,11 +404,12 @@ public class WorkspaceSmokeTest {
             verifyCommands();
             verifyFailure();
             runOnFx(() -> render(root, "error", 853, 440));
-            runOnFx(() -> enter(input, "view"));
+            String longCommand = "unknown" + "x".repeat(600);
+            runOnFx(() -> enter(input, longCommand));
             runOnFx(() -> {
                 render(root, "error-usage", 1280, 680);
                 TextArea feedback = (TextArea) root.lookup("#resultDisplay");
-                assertTrue(feedback.getText().contains(ViewCommand.MESSAGE_USAGE));
+                assertTrue(feedback.getText().startsWith("Unknown command"));
                 assertTrue(hasVisibleVerticalScrollBar(feedback), "Long usage feedback scrolls within its cap");
                 assertTrue(feedback.getPrefRowCount() <= ResultDisplay.MAX_VISIBLE_LINES);
                 String completeFeedback = feedback.getText();
@@ -426,9 +427,16 @@ public class WorkspaceSmokeTest {
                 }
                 assertEquals(vertical.getMin(), vertical.getValue(), 0.001);
                 assertEquals(completeFeedback, feedback.getText());
-                assertEquals("view", input.getText());
+                assertEquals(longCommand, input.getText());
                 assertTrue(input.getStyleClass().contains(CommandBox.ERROR_STYLE_CLASS));
                 assertEquals(input, stage.getScene().getFocusOwner());
+            });
+            runOnFx(() -> enter(input, "view"));
+            runOnFx(() -> {
+                render(root, "view-missing-screen", 1280, 680);
+                TextArea feedback = (TextArea) root.lookup("#resultDisplay");
+                assertEquals(ViewCommand.MESSAGE_MISSING_SCREEN, feedback.getText());
+                assertFalse(hasVisibleVerticalScrollBar(feedback), "The view usage error fits without scrolling");
             });
             runOnFx(() -> {
                 enter(input, "view storage");
@@ -547,7 +555,7 @@ public class WorkspaceSmokeTest {
                 assertEquals("Recorded participation score 0 for Alice Tan in Week 3.", feedback.getText());
                 enter(input, "participation list w/3");
                 TextArea listing = (TextArea) root.lookup("#recordListing");
-                assertEquals("Participation for T01, Week 3:\nAlice Tan | A0123456X | 0"
+                assertEquals("Participation for T01, Week 3: 1 recorded, 2 not recorded\nAlice Tan | A0123456X | 0"
                         + "\nBen Lim | A0234567Y | Not recorded\nCarl Goh | A0345678Z | Not recorded",
                         listing.getText());
                 enter(input, "participation set id/A0123456X w/3 s/6");
@@ -790,7 +798,7 @@ public class WorkspaceSmokeTest {
                 assertTrue(listing.getText().contains("Alice Tan | A0123456X | Present"));
                 assertTrue(listing.getText().contains("Student | A116 | Not recorded"));
                 assertEquals("records", tabs.getSelectionModel().getSelectedItem().getId());
-                assertEquals("Attendance for T01, Week 3:", feedback.getText());
+                assertEquals("Attendance for T01, Week 3: 1 present, 0 absent, 19 not recorded", feedback.getText());
                 assertTrue(input.getText().isEmpty());
             });
             runOnFx(() -> render(root, "attendance-list", 853, 440));

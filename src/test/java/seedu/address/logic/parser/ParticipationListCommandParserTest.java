@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
+import static seedu.address.logic.parser.CommandParserTestUtil.blankValueMessage;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import org.junit.jupiter.api.Test;
@@ -22,9 +23,10 @@ public class ParticipationListCommandParserTest {
     public void parse_missingOrInvalidWeek_reportsSpecificError() {
         assertParseFailure(parser, "", String.format(TAssistArgumentParser.MESSAGE_MISSING_PARAMETERS, "w/")
                         + " Usage: " + ParticipationListCommand.MESSAGE_USAGE);
-        for (String week : new String[] {"", "0", "14", "-1", "+1", "1.5", "three", "9".repeat(1000)}) {
+        for (String week : new String[] {"0", "14", "-1", "+1", "1.5", "three", "9".repeat(1000)}) {
             assertParseFailure(parser, "w/" + week, TAssistParserUtil.MESSAGE_WEEK);
         }
+        assertParseFailure(parser, "w/", blankValueMessage("w/", ParticipationListCommand.MESSAGE_USAGE));
     }
 
     @Test

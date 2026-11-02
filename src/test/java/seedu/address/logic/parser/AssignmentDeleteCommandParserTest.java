@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
+import static seedu.address.logic.parser.CommandParserTestUtil.blankValueMessage;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalAssignments.NAME_PS1;
 
@@ -38,7 +39,8 @@ public class AssignmentDeleteCommandParserTest {
 
     @Test
     public void parse_invalidName_reportsConstraints() {
-        for (String input : new String[] {"a/", "a/   ", "a/PS_1", "a/" + "a".repeat(61)}) {
+        assertParseFailure(parser, "a/   ", blankValueMessage("a/", AssignmentDeleteCommand.MESSAGE_USAGE));
+        for (String input : new String[] {"a/PS_1", "a/" + "a".repeat(61)}) {
             assertParseFailure(parser, input, AssignmentName.MESSAGE_CONSTRAINTS);
         }
     }

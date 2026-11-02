@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
+import static seedu.address.logic.parser.CommandParserTestUtil.blankValueMessage;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalAssignments.NAME_PS1;
 
@@ -31,7 +32,7 @@ public class AssignmentRenameCommandParserTest {
     public void parse_invalidName_reportsConstraints() {
         assertParseFailure(parser, "a/PS_1 n/PS2", AssignmentName.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, "a/PS1 n/PS_2", AssignmentName.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, "a/PS1 n/", AssignmentName.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "a/PS1 n/", blankValueMessage("n/", AssignmentRenameCommand.MESSAGE_USAGE));
         assertParseFailure(parser, "a/PS1 n/" + "a".repeat(61), AssignmentName.MESSAGE_CONSTRAINTS);
     }
 

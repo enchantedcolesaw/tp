@@ -40,8 +40,8 @@ public final class AssignmentCommandRegistration {
                         List.of("assignment submit a/PS1 id/A0123456X s/yes")));
         registry.register("assignment", "grade", new AssignmentGradeCommandParser(),
                 new HelpEntry("assignment", AssignmentGradeCommand.MESSAGE_USAGE,
-                        "Record or replace a whole-number grade from 0 to 100 after the student has submitted the "
-                                + "assignment.",
+                        "Record or replace a whole-number grade from 0 to 100. Grading an assignment that is not "
+                                + "yet submitted also records it as submitted.",
                         List.of("assignment grade a/PS1 id/A0123456X m/87")));
         registry.register("assignment", "list", new AssignmentListCommandParser(),
                 new HelpEntry("assignment", AssignmentListCommand.MESSAGE_USAGE,

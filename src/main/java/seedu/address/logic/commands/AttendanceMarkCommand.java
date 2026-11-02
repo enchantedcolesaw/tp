@@ -28,6 +28,7 @@ public class AttendanceMarkCommand extends Command {
     public static final String MESSAGE_RECORDED = "Recorded %s as %s for Week %d.";
     public static final String MESSAGE_UPDATED = "Updated %s's attendance for Week %d: %s to %s.";
     public static final String MESSAGE_UNCHANGED = "%s's attendance for Week %d is already %s. Nothing changed.";
+    public static final String MESSAGE_SCORE_WARNING = " Warning: %s has participation score %d for Week %d.";
 
     private final List<StudentId> studentIds;
     private final int week;
@@ -71,7 +72,7 @@ public class AttendanceMarkCommand extends Command {
         for (Student student : students) {
             Optional<String> oldStatus = student.getAttendanceRecord(week).map(AttendanceMarkCommand::toCommandValue);
             model.setStudent(group.getName(), student.withAttendanceRecord(week, status.name()));
-            feedback.add(createFeedback(student, oldStatus));
+            feedback.add(createFeedback(student, oldStatus) + warnIfScored(student));
         }
         return new CommandResult(String.join("\n", feedback));
     }
@@ -88,6 +89,15 @@ public class AttendanceMarkCommand extends Command {
             return String.format(MESSAGE_UNCHANGED, student.getName(), week, newStatus);
         }
         return String.format(MESSAGE_UPDATED, student.getName(), week, oldStatus.get(), newStatus);
+    }
+
+    /**
+     * Returns a warning if a student with a positive score for the week is marked absent, or an empty string.
+     */
+    private String warnIfScored(Student student) {
+        Optional<Integer> score = student.getParticipationRecord(week).filter(value -> value > 0);
+        return status == AttendanceStatus.ABSENT && score.isPresent()
+                ? String.format(MESSAGE_SCORE_WARNING, student.getName(), score.get(), week) : "";
     }
 
     private static String toCommandValue(String storedStatus) {

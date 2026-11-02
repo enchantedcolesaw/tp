@@ -19,6 +19,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.exceptions.IllegalValueException;
+import seedu.address.commons.util.JsonUtil;
 import seedu.address.model.assignment.Assignment;
 import seedu.address.model.assignment.AssignmentName;
 import seedu.address.model.assignment.AssignmentRecord;
@@ -41,6 +42,14 @@ public class JsonAdaptedGroupTest {
     public void toModelType_validGroupDetails_returnsGroup() throws Exception {
         JsonAdaptedGroup group = new JsonAdaptedGroup(T01);
         assertEquals(T01, group.toModelType());
+    }
+
+    @Test
+    public void toModelType_unicodeSpacesInNames_returnsNamesWithNormalSpaces() throws Exception {
+        String json = "{\"name\":\"Lab\\u00a01\",\"students\":[],\"assignments\":[\"Lab\\u20032\"]}";
+        Group group = JsonUtil.fromJsonString(json, JsonAdaptedGroup.class).toModelType();
+        assertEquals("Lab 1", group.getName().fullName);
+        assertEquals(new AssignmentName("Lab 2"), group.getAssignmentList().getFirst().getName());
     }
 
     @Test

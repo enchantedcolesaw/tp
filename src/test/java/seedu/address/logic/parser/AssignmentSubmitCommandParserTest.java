@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
+import static seedu.address.logic.parser.CommandParserTestUtil.blankValueMessage;
 import static seedu.address.testutil.TypicalAssignments.NAME_PS1;
 import static seedu.address.testutil.TypicalStudents.ALICE;
 import static seedu.address.testutil.TypicalStudents.BEN;
@@ -11,7 +12,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.AssignmentSubmitCommand;
-import seedu.address.model.student.StudentId;
 
 public class AssignmentSubmitCommandParserTest {
     private final AssignmentSubmitCommandParser parser = new AssignmentSubmitCommandParser();
@@ -32,7 +32,8 @@ public class AssignmentSubmitCommandParserTest {
 
     @Test
     public void parse_repeatedStudentIdWithBadValue_reportsThatValue() {
-        assertParseFailure(parser, "a/PS1 id/A0123456X id/ s/yes", StudentId.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "a/PS1 id/A0123456X id/ s/yes",
+                blankValueMessage("id/", AssignmentSubmitCommand.MESSAGE_USAGE));
         assertParseFailure(parser, "a/PS1 id/A0123456X id/invalid! s/yes",
                 String.format(TAssistParserUtil.MESSAGE_INVALID_STUDENT_ID_IN_LIST, "invalid!"));
         assertParseFailure(parser, "a/PS1 id/A0123456X id/A0234567Y later s/yes",

@@ -17,6 +17,7 @@ import seedu.address.model.student.WeeklyRecordEntry;
 public class ParticipationListCommand extends Command {
     public static final String MESSAGE_USAGE = "participation list w/WEEK";
     public static final String MESSAGE_NO_STUDENTS = "No students in %s.";
+    public static final String MESSAGE_HEADER = "Participation for %s, Week %d: %d recorded, %d not recorded";
 
     private final int week;
 
@@ -37,7 +38,9 @@ public class ParticipationListCommand extends Command {
             return CommandResult.forRecordListing(String.format(MESSAGE_NO_STUDENTS, group.getName()));
         }
 
-        StringBuilder feedback = new StringBuilder("Participation for " + group.getName() + ", Week " + week + ":");
+        long recorded = entries.stream().filter(entry -> entry.getRecord().isPresent()).count();
+        StringBuilder feedback = new StringBuilder(String.format(MESSAGE_HEADER, group.getName(), week, recorded,
+                entries.size() - recorded));
         for (WeeklyRecordEntry<Integer> entry : entries) {
             feedback.append('\n').append(entry.getStudent().getName()).append(" | ")
                     .append(entry.getStudent().getStudentId()).append(" | ")

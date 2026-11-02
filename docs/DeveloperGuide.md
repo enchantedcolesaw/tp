@@ -340,6 +340,9 @@ with a normal space. Text pasted from a web page, a PDF, or a chat app often con
 like a space or a line break, but Java's `\s` and `String#trim` do not treat them as whitespace, so a command such as
 `group add` followed by a non-breaking space would otherwise be read as one unknown subcommand. Tabs and ASCII line
 breaks are left to the existing whitespace rules.
+Names read from the data file do not pass through `TAssistParser`, so `StringUtil#normalizeSpaces`, which
+`GroupName`, `StudentName`, and `AssignmentName` use, also treats Unicode whitespace (`(?U)\s`) as a space. A name
+saved with a non-breaking space therefore loads the same way as the typed command would.
 
 Zero-width characters, such as the zero-width space U+200B, the word joiner U+2060, and the byte order mark U+FEFF,
 are not changed. Unlike the characters above, they do not separate words: replacing one with a space would split
@@ -366,7 +369,11 @@ Prefixes contain lowercase letters followed by `/`, and start at the beginning o
 Prefix-like tokens at those boundaries are reserved for parameters. A slash embedded in a value does not separate
 parameters, and URL schemes such as `https://` are retained as values. Parameters can appear in any order.
 Unknown prefixes, repeated parameters, missing required parameters, and unexpected text before parameters
-produce specific errors. If a missing prefix appears inside another value right after other text, as `w/` does in
+produce specific errors. A required prefix typed with a blank value, as in `assignment add a/`, is reported as
+`Missing value after a/.` with the command's format, after any wholly missing prefixes, so a blank value is not
+described as an invalid one. Optional prefixes keep blank values for their command to check, which lets the group
+commands say `Missing group name.` and `student find` name the blank filter; the student commands check theirs with
+`StudentCommandParserUtil#verifyNoBlankValues`. If a missing prefix appears inside another value right after other text, as `w/` does in
 `id/A0123456Xw/3`, the error says `Missing space before w/ in 'id/A0123456Xw/3'.` instead of naming `w/` as
 missing. It quotes only the value's first word, the only word that can hide a prefix, since a later word with a
 slash is read as a prefix of its own. Such a word, as in `n/Alice Tanid/A1`, is an unknown prefix (`Tanid/`). The
@@ -568,7 +575,8 @@ or scores defensively, even when called without a parser.
 leaves all scores unchanged. For each student, it reads that week's existing value, if any, creates an immutable copy
 with `Student.withParticipationRecord`, and passes the copy to `Model.setStudent`. Feedback distinguishes a first
 entry, a replacement (showing the old and new score, such as `2 to 4`), and an entry equal to the existing score,
-which says nothing changed. The replacement preserves roster order, attendance, and scores for other weeks; students
+which says nothing changed. A score above 0 for a student whose week is marked `ABSENT` adds
+`MESSAGE_ABSENT_WARNING` to that student's line; the score is still recorded, since the mark may be the mistake. The replacement preserves roster order, attendance, and scores for other weeks; students
 in other groups are untouched.
 
 The sequence diagram below shows how `LogicManager` executes the input `participation set id/A0123456X w/3 s/2`
@@ -586,12 +594,13 @@ The `parse participation set` reference frame is shown below. `CommandRegistry` 
 ![Parsing of the `participation set id/A0123456X w/3 s/2` command](images/ParticipationSetParseSequenceDiagram.png)
 
 `ParticipationListCommand` uses `Group.getWeeklyRecordEntries` with `Student::getParticipationRecords`, so it reuses
-the shared weekly listing mechanism. Each row formats its value or `Not recorded`; zero is an actual score.
+the shared weekly listing mechanism. Each row formats its value or `Not recorded`; zero is an actual score. The
+heading counts the students with and without a score, so a recorded zero counts as recorded.
 
 Because zero is an actual score, setting a score to 0 cannot undo a score entered by mistake.
 `ParticipationClearCommand` removes the week's score with `withoutParticipationRecord`, so the week shows
-`Not recorded` again. It works like `attendance clear`: it takes only `id/` and `w/`, names the score it removed, and
-changes nothing when the week has no score.
+`Not recorded` again. It works like `attendance clear`: it takes only `id/`, which may be repeated, and `w/`, names
+each score it removed, and changes nothing for a student whose week has no score.
 
 **Aspect: How a TA removes a wrong weekly record**
 
@@ -622,8 +631,9 @@ participation feedback and failed-input retention through the JavaFX command box
 `StudentCommandRegistration` registers `student add`, `student edit`, `student list`, `student find`,
 `student sort`, and `student delete`, including their help formats and examples. `MainApp.init` installs these registrations before constructing `LogicManager`.
 The add and delete parsers use `StudentCommandParserUtil` to reject malformed parameters and report missing
-prefixes with the command's usage. Present but blank values go through the existing domain validators, so a blank
-name or ID reports its value constraints. Listing accepts no parameters. `StudentName` accepts `s/o`, `d/o`, `a/l`
+prefixes with the command's usage. `StudentCommandParserUtil#verifyNoBlankValues` then reports a blank value, such as
+`n/` in `student add` or `nid/` in `student edit`, as `Missing value after nid/.` with the command's format, instead
+of describing it as an invalid name or ID. Listing accepts no parameters. `StudentName` accepts `s/o`, `d/o`, `a/l`
 and `a/p` only as a separate word between two parts of a name, and the add and find parsers keep them in the name as
 literal words (see [Command registration and shared validation](#command-registration-and-shared-validation)).
 
@@ -716,11 +726,15 @@ within one group.
 
 `AssignmentAddCommand` finds the active group and rejects a name that the group already holds, then calls
 `Model.addAssignment`. Its duplicate message shows the name of the existing assignment, so the TA sees the
-capitalization that is stored. `AssignmentSubmitCommand` and `AssignmentGradeCommand` resolve the active group,
+capitalization that is stored. Before adding, it compares only the letters and digits of each name, ignoring case,
+so `PS 1` and `PS-1` match `PS1`. A match adds a warning naming the existing assignment instead of rejecting the
+name, because names such as `PS1.5` and `PS15` may be intended. `AssignmentSubmitCommand` and `AssignmentGradeCommand` resolve the active group,
 assignment, and students before updating an immutable `Assignment` through `Model#setAssignment`.
 `AssignmentSubmitCommand` finds every named student through `Command#getStudents` first, so an unknown ID changes no
 record. It then applies each changed status to one updated `Assignment` and replaces it once, with one feedback line
-per student. A grade update also checks that the record is submitted. Each failed command leaves the model unchanged.
+per student. A grade update calls `AssignmentRecord#withSubmissionStatus(true)` before `withGrade`, because a graded
+assignment is a submitted one; the feedback says when the submission was recorded too. Each failed command leaves the
+model unchanged.
 With `a/`, `AssignmentListCommand` returns one row per student in roster order: name, student ID, submission
 status, and grade; missing records show `Not submitted` and `-`. Without `a/`, it numbers the names of the active
 group's assignments in creation order, so the TA can recover the exact names after a restart. The
@@ -820,21 +834,28 @@ through `Command#getStudents`. If any ID is unknown, no student is marked. For e
 existing record, if any, creates an updated student through
 `withAttendanceRecord`, and replaces it through `Model#setStudent`. The stored status is `PRESENT` or `ABSENT`.
 The confirmation distinguishes a first mark, an update (showing the old and new status, such as
-`present to absent`), and a mark equal to the existing one, which says nothing changed.
+`present to absent`), and a mark equal to the existing one, which says nothing changed. Marking a student absent
+who has a participation score above 0 that week adds `MESSAGE_SCORE_WARNING`, the reverse of the warning in
+`participation set`.
 Existing `LogicManager` persistence saves the result.
 
 `AttendanceListCommandParser` requires only `w/` and uses the same week validation. `AttendanceListCommand`
 selects attendance through `Group#getWeeklyRecordEntries`. If the group has no students, it returns
 `No students in GROUP.` Otherwise, it lists every student, formatting each row with the student's name, ID, and
 capitalized status, using `WeeklyRecordEntry#formatValueOrNotRecorded` to show a missing mark as `Not recorded`.
-The rows appear on the Records screen, and the feedback box shows only the heading.
+The heading counts the present, absent, and unmarked students, counting stored values rather than display text, so
+the TA can see at a glance whether anyone was missed. The rows appear on the Records screen, and the feedback box
+shows only the heading.
 
-`AttendanceClearCommandParser` requires `id/` and `w/` exactly once, with the same validation as marking. It does not
-accept `s/`, so a status copied from a mark command is reported instead of being ignored. `AttendanceClearCommand`
-finds the student in the active group, then replaces them through `Model#setStudent` with a copy from
-`withoutAttendanceRecord`. The feedback names the status it removed, such as `present to Not recorded`, so a TA who
-cleared the wrong week can mark it again. If the week has no mark, the command changes nothing and says so. The data
-is then unchanged, so `LogicManager` does not save, just as for a repeated mark.
+`AttendanceClearCommandParser` requires `w/` exactly once and declares `id/` with `allowRepeated`, as
+`AttendanceMarkCommandParser` does, so that one command can undo a batch mark; `parseStudentIds` drops repeated IDs.
+It does not accept `s/`, so a status copied from a mark command is reported instead of being ignored.
+`AttendanceClearCommand` finds every named student in the active group through `Command#getStudents` first, so an
+unknown ID clears nothing. It then replaces each student that has a mark through `Model#setStudent` with a copy from
+`withoutAttendanceRecord`, with one feedback line per student. Each line names the status it removed, such as
+`present to Not recorded`, so a TA who cleared the wrong week can mark it again. A student whose week has no mark is
+reported as unchanged. If no named student has a mark, the data is unchanged, so `LogicManager` does not save, just as
+for a repeated mark.
 
 #### Where per-student records are stored
 
@@ -1361,9 +1382,9 @@ The following extensions apply to every use case that changes or views records o
 
       Use case ends.
 
-* 5b. TA notices a mark for a student or week that should have none (e.g. the TA marked the wrong week).
-    * 5b1. TA requests to clear that student's attendance for that week.
-    * 5b2. TAssist removes the mark and shows the status it removed.
+* 5b. TA notices marks for one or more students or a week that should have none (e.g. the TA marked the wrong week).
+    * 5b1. TA requests to clear those students' attendance for that week.
+    * 5b2. TAssist removes each mark and shows the status it removed for each student.
 
       Use case resumes at step 4.
 
@@ -1418,8 +1439,8 @@ The following extensions apply to every use case that changes or views records o
 2.  TAssist creates the assignment for the active group and shows a confirmation.
 3.  TA requests to mark the assignment of one or more students as submitted.
 4.  TAssist records the submission statuses and shows a confirmation for each student.
-5.  TA requests to record a grade for the assignment of one of those students.
-6.  TAssist records the grade and shows a confirmation.
+5.  TA requests to record a grade for the assignment of one student.
+6.  TAssist records the grade, records the assignment as submitted if it was not, and shows a confirmation.
 7.  TA repeats steps 3-6 for other students.
 8.  TA requests to view the records of the assignment.
 9.  TAssist shows the submission status and grade of every student in the group for that assignment.
@@ -1463,9 +1484,9 @@ The following extensions apply to every use case that changes or views records o
       Use case resumes at step 5.
 
 * 5b. The student's assignment has not been marked as submitted.
-    * 5b1. TAssist shows an error message asking the TA to mark the assignment as submitted first.
+    * 5b1. TAssist records the assignment as submitted together with the grade, and says so in the confirmation.
 
-      Use case resumes at step 3.
+      Use case resumes at step 7.
 
 * 5c. The student already has a grade for that assignment (e.g. the TA is correcting a mistake).
     * 5c1. TAssist replaces the previous grade with the new grade and shows both grades.
@@ -1660,6 +1681,7 @@ through the real parsers, model and JSON storage, but the steps below also check
       Expected: Alice is `Absent`, Ben is `Absent` and Chloe is `Not recorded`; Alice has 3, Ben is
       `Not recorded` and Chloe has 0; Alice is `Submitted | 87`, Ben is `Submitted | -` and Chloe is
       `Not submitted | -`.
+      The headings count `0 present, 2 absent, 1 not recorded` and `2 recorded, 1 not recorded`.
    1. Enter `group use g/T02` and `attendance list w/1`.<br>
       Expected: T02's Alice is `Present`. Records of one group never appear in another.
 
@@ -1791,11 +1813,19 @@ label.
    `Cleared Alice Tan's participation score for Week 3: 4 to Not recorded.` List Week 3; Alice shows `Not recorded`.
    Enter the clear command again. Expect `Alice Tan has no participation score recorded for Week 3. Nothing changed.`
    Close and reopen, then list Weeks 3 and 13. Expect `Not recorded` and 5.
+   Enter `participation set id/A0123456X id/A0234567Y w/4 s/1`, then
+   `participation clear id/A0123456X id/A0999999Z w/4`. Expect an unknown-student error naming A0999999Z, and both
+   Week 4 scores remain. Enter `participation clear id/A0123456X id/A0234567Y w/4`. Expect one `Cleared ...` line for
+   Alice, then one for Ben.
 6. Try `participation clear id/A0123456X w/3 s/2`, `participation clear w/3`, and
    `participation clear id/A0123456X w/3 now`. Expect unknown-prefix, missing-prefix, and
    `Unexpected extra text after 'w/3': 'now'. This value cannot contain spaces.` errors without changing any record.
 7. Switch to an empty group and list Week 3. Expect `No students in GROUP_NAME.`
    With no active group, all three commands must ask you to create or select a group first.
+8. Switch back with `group use g/T01`, then enter `attendance mark id/A0234567Y w/6 s/absent`, then `participation set id/A0234567Y w/6 s/3`. Expect
+   the score to be recorded with `Warning: Ben Lim is marked absent for Week 6.` Enter `participation set
+   id/A0234567Y w/6 s/0`; expect no warning. Set the score back to 3, then enter `attendance mark id/A0234567Y w/6
+   s/absent` again; expect `Warning: Ben Lim has participation score 3 for Week 6.` after the unchanged-mark message.
 
 ### Creating assignments and listing their records
 
@@ -1806,8 +1836,9 @@ label.
    Enter `assignment submit a/PS1 id/A0234567Y s/no` twice. Each time, expect
    `Ben Lim's PS1 submission status is already not submitted. Nothing changed.` without `Changes saved.`
    The model and saved file should remain unchanged.
-3. Enter `assignment grade a/PS1 id/A0234567Y m/87`. Expect an error with the exact command
-   `assignment submit a/PS1 id/A0234567Y s/yes`. Enter `assignment submit a/PS1 id/A0123456X id/A0999999Z s/yes`.
+3. Enter `assignment grade a/PS1 id/A0234567Y m/87`. Expect
+   `Recorded Ben Lim's PS1 submission status as submitted and grade 87.`, and the list shows Ben as `Submitted | 87`.
+   Enter `undo` to return Ben to `Not submitted | -`. Enter `assignment submit a/PS1 id/A0123456X id/A0999999Z s/yes`.
    Expect an error that student ID A0999999Z does not exist in T01, and both students still `Not submitted`.
    Then submit Alice and Ben together with `assignment submit a/PS1 id/A0123456X id/a0234567y id/A0123456X s/yes`.
    Expect one success line for Alice and one for Ben, in that order. Grade Alice with
@@ -1826,9 +1857,11 @@ label.
 6. Enter `assignment add a/ PS1 ` and `assignment add a/ps1`. Expect `Assignment PS1 already exists in T01.` both
    times.
    Enter `assignment add a/Mid-term   1`. Expect `Created assignment Mid-term 1 for T01.`
+   Enter `assignment add a/PS-1`. Expect the assignment to be created, with
+   `Warning: T01 already has a similar assignment named PS1. Check that this is a different assignment.` Enter `undo`.
 7. Try `assignment list a/PS9`, `assignment add a/PS_1`, `assignment add a/`, `assignment add`,
    `assignment add a/PS2 a/PS3`, and `assignment add a/PS2 n/x`. Expect specific unknown-assignment, invalid-name,
-   missing-parameter, and duplicate- or unknown-prefix errors, without changing the group or the file. Enter
+   missing-value (`Missing value after a/.`), missing-parameter, and duplicate- or unknown-prefix errors, without changing the group or the file. Enter
    `assignment grade a/PS1 id/A0123456X g/87`; expect an unknown-prefix error, since `g/` is reserved for groups.
 8. Switch to group T02 and enter `assignment list a/PS1`. Expect an unknown-assignment error, because assignments
    belong to one group.
@@ -1998,10 +2031,11 @@ label.
       Expected: `Updated Alice Tan's attendance for Week 3: present to absent.`
    1. Enter `attendance mark id/A0123456X w/3 s/absent` again.
       Expected: `Alice Tan's attendance for Week 3 is already absent. Nothing changed.`
-   1. Enter `attendance list w/3`. Expected: `Attendance for T01, Week 3:` and
-      `Alice Tan | A0123456X | Absent`. Other students, if present, show `Not recorded`.
-   1. Enter `attendance list w/13`. Expected: `Attendance for T01, Week 13:`, with every student shown as
+   1. Enter `attendance list w/3`. Expected: a heading `Attendance for T01, Week 3: 0 present, 1 absent, N not recorded`,
+      where N is the number of other students, and `Alice Tan | A0123456X | Absent`. Other students show
       `Not recorded`.
+   1. Enter `attendance list w/13`. Expected: `Attendance for T01, Week 13: 0 present, 0 absent, N not recorded`,
+      where N is the number of students, with every student shown as `Not recorded`.
    1. Close and reopen the app. Enter `attendance list w/3`. Expected: Alice is still absent.
 
 1. Clearing a mark
@@ -2013,6 +2047,8 @@ label.
       `Changes saved.`
    1. Enter `attendance list w/4`. Expected: every student shows `Not recorded`.
    1. Enter `attendance list w/3`. Expected: Alice is still absent in Week 3.
+   1. Enter `attendance clear id/A0123456X id/A0999999Z w/3`.
+      Expected: an unknown-student error naming A0999999Z, and `attendance list w/3` still shows Alice as absent.
    1. Enter `attendance clear id/A0123456X w/4 s/present`.
       Expected: `Unknown prefix 's/'. Allowed prefixes: id/ w/.`
    1. Enter `attendance clear id/A0123456X w/4 now`.
@@ -2081,6 +2117,8 @@ parameter errors, empty groups, week boundaries, and display formatting.
    1. Paste and enter `group add g/T04`, then `group add g/T03`. Expected: T04 and then T03 are created, as when the
       commands are typed with normal spaces. `group add` makes each new group active, so T03 is now active.
    1. Paste and enter `student add n/Ann Lee id/N1`. Expected: `Added Ann Lee to T03.`
+   1. Close TAssist. In `data/tassist.json`, replace the space in `Ann Lee` with a non-breaking space (or the
+      escape `\u00a0`), save, and relaunch. Expected: the file loads, and `student list` shows `Ann Lee`.
 
 1. Zero-width characters are not treated as spaces
 
@@ -2120,7 +2158,7 @@ The smoke test covers all four screens at normal and compact sizes, F1 and Escap
 the group strip, the navigation bar highlighting the current screen and keeping focus in the command box, the Students
 screen following the active group and its students, group creation/listing/switching through the command box,
 both empty states, long group and student names, row numbering after a removal, `help TOPIC` scrolling to its topic, commands that
-do not open a screen keeping the current screen, a usage message fitting the feedback box, invalid-input retention, and
+do not open a screen keeping the current screen, a short `view` error fitting the feedback box, long error feedback scrolling within its cap, invalid-input retention, and
 recalling and editing earlier commands with Up and Down, including after a recalled command fails. Normal unit tests cover screen
 parsing, result identity, navigation with unavailable storage, the Students screen's captions and empty states, and
 `CommandHistory`.
@@ -2145,7 +2183,9 @@ For manual testing, build with `./gradlew shadowJar` and launch the JAR in an em
    at once. Click each screen in the
    navigation bar and check that the tooltip names the matching `view` command and that the command box keeps focus.
 4. Enter `view nowhere`. Verify that the command remains editable and the feedback names the valid screens.
-   Enter `view` and verify that the whole usage message is readable without scrolling.
+   Enter `view` and verify that the one-line message `Missing screen name. Use one of: students, records, help,
+   storage. Example: view storage` is readable without scrolling. Enter `view storage now` and verify that the
+   feedback names `now` as extra text.
 5. Enter `view student` and `view students`, and verify that both open the Students screen.
    Enter `help group`, `help student`, and `help assignment`, then repeat with their plural forms. Verify that each pair opens Help at the same topic and shows the same feedback.
 6. Check F1 and Escape while typing. Enter `view help` and `view nowhere`, type `view st`, and press Up twice:

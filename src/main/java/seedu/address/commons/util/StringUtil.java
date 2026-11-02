@@ -68,14 +68,14 @@ public class StringUtil {
 
     /**
      * Returns {@code s} without leading and trailing whitespace, and with each run of internal whitespace
-     * replaced by a single space.
+     * replaced by a single space. Unicode spaces, such as the non-breaking space, count as whitespace.
      * e.g. {@code "  Alice   Tan "} becomes {@code "Alice Tan"}.
      *
      * @throws NullPointerException if {@code s} is null.
      */
     public static String normalizeSpaces(String s) {
         requireNonNull(s);
-        return s.trim().replaceAll("\\s+", " ");
+        return s.replaceAll("(?U)\\s+", " ").trim();
     }
 
     /**

@@ -10,11 +10,10 @@ import seedu.address.model.Model;
  */
 public class ViewCommand extends Command {
     public static final String COMMAND_WORD = "view";
-    public static final String MESSAGE_USAGE = "view: Opens a screen.\n"
-            + "Parameters: students | records | help | storage\n"
-            + "The singular forms student and record are also accepted.\n"
-            + "Example: view storage";
-    public static final String MESSAGE_UNKNOWN_SCREEN = "Unknown screen: %s.\n" + MESSAGE_USAGE;
+    public static final String MESSAGE_SCREENS = "Use one of: students, records, help, storage. Example: view storage";
+    public static final String MESSAGE_MISSING_SCREEN = "Missing screen name. " + MESSAGE_SCREENS;
+    public static final String MESSAGE_EXTRA_TEXT = "Unexpected extra text after '%s': '%s'. Enter one screen name.";
+    public static final String MESSAGE_UNKNOWN_SCREEN = "Unknown screen '%s'. " + MESSAGE_SCREENS;
 
     private final WorkspaceView view;
 

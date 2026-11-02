@@ -12,6 +12,7 @@ import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
@@ -106,6 +107,8 @@ public class GroupStrip extends UiPart<ScrollPane> {
         Label chip = new Label(name);
         chip.getStyleClass().add("group-chip");
         chip.setMaxWidth(CHIP_MAX_WIDTH);
+        // Long names that differ only at the end stay distinguishable.
+        chip.setTextOverrun(OverrunStyle.CENTER_ELLIPSIS);
         chip.setTooltip(new Tooltip(name));
         chip.pseudoClassStateChanged(ACTIVE, isActive(group));
         return chip;

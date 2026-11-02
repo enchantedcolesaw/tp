@@ -46,6 +46,14 @@ public class JsonAdaptedStudentTest {
     }
 
     @Test
+    public void toModelType_unicodeSpacesInName_returnsStudentWithNormalSpaces() throws Exception {
+        for (String name : List.of("Ben\\u00a0Lim", "Ben\u00A0Lim", "Ben\\u2003Lim", "\\u3000Ben Lim\\u00a0")) {
+            String json = "{\"name\":\"" + name + "\",\"studentId\":\"A0234567Y\"}";
+            assertEquals(BEN, JsonUtil.fromJsonString(json, JsonAdaptedStudent.class).toModelType());
+        }
+    }
+
+    @Test
     public void toModelType_duplicateWeekAliases_throwsIllegalValueException() throws Exception {
         for (String weeklyRecords : List.of("\"participation\":{\"1\":3,\"01\":5}",
                 "\"participation\":{\"01\":5,\"1\":3}", "\"participation\":{\"1\":3,\"001\":3}",

@@ -46,7 +46,8 @@ opened TAssist.
 
 The bar at the top shows the **tutorial groups** next to the TAssist name, with the active group highlighted, and
 the **screens** below it. **Students** and **Records** are on the left; **Help** and **Storage** are on the right.
-Hover over a screen, or over a shortened group name, to see more. The tooltip of a screen names the command that does
+Hover over a screen, or over a shortened group name, to see more. A long group name is shortened in the middle, so
+names that differ only at the end still look different. The tooltip of a screen names the command that does
 the same, such as `view storage`.
 
 ![TAssist displaying the Students screen for tutorial group T01](images/Ui.png)
@@ -187,8 +188,9 @@ Format: `view SCREEN`
 `SCREEN` is one of `students`, `records`, `help`, or `storage`.
 Screen names ignore case. Specify exactly one screen name. Opening a screen does not change any data.
 The singular forms `student` and `record` open the Students and Records screens.
-An unknown screen name reports `Unknown screen` and lists the valid names. Missing or multiple screen names report
-an invalid command format and show the expected syntax.
+An unknown screen name, such as `view nowhere`, reports `Unknown screen 'nowhere'.` and lists the valid names.
+`view` alone reports `Missing screen name.` with the valid names, and extra words, as in `view storage now`, report
+`Unexpected extra text after 'storage': 'now'. Enter one screen name.`
 
 Examples: `view students`, `view records`, `view help`, `view storage`.
 
@@ -474,7 +476,8 @@ Format: `student sort by/FIELD`
   restarting also resets both.
 
 For example, enter `student find n/alice`, then `student sort by/id` to order only matching students by ID.
-An unsupported or blank field shows `Invalid sort field. Use by/name or by/id.` Text after the field, as in
+An unsupported field shows `Invalid sort field. Use by/name or by/id.`, and a blank one shows
+`Missing value after by/. Type the value right after the prefix.` with the format. Text after the field, as in
 `student sort by/id now`, shows `Unexpected extra text after 'by/id': 'now'. This value cannot contain spaces.`
 Sorting zero displayed students reports, for example, `Sorted 0 students in T01 by name.`
 
@@ -509,7 +512,8 @@ Duplicate ID when editing | `Student ID A0234567Y already exists in T01.` Choose
 Nothing to edit | `Nothing to edit. Include a new name with n/ or a new student ID with nid/. Usage: student edit id/STUDENT_ID [n/NEW_NAME] [nid/NEW_ID]` Add `n/`, `nid/`, or both.
 Missing parameter | `Missing required parameter(s): id/. Usage: student add n/NAME id/STUDENT_ID` names the missing prefixes, followed by the command's format. Supply all required prefixes.
 Missing space before a prefix | `Missing space before id/ in 'n/Aliceid/A0123456X'. Put a space before each prefix.` Add a space before the named prefix.
-Invalid or blank value | The feedback identifies the invalid student name or ID and gives its rules.
+Invalid value | The feedback identifies the invalid student name or ID and gives its rules.
+Blank value | `Missing value after id/. Type the value right after the prefix.` followed by the command's format.
 Repeated or unknown prefix | The feedback identifies the prefix. Use only the command's documented prefixes, once each.
 Extra text after a value | The feedback names the extra text after a single-word value such as `id/A0123456X`, `f/yes`, or `by/id`, and says that value cannot contain spaces. Remove the extra text, or add the prefix it was meant to follow.
 Extra input to `student list` | `This command takes no parameters. Remove the extra input.`
@@ -528,6 +532,9 @@ Format: `attendance mark id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/STATUS`
   If any ID is invalid or not in the active group, nobody is marked, and the error names the first such ID.
 * Repeating a mark for the same student and week replaces the earlier mark, and the feedback shows the old and
   new status. Other students, weeks, and participation records are preserved.
+* Marking a student absent for a week in which they have a participation score above 0 still records the mark, and
+  the feedback adds a warning, such as `Warning: Alice Tan has participation score 4 for Week 3.`, so that you can
+  check whether you meant another student or week.
 
 For Alice Tan in active group T01, `attendance mark id/A0123456X w/3 s/present` shows
 `Recorded Alice Tan as present for Week 3.` Re-entering it with `s/absent` shows
@@ -543,10 +550,11 @@ Problem | Feedback and correction
 --------|------------------------
 No active group | `No active tutorial group. Create or select a group first.` Use `group add` or `group use`.
 Unknown student | `Student ID A0999999Z does not exist in T01. See students in the active group with: student list` Check the ID, or switch to the student's group with `group use`.
-Invalid or blank week | `Invalid week. Enter a number from 1 to 13.` Supply digits only, without a sign or decimal point.
-Invalid or blank status | `Invalid attendance status. Use present or absent.` Supply `present` or `absent` after `s/`.
+Invalid week | `Invalid week. Enter a number from 1 to 13.` Supply digits only, without a sign or decimal point.
+Invalid status | `Invalid attendance status. Use present or absent.` Supply `present` or `absent` after `s/`.
+Blank value | `Missing value after w/. Type the value right after the prefix.` followed by the command's format.
 Missing parameter | The feedback names the missing prefixes. Include `id/`, `w/`, and `s/` for marking; `w/` for listing; `id/` and `w/` for clearing.
-Repeated or unknown prefix | The feedback names the prefix. Use only the documented prefixes, once each, except `id/` in `attendance mark`.
+Repeated or unknown prefix | The feedback names the prefix. Use only the documented prefixes, once each, except `id/` in `attendance mark` and `attendance clear`.
 Extra text after a value | The feedback names the extra text after a single-word value such as `w/3` in `w/3 please`, and says that value cannot contain spaces. Remove the extra text, or add the prefix it was meant to follow.
 
 ### Listing weekly attendance: `attendance list`
@@ -559,13 +567,14 @@ For example, after the examples above, `attendance list w/3` shows the following
 Records screen:
 
 ```text
-Attendance for T01, Week 3:
+Attendance for T01, Week 3: 0 present, 1 absent, 1 not recorded
 Alice Tan | A0123456X | Absent
 Ravi s/o Kumar | A0345679Z | Not recorded
 ```
 
-Each student appears with `Present`, `Absent`, or `Not recorded`, so a week with no marks yet lists every student as
-`Not recorded`. An empty group shows `No students in T01.` Records in other groups or weeks are not included.
+The heading counts the students who are present, absent, and not yet marked, so you can check that you have not
+missed anyone; the feedback box shows it too. Each student appears with `Present`, `Absent`, or `Not recorded`, so a
+week with no marks yet lists every student as `Not recorded`. An empty group shows `No students in T01.` Records in other groups or weeks are not included.
 Use `group use g/GROUP_NAME` to choose another group before listing it.
 
 Specify `w/` exactly once with a whole number from 1 to 13. Missing, repeated, or extra parameters are rejected;
@@ -573,13 +582,18 @@ invalid weeks and no active group have the same errors as `attendance mark`.
 
 ### Clearing an attendance mark: `attendance clear`
 
-Removes one student's attendance mark for a week, so that the week shows `Not recorded` again. Use it when you marked
-the wrong student or the wrong week. To change a mark between present and absent, use `attendance mark` instead.
+Removes the attendance marks of one or more students for a week, so that the week shows `Not recorded` again. Use it
+when you marked the wrong students or the wrong week. To change a mark between present and absent, use
+`attendance mark` instead.
 
-Format: `attendance clear id/STUDENT_ID w/WEEK`
+Format: `attendance clear id/STUDENT_ID [id/STUDENT_ID]... w/WEEK`
 
-* `WEEK` is a whole number from 1 to 13. Student IDs ignore case. Supply each prefix exactly once, in any order.
-* Only that student's mark for that week is removed. Other weeks, other students, and participation scores are kept.
+* `WEEK` is a whole number from 1 to 13. Student IDs ignore case. Supply `w/` exactly once, in any order.
+* To clear several students at once, repeat `id/`, for example `attendance clear id/A0123456X id/A0234567Y w/4`. The
+  feedback has one line for each student, in the order you typed them. If any ID is invalid or not in the active
+  group, nobody's mark is cleared.
+* Only those students' marks for that week are removed. Other weeks, other students, and participation scores are
+  kept.
 
 Example: after the `attendance mark` examples above, Alice Tan's Week 3 mark is absent, and
 `attendance clear id/A0123456X w/3` shows
@@ -590,7 +604,7 @@ The change is saved automatically, and `attendance list` and `group export` no l
 Invalid weeks, unknown students, and no active group have the same errors as `attendance mark`. Only `id/` and `w/`
 are accepted, so a status such as `s/present` is rejected. For example, `attendance clear id/A0123456X w/3 s/present`
 shows `Unknown prefix 's/'. Allowed prefixes: id/ w/.`, and `attendance clear` with no parameters
-shows `Missing required parameter(s): id/ w/. Usage: attendance clear id/STUDENT_ID w/WEEK` Extra text after a value is reported too:
+shows `Missing required parameter(s): id/ w/. Usage: attendance clear id/STUDENT_ID [id/STUDENT_ID]... w/WEEK` Extra text after a value is reported too:
 `attendance clear id/A0123456X w/3 now` shows
 `Unexpected extra text after 'w/3': 'now'. This value cannot contain spaces.`
 
@@ -609,6 +623,8 @@ Format: `participation set id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/SCORE`
   first such ID.
 * Setting the same student and week again replaces the score, and the feedback shows the old and new score.
   Other weeks, other students, and other groups are unaffected.
+* A score above 0 for a student marked absent that week is still recorded, and the feedback adds a warning, such as
+  `Warning: Alice Tan is marked absent for Week 3.` A score of 0 gives no warning.
 
 Example: `participation set id/A0123456X w/3 s/2` shows
 `Recorded participation score 2 for Alice Tan in Week 3.`
@@ -626,24 +642,28 @@ Format: `participation list w/WEEK`
 Example: after the examples above, `participation list w/3` shows
 
 ```text
-Participation for T01, Week 3:
+Participation for T01, Week 3: 1 recorded, 1 not recorded
 Alice Tan | A0123456X | 4
 Ravi s/o Kumar | A0345679Z | Not recorded
 ```
 
-Students without a score show `Not recorded`, even if no scores have been entered that week.
+The heading counts the students with and without a score for the week. Students without a score show
+`Not recorded`, even if no scores have been entered that week.
 A recorded zero shows `0`. An empty group shows `No students in T01.`
 Listing does not change scores. Successful score changes are saved automatically and restored when you reopen TAssist.
 
 ### Clearing a participation score: `participation clear`
 
-Removes one student's participation score for a week, so that the week shows `Not recorded` again. Use it when you
-entered a score for the wrong student or the wrong week. Setting the score to 0 is not the same: 0 is a real score.
+Removes the participation scores of one or more students for a week, so that the week shows `Not recorded` again.
+Use it when you entered a score for the wrong students or the wrong week. Setting the score to 0 is not the same: 0 is
+a real score.
 
-Format: `participation clear id/STUDENT_ID w/WEEK`
+Format: `participation clear id/STUDENT_ID [id/STUDENT_ID]... w/WEEK`
 
-* `WEEK` is a whole number from 1 to 13. Student IDs ignore case. Supply each prefix exactly once, in any order.
-* Only that student's score for that week is removed. Other weeks, other students, and attendance are kept.
+* `WEEK` is a whole number from 1 to 13. Student IDs ignore case. Supply `w/` exactly once, in any order.
+* To clear several students at once, repeat `id/`, as in `attendance clear`. The feedback has one line for each
+  student, and if any ID is invalid or not in the active group, nobody's score is cleared.
+* Only those students' scores for that week are removed. Other weeks, other students, and attendance are kept.
 
 Example: after the `participation set` examples above, Alice Tan's Week 3 score is 4, and
 `participation clear id/A0123456X w/3` shows
@@ -660,10 +680,11 @@ Problem | Feedback and correction
 --------|------------------------
 No active group | `No active tutorial group. Create or select a group first.` Use `group add` or `group use`.
 Unknown student | `Student ID A0999999Z does not exist in T01. See students in the active group with: student list` Check the ID, or switch to the student's group with `group use`.
-Invalid or blank week | `Invalid week. Enter a number from 1 to 13.` Supply digits only, without a sign or decimal point.
-Invalid or blank score | `Invalid participation score. Enter a whole number from 0 to 5.` Supply one of 0, 1, 2, 3, 4, or 5.
+Invalid week | `Invalid week. Enter a number from 1 to 13.` Supply digits only, without a sign or decimal point.
+Invalid score | `Invalid participation score. Enter a whole number from 0 to 5.` Supply one of 0, 1, 2, 3, 4, or 5.
+Blank value | `Missing value after s/. Type the value right after the prefix.` followed by the command's format.
 Missing parameter | The feedback names the missing prefixes. Include `id/`, `w/`, and `s/` for setting; `w/` for listing; `id/` and `w/` for clearing.
-Repeated or unknown prefix | The feedback names the prefix. Use only the documented prefixes, once each.
+Repeated or unknown prefix | The feedback names the prefix. Use only the documented prefixes, once each, except `id/` in `participation set` and `participation clear`.
 Extra text after a value | The feedback names the extra text after a single-word value such as `id/A0123456X` or `w/3`, and says that value cannot contain spaces. Remove the extra text, or add the prefix it was meant to follow.
 
 ### Creating an assignment: `assignment add`
@@ -679,6 +700,9 @@ Format: `assignment add a/ASSIGNMENT_NAME`
 * Names ignore case when matching, but keep the capitalization entered for display. `PS1` and `ps1` are duplicates,
   and so are `Problem Set 1` and `problem set 1` typed with extra spaces.
 * An assignment belongs to one group. Another group may have an assignment with the same name.
+* If the group already has an assignment whose name differs only in capitalization, spaces, or punctuation, such as
+  `PS1` when you add `PS 1` or `PS-1`, the new assignment is still created, and the feedback adds
+  `Warning: T01 already has a similar assignment named PS1. Check that this is a different assignment.`
 * Supply `a/` exactly once.
 
 Example: `assignment add a/PS1` shows `Created assignment PS1 for T01.` when T01 is active.
@@ -705,16 +729,18 @@ Running `assignment submit a/PS1 id/A0123456X s/yes` then shows
 
 ### Recording a grade: `assignment grade`
 
-Records or replaces a whole-number grade from 0 to 100 for a submitted assignment. Submit the assignment first with
-`assignment submit`.
+Records or replaces a whole-number grade from 0 to 100 for one student's assignment. A graded assignment counts as
+submitted, so if the student's submission has not been recorded yet, TAssist records it as submitted together with
+the grade.
 
 Format: `assignment grade a/ASSIGNMENT_NAME id/STUDENT_ID m/GRADE`
 
 Example: `assignment grade a/PS1 id/A0123456X m/87` shows `Recorded grade 87 for Alice Tan's PS1.`
 Replacing it with `assignment grade a/PS1 id/A0123456X m/60` shows `Updated Alice Tan's PS1 grade: 87 to 60.`,
 and entering the same grade again shows `Alice Tan's PS1 grade is already 60. Nothing changed.`
-An unsubmitted assignment shows `Cannot record a grade for an unsubmitted assignment. Record it first with:
-assignment submit a/PS1 id/A0123456X s/yes`.
+For a student whose submission has not been recorded, such as Ravi, `assignment grade a/PS1 id/A0345679Z m/75` shows
+`Recorded Ravi s/o Kumar's PS1 submission status as submitted and grade 75.` To remove a grade, record the submission
+as not submitted with `assignment submit ... s/no`.
 
 ### Listing assignments and their records: `assignment list`
 
@@ -792,10 +818,10 @@ Problem | Feedback and correction
 No active group | `No active tutorial group. Create or select a group first.` Use `group add` or `group use`.
 Duplicate assignment | `Assignment PS1 already exists in T01.` The message shows the name of the existing assignment. Use a different name, or list its records with `assignment list a/PS1`. `assignment rename` shows the same message when the new name belongs to another assignment.
 Unknown assignment | `Assignment PS2 does not exist in T01. See the group's assignments with: assignment list`, then, except for `assignment rename` and `assignment delete`, on the next line `Or create it with: assignment add a/PS2` Check the name against `assignment list`. Assignments belong to one group, so also check the active group.
-Invalid or blank name | `Invalid assignment name. Use 1-60 letters, digits, spaces, hyphens, periods, colons, or parentheses, with at least one letter or digit.` Follow the naming rules above.
+Invalid name | `Invalid assignment name. Use 1-60 letters, digits, spaces, hyphens, periods, colons, or parentheses, with at least one letter or digit.` Follow the naming rules above. A blank `a/` in `assignment list` is reported the same way.
+Blank value | `Missing value after a/. Type the value right after the prefix.` followed by the command's format.
 Invalid submission status | `Invalid submission status. Use yes or no.` Enter `yes` or `no` after `s/`.
 Invalid grade | `Invalid grade. Enter a whole number from 0 to 100.` Supply a whole number after `m/`.
-Grade before submission | `Cannot record a grade for an unsubmitted assignment. Record it first with: assignment submit a/PS1 id/A0123456X s/yes` Run the suggested command, using the assignment and student shown in the message.
 Unknown student | `Student ID A0999999Z does not exist in T01. See students in the active group with: student list` Check the ID, or switch to the student's group with `group use`.
 Missing parameter | The feedback names the missing prefix. Supply `a/`, `id/`, and `s/` or `m/` (`id/` may be repeated in `assignment submit`). `assignment rename` needs only `a/` and `n/`, and `assignment delete` needs only `a/`.
 Repeated or unknown prefix | The feedback names the prefix. Use only the prefixes listed in the command format, once each, except `id/` in `assignment submit`.
@@ -912,7 +938,9 @@ The file looks like this:
   Weeks must be 1–13 and scores must be whole numbers from 0 to 5. A fractional score such as `4.5`, or a week or
   score outside that range, makes the file invalid. A score such as `4.0` is read as `4`. An omitted map means no
   scores have been recorded.
-* Group names, student names, and student IDs follow the same rules as when you type them in a command.
+* Group names, student names, and student IDs follow the same rules as when you type them in a command. As in
+  commands, non-breaking and other Unicode spaces in a name, such as those copied from a web page, are read as
+  normal spaces.
 * `attendance` maps week numbers (`"1"` through `"13"`) to `"PRESENT"` or `"ABSENT"`.
   Status values ignore case and surrounding spaces when loaded. An omitted attendance map means no attendance
   records for that student. Invalid weeks or statuses make the file invalid.
@@ -1008,10 +1036,10 @@ Action | Format, Examples
 **Delete student** | `student delete id/STUDENT_ID [f/yes]`<br> e.g., `student delete id/A0234567Y`
 **Mark attendance** | `attendance mark id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/STATUS`<br> e.g., `attendance mark id/A0123456X w/3 s/present`
 **List attendance** | `attendance list w/WEEK`<br> e.g., `attendance list w/3`
-**Clear attendance** | `attendance clear id/STUDENT_ID w/WEEK`<br> e.g., `attendance clear id/A0123456X w/3`
+**Clear attendance** | `attendance clear id/STUDENT_ID [id/STUDENT_ID]... w/WEEK`<br> e.g., `attendance clear id/A0123456X w/3`
 **Set participation** | `participation set id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/SCORE`<br> e.g., `participation set id/A0123456X w/3 s/2`
 **List participation** | `participation list w/WEEK`<br> e.g., `participation list w/3`
-**Clear participation** | `participation clear id/STUDENT_ID w/WEEK`<br> e.g., `participation clear id/A0123456X w/3`
+**Clear participation** | `participation clear id/STUDENT_ID [id/STUDENT_ID]... w/WEEK`<br> e.g., `participation clear id/A0123456X w/3`
 **Add assignment** | `assignment add a/ASSIGNMENT_NAME`<br> e.g., `assignment add a/PS1`
 **Record submission** | `assignment submit a/ASSIGNMENT_NAME id/STUDENT_ID [id/STUDENT_ID]... s/STATUS`<br> e.g., `assignment submit a/PS1 id/A0123456X s/yes`
 **Record grade** | `assignment grade a/ASSIGNMENT_NAME id/STUDENT_ID m/GRADE`<br> e.g., `assignment grade a/PS1 id/A0123456X m/87`

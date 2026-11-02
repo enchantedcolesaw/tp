@@ -169,11 +169,27 @@ public class AssignmentCommandsIntegrationTest extends AppIntegrationTest {
     }
 
     @Test
+    public void execute_gradeUnsubmitted_recordsSubmissionAndGradeAfterRestart() throws Exception {
+        feedback("assignment add a/PS1");
+        assertEquals("Recorded Ben Lim's PS1 submission status as submitted and grade 75.",
+                feedback("assignment grade a/PS1 id/A0234567Y m/75"));
+        assertEquals("Undone: assignment grade a/PS1 id/A0234567Y m/75", feedback("undo"));
+        assertEquals(LIST_PS1_IN_T01, feedback("assignment list a/PS1"));
+        feedback("redo");
+
+        restart();
+
+        assertEquals("PS1 records for T01:\nAlice Tan | A0123456X | Not submitted | -"
+                + "\nBen Lim | A0234567Y | Submitted | 75"
+                + "\nCarl Goh | A0345678Z | Not submitted | -", feedback("assignment list a/PS1"));
+    }
+
+    @Test
     public void execute_rejectedInput_preservesModelAndSavedFile() throws Exception {
         feedback("assignment add a/PS1");
         assertRejected("assignment submit a/PS1 id/A0123456X s/maybe", ParseException.class);
         assertRejected("assignment grade a/PS1 id/A0123456X m/101", ParseException.class);
-        assertRejected("assignment grade a/PS1 id/A0123456X m/87", CommandException.class);
+        assertRejected("assignment grade a/PS1 id/A0999999Z m/87", CommandException.class);
         for (String command : List.of("assignment", "assignment remove", "assignment add", "assignment add a/",
                 "assignment add a/PS_1", "assignment add a/PS1/PS2", "assignment add a/--",
                 "assignment add a/" + "a".repeat(10000), "assignment add a/PS2 a/PS3", "assignment add PS2",

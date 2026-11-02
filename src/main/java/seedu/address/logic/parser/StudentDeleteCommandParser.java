@@ -27,6 +27,7 @@ public class StudentDeleteCommandParser implements Parser<StudentDeleteCommand> 
         if (values.getValue(PREFIX_FAST).isEmpty()) {
             parser.verifyNoMissingSpaceBefore(values, PREFIX_FAST);
         }
+        StudentCommandParserUtil.verifyNoBlankValues(values, StudentDeleteCommand.MESSAGE_USAGE, PREFIX_ID);
         parser.verifyNoExtraText(values);
         return new StudentDeleteCommand(TAssistParserUtil.parseStudentId(values.getValue(PREFIX_ID).orElseThrow()),
                 FastDeleteOption.isPresent(values));

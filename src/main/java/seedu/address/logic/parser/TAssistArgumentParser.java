@@ -26,6 +26,7 @@ public class TAssistArgumentParser {
     public static final String MESSAGE_UNKNOWN_PREFIX = "Unknown prefix '%s'. Allowed prefixes: %s.";
     public static final String MESSAGE_MISSING_PARAMETERS =
             "Missing required parameter(s): %s.";
+    public static final String MESSAGE_BLANK_VALUE = "Missing value after %s. Type the value right after the prefix.";
     public static final String MESSAGE_UNEXPECTED_TEXT =
             "Unexpected text before parameters: '%s'. Start each parameter with an allowed prefix: %s.";
     public static final String MESSAGE_NO_PARAMETERS = "This command takes no parameters. Remove the extra input.";
@@ -347,6 +348,12 @@ public class TAssistArgumentParser {
                     .map(Prefix::toString)
                     .collect(Collectors.joining(" ")))
                     + (usage.isEmpty() ? "" : " Usage: " + usage));
+        }
+        for (Prefix prefix : requiredPrefixes) {
+            if (values.getAllValues(prefix).stream().anyMatch(String::isBlank)) {
+                throw new ParseException(String.format(MESSAGE_BLANK_VALUE, prefix)
+                        + (usage.isEmpty() ? "" : " Usage: " + usage));
+            }
         }
     }
 

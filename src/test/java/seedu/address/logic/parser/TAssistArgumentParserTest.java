@@ -55,8 +55,11 @@ public class TAssistArgumentParserTest {
     }
 
     @Test
-    public void parse_emptyValue_retainsValueForDomainValidation() throws Exception {
-        assertEquals("", parser.parse("n/ id/A1").getValue(PREFIX_NAME).orElseThrow());
+    public void parse_blankRequiredValue_reportsMissingValue() {
+        assertThrows(ParseException.class, String.format(TAssistArgumentParser.MESSAGE_BLANK_VALUE, "n/"), () ->
+                parser.parse("n/ id/A1"));
+        assertThrows(ParseException.class, String.format(TAssistArgumentParser.MESSAGE_BLANK_VALUE, "id/")
+                + " Usage: cmd n/NAME id/ID", () -> parser.parse("n/Alice id/   ", "cmd n/NAME id/ID"));
     }
 
     @Test

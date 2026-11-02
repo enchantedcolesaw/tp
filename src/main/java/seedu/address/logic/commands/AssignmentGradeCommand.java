@@ -18,16 +18,15 @@ import seedu.address.model.student.Student;
 import seedu.address.model.student.StudentId;
 
 /**
- * Records or replaces the grade for one student's submitted assignment.
+ * Records or replaces the grade for one student's assignment, recording the submission if needed.
  */
 public class AssignmentGradeCommand extends Command {
     public static final String MESSAGE_USAGE = "assignment grade a/ASSIGNMENT_NAME id/STUDENT_ID m/GRADE";
     public static final String MESSAGE_SUCCESS = "Recorded grade %d for %s's %s.";
     public static final String MESSAGE_UPDATED = "Updated %s's %s grade: %d to %d.";
     public static final String MESSAGE_UNCHANGED = "%s's %s grade is already %d. Nothing changed.";
-    public static final String MESSAGE_NOT_SUBMITTED =
-            "Cannot record a grade for an unsubmitted assignment. Record it first with: "
-                    + "assignment submit a/%s id/%s s/yes";
+    public static final String MESSAGE_SUBMITTED_AND_GRADED =
+            "Recorded %s's %s submission status as submitted and grade %d.";
 
     private static final Logger logger = LogsCenter.getLogger(AssignmentGradeCommand.class);
 
@@ -52,14 +51,14 @@ public class AssignmentGradeCommand extends Command {
         Assignment assignment = getAssignment(group, assignmentName);
         Student student = getStudent(group, studentId);
         AssignmentRecord previousRecord = assignment.getStudentRecord(studentId);
-        if (!previousRecord.isSubmitted()) {
-            throw new CommandException(String.format(MESSAGE_NOT_SUBMITTED,
-                    assignment.getName(), student.getStudentId()));
-        }
-
-        model.setAssignment(group.getName(), assignment.withGrade(studentId, grade));
+        AssignmentRecord gradedRecord = previousRecord.withSubmissionStatus(true).withGrade(grade);
+        model.setAssignment(group.getName(), assignment.withRecord(studentId, gradedRecord));
         logger.fine("Recorded an assignment grade for " + student.getStudentId()
                 + " in " + group.getName());
+        if (!previousRecord.isSubmitted()) {
+            return new CommandResult(String.format(MESSAGE_SUBMITTED_AND_GRADED,
+                    student.getName(), assignment.getName(), grade));
+        }
         return new CommandResult(createFeedback(student, assignment, previousRecord.getGrade()));
     }
 

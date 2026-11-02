@@ -14,13 +14,13 @@ public class ParticipationClearCommandParser implements Parser<ParticipationClea
 
     private final TAssistArgumentParser argumentParser = new TAssistArgumentParser(
             List.of(PREFIX_ID, PREFIX_WEEK), List.of(),
-            List.of(PREFIX_ID, PREFIX_WEEK));
+            List.of(PREFIX_ID, PREFIX_WEEK)).allowRepeated(PREFIX_ID);
 
     @Override
     public ParticipationClearCommand parse(String arguments) throws ParseException {
         ArgumentMultimap values = argumentParser.parse(arguments, ParticipationClearCommand.MESSAGE_USAGE);
         return new ParticipationClearCommand(
-                TAssistParserUtil.parseStudentId(values.getValue(PREFIX_ID).orElseThrow()),
+                TAssistParserUtil.parseStudentIds(values.getAllValues(PREFIX_ID)),
                 TAssistParserUtil.parseWeek(values.getValue(PREFIX_WEEK).orElseThrow()));
     }
 }

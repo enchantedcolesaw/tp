@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
+import static seedu.address.logic.parser.CommandParserTestUtil.blankValueMessage;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalStudents.ALICE;
 
@@ -32,7 +33,8 @@ public class StudentDeleteCommandParserTest {
     @Test
     public void parse_missingOrInvalidId_reportsSpecificError() {
         assertParseFailure(parser, "", MISSING_ID);
-        for (String id : new String[] {"", "ABC", "A1!", "1".repeat(21)}) {
+        assertParseFailure(parser, "id/", blankValueMessage("id/", StudentDeleteCommand.MESSAGE_USAGE));
+        for (String id : new String[] {"ABC", "A1!", "1".repeat(21)}) {
             assertParseFailure(parser, "id/" + id, StudentId.MESSAGE_CONSTRAINTS);
         }
     }

@@ -1,7 +1,6 @@
 package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
-import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 
 import java.util.Locale;
 
@@ -17,8 +16,12 @@ public class ViewCommandParser implements Parser<ViewCommand> {
     public ViewCommand parse(String args) throws ParseException {
         requireNonNull(args);
         String screenName = args.trim();
-        if (screenName.isEmpty() || screenName.split("\\s+").length != 1) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, ViewCommand.MESSAGE_USAGE));
+        if (screenName.isEmpty()) {
+            throw new ParseException(ViewCommand.MESSAGE_MISSING_SCREEN);
+        }
+        String[] words = screenName.split("\\s+", 2);
+        if (words.length > 1) {
+            throw new ParseException(String.format(ViewCommand.MESSAGE_EXTRA_TEXT, words[0], words[1]));
         }
 
         String screenKeyword = screenName.toLowerCase(Locale.ROOT);

@@ -1,6 +1,7 @@
 package seedu.address.logic.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static seedu.address.logic.parser.CommandParserTestUtil.blankValueMessage;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalStudents.ALICE;
 import static seedu.address.testutil.TypicalStudents.BEN;
@@ -10,6 +11,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.commands.StudentSortCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -39,7 +41,8 @@ public class StudentSortCommandParserTest {
         }
         String invalidFieldMessage = StudentSortCommandParser.MESSAGE_INVALID_FIELD;
         assertThrows(ParseException.class, invalidFieldMessage, () -> parser.parse(" by/grade"));
-        assertThrows(ParseException.class, invalidFieldMessage, () -> parser.parse(" by/"));
+        assertThrows(ParseException.class, blankValueMessage("by/", StudentSortCommand.MESSAGE_USAGE), () ->
+                parser.parse(" by/"));
         String extraTextMessage = String.format(TAssistArgumentParser.MESSAGE_EXTRA_TEXT, "by/id", "now");
         assertThrows(ParseException.class, extraTextMessage, () -> parser.parse(" by/id now"));
         assertThrows(NullPointerException.class, () -> parser.parse(null));

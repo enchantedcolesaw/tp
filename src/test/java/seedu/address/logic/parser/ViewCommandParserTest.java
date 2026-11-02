@@ -1,7 +1,6 @@
 package seedu.address.logic.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.util.List;
@@ -47,13 +46,20 @@ public class ViewCommandParserTest {
     }
 
     @Test
-    public void parseCommand_missingOrMultipleScreens_throwsParseException() {
-        String[] inputs = {"view", "view students help", "view students students", "view students\thelp",
-            "view student help", "view student student"};
-        String expected = String.format(MESSAGE_INVALID_COMMAND_FORMAT, ViewCommand.MESSAGE_USAGE);
-        for (String input : inputs) {
-            assertThrows(ParseException.class, expected, () -> parser.parseCommand(input));
+    public void parseCommand_missingScreen_namesTheMissingScreen() {
+        for (String input : List.of("view", "view   ", "view \t")) {
+            assertThrows(ParseException.class, ViewCommand.MESSAGE_MISSING_SCREEN, () -> parser.parseCommand(input));
         }
+    }
+
+    @Test
+    public void parseCommand_multipleWords_namesTheExtraText() {
+        assertThrows(ParseException.class, String.format(ViewCommand.MESSAGE_EXTRA_TEXT, "storage", "now"), () ->
+                parser.parseCommand("view storage now"));
+        assertThrows(ParseException.class, String.format(ViewCommand.MESSAGE_EXTRA_TEXT, "students", "help"), () ->
+                parser.parseCommand("view students\thelp"));
+        assertThrows(ParseException.class, String.format(ViewCommand.MESSAGE_EXTRA_TEXT, "student", "student x"), () ->
+                parser.parseCommand("view student student x"));
     }
 
     @Test

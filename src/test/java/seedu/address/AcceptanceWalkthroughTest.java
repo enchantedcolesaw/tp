@@ -16,9 +16,9 @@ import seedu.address.commons.core.DataLoadStatus;
 import seedu.address.logic.LogicManager;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.logic.parser.TAssistArgumentParser;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.TAssist;
-import seedu.address.model.assignment.AssignmentName;
 import seedu.address.model.student.StudentName;
 
 /**
@@ -76,7 +76,8 @@ public class AcceptanceWalkthroughTest extends AppIntegrationTest {
         assertEquals(recorded, app.model.getTAssist());
         assertRecordsOfT01();
         assertEquals("Switched active group to T02.", feedback("group use g/T02"));
-        assertEquals("Attendance for T02, Week 1:\nAlice Tan | A0123456X | Present", feedback("attendance list w/1"));
+        assertEquals("Attendance for T02, Week 1: 1 present, 0 absent, 0 not recorded\nAlice Tan | A0123456X | Present",
+                feedback("attendance list w/1"));
     }
 
     @Test
@@ -92,7 +93,7 @@ public class AcceptanceWalkthroughTest extends AppIntegrationTest {
                 "attendance mark id/A0123456X w/14 s/present", "attendance mark id/A0123456X w/1 s/late",
                 "attendance mark id/A0123456X w/1 s/present w/2", "attendance mark id/A9 w/1 s/present",
                 "participation set id/A0123456X w/1 s/6", "participation set id/A0123456X w/1",
-                "assignment add a/ps1", "assignment grade a/PS1 id/A0345678Z m/50",
+                "assignment add a/ps1", "assignment grade a/PS1 id/A0999999Z m/50",
                 "assignment grade a/PS1 id/A0123456X m/101", "assignment list a/PS9",
                 "attendance", "unknown", "view nowhere", "help nothing");
         for (String command : invalidCommands) {
@@ -113,8 +114,8 @@ public class AcceptanceWalkthroughTest extends AppIntegrationTest {
         assertEquals("Added Bob Lee to T03.", feedback("\u3000student\u2003add n/Bob\u2003Lee id/A2\u202F"));
         assertEquals("Added Cy Ng to T03.", feedback("student add\u2028n/Cy\u0085Ng\u2029id/A3"));
         TAssist beforeRejected = new TAssist(app.model.getTAssist());
-        assertThrows(ParseException.class, AssignmentName.MESSAGE_CONSTRAINTS, () ->
-                app.logic.execute("assignment add a/\u2003"));
+        assertThrows(ParseException.class, String.format(TAssistArgumentParser.MESSAGE_BLANK_VALUE, "a/")
+                + " Usage: assignment add a/ASSIGNMENT_NAME", () -> app.logic.execute("assignment add a/\u2003"));
         assertEquals(beforeRejected, app.model.getTAssist());
 
         restart();
@@ -142,7 +143,7 @@ public class AcceptanceWalkthroughTest extends AppIntegrationTest {
 
         assertEquals("Students in T01:\n1. Alice Tan | A0123456X\n2. Chloe O'Neil-Ng | A0345678Z",
                 feedback("student list"));
-        assertEquals("Attendance for T01, Week 1:\nAlice Tan | A0123456X | Absent\n"
+        assertEquals("Attendance for T01, Week 1: 0 present, 1 absent, 1 not recorded\nAlice Tan | A0123456X | Absent\n"
                 + "Chloe O'Neil-Ng | A0345678Z | Not recorded", feedback("attendance list w/1"));
         assertEquals("PS1 records for T01:\nAlice Tan | A0123456X | Submitted | 87\n"
                 + "Chloe O'Neil-Ng | A0345678Z | Not submitted | -", feedback("assignment list a/PS1"));
@@ -184,9 +185,11 @@ public class AcceptanceWalkthroughTest extends AppIntegrationTest {
         assertEquals("1. T01\n2. T02\nActive group: T01", feedback("group list"));
         assertEquals("Students in T01:\n1. Alice Tan | A0123456X\n2. Ben Lim | A0234567Y\n"
                 + "3. Chloe O'Neil-Ng | A0345678Z", feedback("student list"));
-        assertEquals("Attendance for T01, Week 1:\nAlice Tan | A0123456X | Absent\nBen Lim | A0234567Y | Absent\n"
+        assertEquals("Attendance for T01, Week 1: 0 present, 2 absent, 1 not recorded\n"
+                + "Alice Tan | A0123456X | Absent\nBen Lim | A0234567Y | Absent\n"
                 + "Chloe O'Neil-Ng | A0345678Z | Not recorded", feedback("attendance list w/1"));
-        assertEquals("Participation for T01, Week 1:\nAlice Tan | A0123456X | 3\nBen Lim | A0234567Y | Not recorded\n"
+        assertEquals("Participation for T01, Week 1: 2 recorded, 1 not recorded\n"
+                + "Alice Tan | A0123456X | 3\nBen Lim | A0234567Y | Not recorded\n"
                 + "Chloe O'Neil-Ng | A0345678Z | 0", feedback("participation list w/1"));
         assertEquals("PS1 records for T01:\nAlice Tan | A0123456X | Submitted | 87\n"
                 + "Ben Lim | A0234567Y | Submitted | -\nChloe O'Neil-Ng | A0345678Z | Not submitted | -",

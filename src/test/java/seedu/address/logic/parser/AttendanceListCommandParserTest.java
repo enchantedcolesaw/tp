@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
+import static seedu.address.logic.parser.CommandParserTestUtil.blankValueMessage;
 
 import org.junit.jupiter.api.Test;
 
@@ -25,9 +26,10 @@ public class AttendanceListCommandParserTest {
 
     @Test
     public void parse_invalidWeek_reportsAttendanceMessage() {
-        for (String week : new String[] {"", "0", "14", "-1", "3.5", "three", "9".repeat(1000)}) {
+        for (String week : new String[] {"0", "14", "-1", "3.5", "three", "9".repeat(1000)}) {
             assertParseFailure(parser, "w/" + week, AttendanceCommandParserUtil.MESSAGE_INVALID_WEEK);
         }
+        assertParseFailure(parser, "w/ ", blankValueMessage("w/", AttendanceListCommand.MESSAGE_USAGE));
     }
 
     @Test

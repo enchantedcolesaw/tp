@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
+import static seedu.address.logic.parser.CommandParserTestUtil.blankValueMessage;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalAssignments.NAME_PS1;
 
@@ -28,7 +29,8 @@ public class AssignmentAddCommandParserTest {
 
     @Test
     public void parse_invalidName_reportsConstraints() {
-        for (String name : new String[] {"", "   ", "-", "PS1_A", "PS1/PS2", "PS1!", "PS1,2", "(...)", "().:",
+        assertParseFailure(parser, "a/   ", blankValueMessage("a/", AssignmentAddCommand.MESSAGE_USAGE));
+        for (String name : new String[] {"-", "PS1_A", "PS1/PS2", "PS1!", "PS1,2", "(...)", "().:",
                 "a".repeat(61)}) {
             assertParseFailure(parser, "a/" + name, AssignmentName.MESSAGE_CONSTRAINTS);
         }
