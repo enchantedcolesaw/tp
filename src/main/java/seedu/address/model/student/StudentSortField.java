@@ -21,12 +21,23 @@ public enum StudentSortField {
     }
 
     /**
-     * Returns an alphabetical order that ignores case and places accented letters next to their plain letters.
+     * Returns an alphabetical order of names, word by word, so that "Tan Ah Kow" comes before "Tanaka Yuki".
+     * It ignores case and places accented letters next to their plain letters.
      */
-    private static Comparator<Object> createNameOrder() {
+    private static Comparator<String> createNameOrder() {
         Collator collator = Collator.getInstance(Locale.ENGLISH);
         collator.setStrength(Collator.SECONDARY);
-        return collator;
+        return (name, otherName) -> {
+            String[] words = name.split(" ");
+            String[] otherWords = otherName.split(" ");
+            for (int i = 0; i < Math.min(words.length, otherWords.length); i++) {
+                int order = collator.compare(words[i], otherWords[i]);
+                if (order != 0) {
+                    return order;
+                }
+            }
+            return Integer.compare(words.length, otherWords.length);
+        };
     }
 
     public String getKeyword() {

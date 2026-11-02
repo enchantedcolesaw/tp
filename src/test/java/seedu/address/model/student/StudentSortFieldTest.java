@@ -22,4 +22,17 @@ public class StudentSortFieldTest {
 
         assertEquals(List.of(upperBen, lowerBen, emile, zoe), students);
     }
+
+    @Test
+    public void nameOrder_sharedFirstWord_keepsWholeWordsTogether() {
+        Student tanAh = new StudentBuilder().withName("Tan Ah Kow").withStudentId("A1").build();
+        Student tanaka = new StudentBuilder().withName("Tanaka Yuki").withStudentId("A2").build();
+        Student tanBee = new StudentBuilder().withName("Tan Bee Lin").withStudentId("A3").build();
+        Student tan = new StudentBuilder().withName("Tan").withStudentId("A4").build();
+        List<Student> students = new ArrayList<>(List.of(tanaka, tanBee, tanAh, tan));
+
+        students.sort(StudentSortField.NAME.getComparator());
+
+        assertEquals(List.of(tan, tanAh, tanBee, tanaka), students);
+    }
 }

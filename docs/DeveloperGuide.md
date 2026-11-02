@@ -690,7 +690,7 @@ An active search always shows the matching count against the total, including `0
 
 `StudentSortCommandParser` requires `by/name` or `by/id`, ignoring the field's case. `by/` takes a single word, so
 `by/id now` is reported as extra text rather than as an invalid field. `StudentSortField` supplies
-ascending comparators: names use an English `Collator` that ignores case and sorts accented letters with their plain
+ascending comparators: names are compared word by word with an English `Collator` that ignores case and sorts accented letters with their plain
 letters, with student ID as the tie-breaker; IDs use
 lexicographic comparison of their normalized uppercase values. Sorting is exposed through the CLI; table headers
 remain non-sortable. These transformations keep the original roster order and all record/export commands intact.
@@ -987,8 +987,10 @@ so the existing storage error handling reports the invalid file before commands 
 
 Its Jackson factory keeps week keys as strings until it can check for duplicates during integer conversion.
 Two aliases for the same week, such as `"1"` and `"01"`, are rejected within an attendance or participation map,
-even if their values match. Jackson wraps this rejection as a loading error, so `MainApp#describeLoadFailure` reads
-the original message from it. The startup warning then names the duplicate week and activates startup file protection.
+even if their values match. A key that is not a whole number, such as `"3.0"`, is rejected too. The factory keeps
+the reason in a transient field, and `toModelType()` throws it as an `IllegalValueException`, so `JsonAdaptedGroup`
+adds the group and student to it as for other invalid records. The startup warning then names the student and the
+problem, and activates startup file protection.
 A single alias remains valid and is saved using the canonical week number.
 
 In the same forgiving way, `JsonAdaptedStudent` and `JsonAdaptedAssignmentRecord` read a participation score or

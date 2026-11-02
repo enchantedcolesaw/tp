@@ -460,7 +460,8 @@ Sorts the displayed students in ascending order and opens the Students screen. T
 Format: `student sort by/FIELD`
 
 * `FIELD` is `name` or `id`, ignoring case. Supply `by/` exactly once.
-* `student sort by/name` orders names without considering capitalization. Students with the same name are
+* `student sort by/name` orders names word by word without considering capitalization, so `Tan Ah Kow` comes
+  before `Tanaka Yuki`. Students with the same name are
   ordered by student ID, since names need not be unique.
 * `student sort by/id` orders IDs alphabetically as text, so `A10` comes before `A2`.
 * Accented letters sort with their plain letters, so `Émile` comes before `Zoe`.
