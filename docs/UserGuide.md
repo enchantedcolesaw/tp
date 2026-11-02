@@ -262,6 +262,8 @@ Format: `group export`
 * Exporting the same group again replaces its earlier file, so the file always matches the latest records.
   Close the file in your spreadsheet before exporting again.
 * The command takes no parameters. Select the group to export with `group use` first.
+* A name that starts with `-`, `+`, `=`, or `@`, such as the assignment `-1`, is written with an apostrophe in
+  front (`'-1`), so that a spreadsheet shows it as text instead of treating it as a formula.
 * The CSV keeps leading zeros in student IDs, such as `00123`. A spreadsheet may interpret an all-digit ID as a
   number and display `00123` as `123`. To preserve leading zeros and long IDs, import the CSV using your spreadsheet
   app's import options and set the `Student ID` column to text before loading it, instead of opening the CSV directly.
