@@ -42,4 +42,11 @@ public class StudentFindCommandParserTest {
         String blankMessage = String.format(StudentFindCommandParser.MESSAGE_BLANK_FILTER, "n/");
         assertThrows(ParseException.class, blankMessage, () -> parser.parse(" n/"));
     }
+
+    @Test
+    public void parse_textAfterIdFragment_reportsExtraText() {
+        String message = String.format(TAssistArgumentParser.MESSAGE_EXTRA_TEXT, "id/A1", "extra");
+        assertThrows(ParseException.class, message, () -> parser.parse(" id/A1 extra"));
+        assertThrows(ParseException.class, message, () -> parser.parse(" n/alice id/A1 extra"));
+    }
 }
