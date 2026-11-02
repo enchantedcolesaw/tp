@@ -764,12 +764,12 @@ A group without assignments shows `No assignments in T01. Create one with: assig
 Use the listed names with `a/` in the other assignment commands.
 
 Example: after the examples above, which leave Alice Tan in T01 with PS1 submitted and graded 60, and
-Ravi s/o Kumar in T01 without a PS1 submission, `assignment list a/PS1` shows
+Ravi s/o Kumar in T01 with PS1 submitted and graded 75, `assignment list a/PS1` shows
 
 ```text
 PS1 records for T01:
 Alice Tan | A0123456X | Submitted | 60
-Ravi s/o Kumar | A0345679Z | Not submitted | -
+Ravi s/o Kumar | A0345679Z | Submitted | 75
 ```
 
 Each row shows the student's name, ID, submission status, and grade. A student without a saved record shows
