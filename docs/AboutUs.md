@@ -23,6 +23,7 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 <img src="images/enchantedcolesaw.png" width="200px">
 
 [[github](http://github.com/enchantedcolesaw)]
+[[portfolio](team/enchantedcolesaw.md)]
 
 * Role: Debugger 2
 * Responsibilities: Debug
