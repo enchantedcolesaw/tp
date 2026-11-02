@@ -18,7 +18,8 @@ import seedu.address.model.student.WeeklyRecordEntry;
  */
 public class AttendanceListCommand extends Command {
     public static final String MESSAGE_USAGE = "attendance list w/WEEK";
-    public static final String MESSAGE_HEADER = "Attendance for %s, Week %d: %d present, %d absent, %d not recorded";
+    public static final String MESSAGE_HEADER =
+            "Attendance for %s, Week %d: %d present, %d absent, %d late, %d excused, %d not recorded";
     public static final String MESSAGE_NO_STUDENTS = "No students in %s.";
 
     private final int week;
@@ -42,8 +43,11 @@ public class AttendanceListCommand extends Command {
 
         long present = countStatus(entries, AttendanceStatus.PRESENT);
         long absent = countStatus(entries, AttendanceStatus.ABSENT);
+        long late = countStatus(entries, AttendanceStatus.LATE);
+        long excused = countStatus(entries, AttendanceStatus.EXCUSED);
         long notRecorded = entries.stream().filter(entry -> entry.getRecord().isEmpty()).count();
-        String header = String.format(MESSAGE_HEADER, group.getName(), week, present, absent, notRecorded);
+        String header = String.format(MESSAGE_HEADER, group.getName(), week, present, absent, late, excused,
+                notRecorded);
         String rows = entries.stream().map(AttendanceListCommand::formatRow).collect(Collectors.joining("\n"));
         return CommandResult.forRecordListing(header + "\n" + rows);
     }

@@ -25,7 +25,7 @@ public final class AttendanceCommandParserUtil {
     }
 
     /**
-     * Parses a present or absent status, ignoring case and surrounding whitespace.
+     * Parses a supported attendance status, ignoring case and surrounding whitespace.
      *
      * @throws ParseException if the status is invalid.
      */

@@ -76,7 +76,8 @@ public class AcceptanceWalkthroughTest extends AppIntegrationTest {
         assertEquals(recorded, app.model.getTAssist());
         assertRecordsOfT01();
         assertEquals("Switched active group to T02.", feedback("group use g/T02"));
-        assertEquals("Attendance for T02, Week 1: 1 present, 0 absent, 0 not recorded\nAlice Tan | A0123456X | Present",
+        assertEquals("Attendance for T02, Week 1: 1 present, 0 absent, "
+                + "0 late, 0 excused, 0 not recorded\nAlice Tan | A0123456X | Present",
                 feedback("attendance list w/1"));
     }
 
@@ -90,7 +91,7 @@ public class AcceptanceWalkthroughTest extends AppIntegrationTest {
                 "group add g/t01", "group use g/T09", "group add g/T_01", "group add g/T03 g/T04",
                 "student add n/Alice", "student add n/Dan id/a0123456x", "student add n/" + "a".repeat(10_000)
                         + " id/A1", "student delete id/A404",
-                "attendance mark id/A0123456X w/14 s/present", "attendance mark id/A0123456X w/1 s/late",
+                "attendance mark id/A0123456X w/14 s/present", "attendance mark id/A0123456X w/1 s/unknown",
                 "attendance mark id/A0123456X w/1 s/present w/2", "attendance mark id/A9 w/1 s/present",
                 "participation set id/A0123456X w/1 s/6", "participation set id/A0123456X w/1",
                 "assignment add a/ps1", "assignment grade a/PS1 id/A0999999Z m/50",
@@ -143,7 +144,8 @@ public class AcceptanceWalkthroughTest extends AppIntegrationTest {
 
         assertEquals("Students in T01:\n1. Alice Tan | A0123456X\n2. Chloe O'Neil-Ng | A0345678Z",
                 feedback("student list"));
-        assertEquals("Attendance for T01, Week 1: 0 present, 1 absent, 1 not recorded\nAlice Tan | A0123456X | Absent\n"
+        assertEquals("Attendance for T01, Week 1: 0 present, 1 absent, "
+                + "0 late, 0 excused, 1 not recorded\nAlice Tan | A0123456X | Absent\n"
                 + "Chloe O'Neil-Ng | A0345678Z | Not recorded", feedback("attendance list w/1"));
         assertEquals("PS1 records for T01:\nAlice Tan | A0123456X | Submitted | 87\n"
                 + "Chloe O'Neil-Ng | A0345678Z | Not submitted | -", feedback("assignment list a/PS1"));
@@ -185,7 +187,7 @@ public class AcceptanceWalkthroughTest extends AppIntegrationTest {
         assertEquals("1. T01\n2. T02\nActive group: T01", feedback("group list"));
         assertEquals("Students in T01:\n1. Alice Tan | A0123456X\n2. Ben Lim | A0234567Y\n"
                 + "3. Chloe O'Neil-Ng | A0345678Z", feedback("student list"));
-        assertEquals("Attendance for T01, Week 1: 0 present, 2 absent, 1 not recorded\n"
+        assertEquals("Attendance for T01, Week 1: 0 present, 2 absent, 0 late, 0 excused, 1 not recorded\n"
                 + "Alice Tan | A0123456X | Absent\nBen Lim | A0234567Y | Absent\n"
                 + "Chloe O'Neil-Ng | A0345678Z | Not recorded", feedback("attendance list w/1"));
         assertEquals("Participation for T01, Week 1: 2 recorded, 1 not recorded\n"

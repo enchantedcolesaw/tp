@@ -27,7 +27,7 @@ public class ParticipationSetCommand extends Command {
     public static final String MESSAGE_UPDATED = "Updated %s's participation score for Week %s: %s to %s.";
     public static final String MESSAGE_UNCHANGED =
             "%s's participation score for Week %s is already %s. Nothing changed.";
-    public static final String MESSAGE_ABSENT_WARNING = " Warning: %s is marked absent for Week %d.";
+    public static final String MESSAGE_ABSENT_WARNING = " Warning: %s is marked %s for Week %d.";
 
     private static final Logger logger = LogsCenter.getLogger(ParticipationSetCommand.class);
     private final List<StudentId> studentIds;
@@ -88,11 +88,13 @@ public class ParticipationSetCommand extends Command {
     }
 
     /**
-     * Returns a warning if a positive score is given to a student marked absent for the week, or an empty string.
+     * Returns a warning if a positive score is given to a student marked absent or excused for the week.
      */
     private String warnIfAbsent(Student student) {
-        boolean isAbsent = student.getAttendanceRecord(week).filter(AttendanceStatus.ABSENT.name()::equals).isPresent();
-        return isAbsent && score > 0 ? String.format(MESSAGE_ABSENT_WARNING, student.getName(), week) : "";
+        return student.getAttendanceRecord(week).map(AttendanceStatus::fromValue)
+                .filter(AttendanceStatus::isAbsence).filter(status -> score > 0)
+                .map(status -> String.format(MESSAGE_ABSENT_WARNING, student.getName(), status.getCommandValue(), week))
+                .orElse("");
     }
 
     @Override

@@ -19,7 +19,7 @@ public class AttendanceStatusTest {
 
     @Test
     public void fromValue_invalidStatus_throwsIllegalArgumentException() {
-        for (String value : new String[] {"", " ", "late", "present absent", "p", "x".repeat(1000)}) {
+        for (String value : new String[] {"", " ", "unknown", "present absent", "p", "x".repeat(1000)}) {
             assertThrows(IllegalArgumentException.class, AttendanceStatus.MESSAGE_CONSTRAINTS, () -> {
                 AttendanceStatus.fromValue(value);
             });

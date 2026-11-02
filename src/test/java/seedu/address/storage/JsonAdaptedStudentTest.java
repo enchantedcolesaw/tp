@@ -110,7 +110,7 @@ public class JsonAdaptedStudentTest {
 
     @Test
     public void toModelType_invalidAttendanceStatus_throwsIllegalValueException() {
-        for (String status : new String[] {"", "late", "present absent"}) {
+        for (String status : new String[] {"", "unknown", "present absent"}) {
             JsonAdaptedStudent adapted = new JsonAdaptedStudent(VALID_NAME, VALID_STUDENT_ID,
                     Map.of(3, status), Map.of());
             assertThrows(IllegalValueException.class, AttendanceStatus.MESSAGE_CONSTRAINTS, adapted::toModelType);

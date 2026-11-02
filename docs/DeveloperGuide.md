@@ -830,14 +830,14 @@ appear exactly once, while `id/` is declared with `allowRepeated` so that one co
 `TAssistParserUtil#parseStudentIds` drops repeated IDs, ignoring case, and keeps the order of first appearance.
 `ParticipationSetCommandParser` treats `id/` the same way.
 `AttendanceCommandParserUtil` reuses the shared week parser with the attendance error message;
-`AttendanceStatus` accepts present or absent, ignoring case and surrounding spaces.
+`AttendanceStatus` accepts present, absent, late or excused, ignoring case and surrounding spaces.
 
 `AttendanceMarkCommand` checks the active group and finds every named student in that group before changing data,
 through `Command#getStudents`. If any ID is unknown, no student is marked. For each student, it reads the week's
 existing record, if any, creates an updated student through
-`withAttendanceRecord`, and replaces it through `Model#setStudent`. The stored status is `PRESENT` or `ABSENT`.
+`withAttendanceRecord`, and replaces it through `Model#setStudent`. The stored status is the enum name: `PRESENT`, `ABSENT`, `LATE`, or `EXCUSED`.
 The confirmation distinguishes a first mark, an update (showing the old and new status, such as
-`present to absent`), and a mark equal to the existing one, which says nothing changed. Marking a student absent
+`present to absent`), and a mark equal to the existing one, which says nothing changed. Marking a student absent or excused
 who has a participation score above 0 that week adds `MESSAGE_SCORE_WARNING`, the reverse of the warning in
 `participation set`.
 Existing `LogicManager` persistence saves the result.
@@ -846,9 +846,11 @@ Existing `LogicManager` persistence saves the result.
 selects attendance through `Group#getWeeklyRecordEntries`. If the group has no students, it returns
 `No students in GROUP.` Otherwise, it lists every student, formatting each row with the student's name, ID, and
 capitalized status, using `WeeklyRecordEntry#formatValueOrNotRecorded` to show a missing mark as `Not recorded`.
-The heading counts the present, absent, and unmarked students, counting stored values rather than display text, so
+The heading counts present, absent, late, excused, and unmarked students separately, using stored values, so
 the TA can see at a glance whether anyone was missed. The rows appear on the Records screen, and the feedback box
-shows only the heading.
+shows only the heading. Late and excused are distinct categories, not additional present/absent counts.
+Positive participation warns for absent and excused students in either command order, but not for late students.
+These statuses do not calculate or change grades.
 
 `AttendanceClearCommandParser` requires `w/` exactly once and declares `id/` with `allowRepeated`, as
 `AttendanceMarkCommandParser` does, so that one command can undo a batch mark; `parseStudentIds` drops repeated IDs.
@@ -997,7 +999,7 @@ and restart. `MainAppTest` checks missing, corrupt, and unreadable startup data,
 protection through shutdown.
 `WorkspaceSmokeTest` verifies startup messages, save confirmations, permission guidance, and restored UI state.
 
-`toModelType()` rejects, with a message naming the problem, a missing or invalid group name, student name or student ID, an empty entry in a list, a weekly record outside weeks 1 to 13, a participation score that is fractional or outside 0 to 5, an attendance status other than present or absent, two groups with the same name (ignoring case), two students with the same ID in one group, an invalid, empty or repeated (ignoring case) assignment name in a group, an assignment record with a missing or unknown assignment or student, duplicate assignment/student records, and a fractional or out-of-range grade or a grade for an unsubmitted assignment. To keep manual editing forgiving, a missing `groups`, `students`, `assignments` or `assignmentRecords` list is read as empty, a missing or `null` `activeGroup` means no group is active, an `activeGroup` that matches no group is ignored with a logged warning and no group is active, a missing attendance or participation field means that student has no records of that kind. Unknown or repeated fields make the file invalid, and the error names the field and its line. If a student is removed from the file but their assignment record remains, loading rejects the dangling record instead of silently discarding it.
+`toModelType()` rejects, with a message naming the problem, a missing or invalid group name, student name or student ID, an empty entry in a list, a weekly record outside weeks 1 to 13, a participation score that is fractional or outside 0 to 5, an attendance status other than present, absent, late or excused, two groups with the same name (ignoring case), two students with the same ID in one group, an invalid, empty or repeated (ignoring case) assignment name in a group, an assignment record with a missing or unknown assignment or student, duplicate assignment/student records, and a fractional or out-of-range grade or a grade for an unsubmitted assignment. To keep manual editing forgiving, a missing `groups`, `students`, `assignments` or `assignmentRecords` list is read as empty, a missing or `null` `activeGroup` means no group is active, an `activeGroup` that matches no group is ignored with a logged warning and no group is active, a missing attendance or participation field means that student has no records of that kind. Unknown or repeated fields make the file invalid, and the error names the field and its line. If a student is removed from the file but their assignment record remains, loading rejects the dangling record instead of silently discarding it.
 
 Each Jackson-friendly class mirrors one model class and only converts its own fields. Assignments keep their names in
 the `assignments` list on `JsonAdaptedGroup`; explicit student records are serialized as the optional
@@ -1006,7 +1008,7 @@ must refer to an assignment and student in the same group. The check prevents an
 for a student or assignment that no longer exists (see [Where per-student records are stored](#where-per-student-records-are-stored)).
 
 `JsonAdaptedStudent` also validates attendance statuses with `AttendanceStatus`, accepting case and surrounding
-spaces and storing the canonical `PRESENT` or `ABSENT` value. An invalid status becomes an `IllegalValueException`
+spaces and storing the canonical `PRESENT`, `ABSENT`, `LATE`, or `EXCUSED` value. An invalid status becomes an `IllegalValueException`
 so the existing storage error handling reports the invalid file before commands use its records.
 
 Its Jackson factory keeps week keys as strings until it can check for duplicates during integer conversion.
@@ -1350,7 +1352,7 @@ The following extensions apply to every use case that changes or views records o
 
 **MSS**
 
-1.  TA requests to mark one or more students as present or absent for a given week.
+1.  TA requests to mark one or more students as present, absent, late, or excused for a given week.
 2.  TAssist records the attendance and shows a confirmation for each student.
 3.  TA repeats steps 1-2 until every student in the group has been marked.
 4.  TA requests to view the group's attendance for that week.
@@ -1370,7 +1372,7 @@ The following extensions apply to every use case that changes or views records o
 
       Use case resumes at step 1.
 
-* 1c. The status is not `present` or `absent`.
+* 1c. The status is not `present`, `absent`, `late`, or `excused`.
     * 1c1. TAssist shows an error message stating the valid statuses.
 
       Use case resumes at step 1.
@@ -1596,7 +1598,7 @@ The following extensions apply to every use case that changes or views records o
 * **Active group**: The tutorial group that the commands currently apply to
 * **Student ID**: The unique identifier of a student, such as `A0123456X`, which distinguishes students with similar names
 * **Week**: A teaching week of the semester, numbered 1 to 13, to which attendance and participation records belong
-* **Attendance status**: Whether a student was present or absent at the tutorial of a given week
+* **Attendance status**: A student's present, absent, late, or excused status for a tutorial week
 * **Participation score**: A whole number from 0 to 5 awarded to a student for contributing in the tutorial of a given week
 * **Assignment**: A piece of coursework, such as a problem set, that students submit and the TA grades
 * **Submission status**: Whether a student has submitted a given assignment
@@ -1684,7 +1686,7 @@ through the real parsers, model and JSON storage, but the steps below also check
       Expected: Alice is `Absent`, Ben is `Absent` and Chloe is `Not recorded`; Alice has 3, Ben is
       `Not recorded` and Chloe has 0; Alice is `Submitted | 87`, Ben is `Submitted | -` and Chloe is
       `Not submitted | -`.
-      The headings count `0 present, 2 absent, 1 not recorded` and `2 recorded, 1 not recorded`.
+      The headings count `0 present, 2 absent, 0 late, 0 excused, 1 not recorded` and `2 recorded, 1 not recorded`.
    1. Enter `group use g/T02` and `attendance list w/1`.<br>
       Expected: T02's Alice is `Present`. Records of one group never appear in another.
 
@@ -2034,10 +2036,10 @@ label.
       Expected: `Updated Alice Tan's attendance for Week 3: present to absent.`
    1. Enter `attendance mark id/A0123456X w/3 s/absent` again.
       Expected: `Alice Tan's attendance for Week 3 is already absent. Nothing changed.`
-   1. Enter `attendance list w/3`. Expected: a heading `Attendance for T01, Week 3: 0 present, 1 absent, N not recorded`,
+   1. Enter `attendance list w/3`. Expected: a heading `Attendance for T01, Week 3: 0 present, 1 absent, 0 late, 0 excused, N not recorded`,
       where N is the number of other students, and `Alice Tan | A0123456X | Absent`. Other students show
       `Not recorded`.
-   1. Enter `attendance list w/13`. Expected: `Attendance for T01, Week 13: 0 present, 0 absent, N not recorded`,
+   1. Enter `attendance list w/13`. Expected: `Attendance for T01, Week 13: 0 present, 0 absent, 0 late, 0 excused, N not recorded`,
       where N is the number of students, with every student shown as `Not recorded`.
    1. Close and reopen the app. Enter `attendance list w/3`. Expected: Alice is still absent.
 
@@ -2061,8 +2063,8 @@ label.
 
    1. Enter `attendance mark id/A0123456X w/0 s/present`, then `attendance list w/14`.
       Expected: `Invalid week. Enter a number from 1 to 13.`
-   1. Enter `attendance mark id/A0123456X w/3 s/late`.
-      Expected: `Invalid attendance status. Use present or absent.`
+   1. Enter `attendance mark id/A0123456X w/3 s/unknown`.
+      Expected: `Invalid attendance status. Use present, absent, late or excused.`
    1. Use a valid student ID absent from T01 in a mark command.
       Expected: `Student ID <ID> does not exist in T01. See students in the active group with: student list`,
       naming the ID you entered.
@@ -2075,6 +2077,19 @@ Automated `AttendanceIntegrationTest` exercises the real parsers, model, and JSO
 clearing, save/reload, preservation of participation and other weeks, isolation when one student ID belongs to two groups,
 and unchanged model and file contents after invalid commands. Parser and command unit tests cover additional
 parameter errors, empty groups, week boundaries, and display formatting.
+
+### Late arrivals and excused absences
+
+1. With T01 active and Alice (A0123456X) and Ben (A0234567Y) present in its roster, enter
+   `attendance mark id/A0123456X w/7 s/late` and `attendance mark id/A0234567Y w/7 s/excused`.
+   List Week 7: Alice shows `Late`, Ben shows `Excused`, and the heading counts each category separately.
+2. Give Ben a positive participation score for Week 7. Verify a warning naming the excused status, then mark Alice
+   excused after giving her a positive score: the mark succeeds with a participation warning too. A zero score or
+   a positive score for a late student does not warn. Neither command changes grades.
+3. Correct and clear the new statuses, then undo and redo each change. The listing follows the restored status.
+   Try a batch mark or clear with an unknown ID: no student's record changes.
+4. Close and reopen. Verify the new and existing present/absent records remain. Export the group: CSV cells show
+   `Late` and `Excused` for weeks with those saved statuses. Invalid status text is still rejected without saving.
 
 ### Undoing and redoing changes
 
