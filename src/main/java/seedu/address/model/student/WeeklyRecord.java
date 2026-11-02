@@ -15,6 +15,7 @@ import seedu.address.commons.util.ToStringBuilder;
 public final class WeeklyRecord<T> {
     public static final int MIN_WEEK = 1;
     public static final int MAX_WEEK = 13;
+    public static final String MESSAGE_INVALID_WEEK = "Week must be a whole number from 1 to 13.";
 
     private final Map<Integer, T> records;
 
@@ -69,8 +70,7 @@ public final class WeeklyRecord<T> {
 
     /** Checks that {@code week} is within the teaching term. */
     public static void validateWeek(int week) {
-        checkArgument(week >= MIN_WEEK && week <= MAX_WEEK,
-                "Week must be a whole number from 1 to 13.");
+        checkArgument(week >= MIN_WEEK && week <= MAX_WEEK, MESSAGE_INVALID_WEEK);
     }
 
     @Override

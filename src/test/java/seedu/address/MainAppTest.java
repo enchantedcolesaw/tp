@@ -381,11 +381,11 @@ public class MainAppTest {
         String data = """
                 {"groups":[{"name":"T01","students":[{"name":"Alice Tan","studentId":"A1",%s}]}]}
                 """;
-        String reason = "Duplicate weekly record for Week 1. Use only one entry per week.";
+        String reason = "Group T01, student A1: Duplicate weekly record for Week 1. Use only one entry per week.";
         assertLoadFailureReason(data.formatted("\"participation\":{\"1\":3,\"01\":5}"), reason);
         assertLoadFailureReason(data.formatted("\"attendance\":{\"1\":\"PRESENT\",\"01\":\"ABSENT\"}"), reason);
         assertLoadFailureReason(data.formatted("\"attendance\":{\"x\":\"PRESENT\"}"),
-                "The file has a JSON syntax error or a value of the wrong type near line 1.");
+                "Group T01, student A1: Week must be a whole number from 1 to 13.");
     }
 
     @Test

@@ -30,6 +30,9 @@ class JsonAdaptedStudent {
     private final Map<Integer, String> attendance;
     private final Map<Integer, Number> participation;
 
+    /** Why the week keys read from the file are invalid, or null if they are valid. Never saved. */
+    private transient String weekKeyError;
+
     /**
      * Constructs a {@code JsonAdaptedStudent} with the given student details.
      */
@@ -65,27 +68,41 @@ class JsonAdaptedStudent {
 
     /**
      * Creates an adapted student from JSON without discarding duplicate week aliases.
-     *
-     * @throws IllegalArgumentException if a week key is not an integer or multiple keys refer to the same week.
+     * A week key that is not an integer, or that repeats another week, is reported by {@link #toModelType()},
+     * so that the error names the student.
      */
     @JsonCreator
     public static JsonAdaptedStudent fromJson(@JsonProperty("name") String name,
             @JsonProperty("studentId") String studentId, @JsonProperty("attendance") Map<String, String> attendance,
             @JsonProperty("participation") Map<String, Number> participation) {
-        return new JsonAdaptedStudent(name, studentId, parseWeekKeys(attendance), parseWeekKeys(participation));
+        try {
+            return new JsonAdaptedStudent(name, studentId, parseWeekKeys(attendance), parseWeekKeys(participation));
+        } catch (IllegalArgumentException exception) {
+            JsonAdaptedStudent student = new JsonAdaptedStudent(name, studentId);
+            student.weekKeyError = exception.getMessage();
+            return student;
+        }
     }
 
     private static <T> Map<Integer, T> parseWeekKeys(Map<String, T> records) {
         Map<Integer, T> normalizedRecords = new TreeMap<>();
         if (records != null) {
             records.forEach((weekKey, value) -> {
-                int week = Integer.parseInt(weekKey);
+                int week = parseWeekKey(weekKey);
                 checkArgument(!normalizedRecords.containsKey(week),
                         "Duplicate weekly record for Week " + week + ". Use only one entry per week.");
                 normalizedRecords.put(week, value);
             });
         }
         return normalizedRecords;
+    }
+
+    private static int parseWeekKey(String weekKey) {
+        try {
+            return Integer.parseInt(weekKey);
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException(WeeklyRecord.MESSAGE_INVALID_WEEK, exception);
+        }
     }
 
     /**
@@ -109,6 +126,9 @@ class JsonAdaptedStudent {
             throw new IllegalValueException(StudentId.MESSAGE_CONSTRAINTS);
         }
         final StudentId modelStudentId = new StudentId(studentId);
+        if (weekKeyError != null) {
+            throw new IllegalValueException(weekKeyError);
+        }
 
         try {
             return new Student(modelName, modelStudentId, toAttendanceRecords(), toParticipationRecords());
