@@ -21,7 +21,6 @@ import seedu.address.commons.core.DataLoadStatus;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.commons.exceptions.IllegalValueException;
-import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.Logic;
 import seedu.address.logic.LogicManager;
 import seedu.address.logic.parser.AssignmentCommandRegistration;
@@ -48,7 +47,7 @@ import seedu.address.ui.UiManager;
  */
 public class MainApp extends Application {
 
-    public static final String VERSION = "V1.4";
+    public static final String VERSION = "V1.6";
 
     private static final Logger logger = LogsCenter.getLogger(MainApp.class);
     private static final Path USER_PREFS_FILE_PATH = AppHome.getHomeDirectory().resolve("preferences.json");
@@ -230,7 +229,7 @@ public class MainApp extends Application {
         try {
             storage.saveUserPrefs(initializedPrefs);
         } catch (IOException e) {
-            logger.warning("Failed to save preference file : " + StringUtil.getDetails(e));
+            logger.warning("Failed to save preference file: " + e.getMessage());
         }
 
         return initializedPrefs;
@@ -248,7 +247,7 @@ public class MainApp extends Application {
         try {
             storage.saveUserPrefs(model.getUserPrefs());
         } catch (IOException e) {
-            logger.severe("Failed to save preferences " + StringUtil.getDetails(e));
+            logger.severe("Failed to save preferences: " + e.getMessage());
         }
     }
 }

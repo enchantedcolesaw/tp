@@ -19,7 +19,7 @@ import seedu.address.model.student.StudentId;
  */
 public class StudentDeleteCommand extends Command {
     public static final String MESSAGE_USAGE = "student delete id/STUDENT_ID [f/yes]";
-    public static final String MESSAGE_SUCCESS = "Removed %s from %s.";
+    public static final String MESSAGE_SUCCESS = "Removed %s (%s) from %s.";
     public static final String MESSAGE_CONFIRMATION =
             "Remove %s (%s) and all their attendance, participation, submission, and grade records from %s?";
 
@@ -67,7 +67,8 @@ public class StudentDeleteCommand extends Command {
         Student removed = model.removeStudent(group.getName(), studentId);
         assert !group.hasStudent(studentId) : "The deleted student must no longer belong to the active group";
         logger.fine("Removed a student from " + group.getName());
-        return new CommandResult(String.format(MESSAGE_SUCCESS, removed.getName(), group.getName()));
+        return new CommandResult(String.format(MESSAGE_SUCCESS, removed.getName(), removed.getStudentId(),
+                group.getName()));
     }
 
     @Override

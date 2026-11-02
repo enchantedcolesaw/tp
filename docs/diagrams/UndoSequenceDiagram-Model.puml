@@ -16,6 +16,8 @@ ModelManager -> TAssistHistory : undo(current)
 activate TAssistHistory
 
 TAssistHistory -> TAssistHistory : pop undo version v
+activate TAssistHistory
+deactivate TAssistHistory
 create Version
 TAssistHistory -> Version : Version(current, description)
 activate Version

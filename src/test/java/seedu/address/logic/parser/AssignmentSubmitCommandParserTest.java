@@ -33,7 +33,8 @@ public class AssignmentSubmitCommandParserTest {
     @Test
     public void parse_repeatedStudentIdWithBadValue_reportsThatValue() {
         assertParseFailure(parser, "a/PS1 id/A0123456X id/ s/yes", StudentId.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, "a/PS1 id/A0123456X id/invalid! s/yes", StudentId.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "a/PS1 id/A0123456X id/invalid! s/yes",
+                String.format(TAssistParserUtil.MESSAGE_INVALID_STUDENT_ID_IN_LIST, "invalid!"));
         assertParseFailure(parser, "a/PS1 id/A0123456X id/A0234567Y later s/yes",
                 String.format(TAssistArgumentParser.MESSAGE_EXTRA_TEXT, "id/A0234567Y", "later"));
         assertParseFailure(parser, "a/PS1 id/A0123456X id/A0234567Ys/yes",

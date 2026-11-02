@@ -90,6 +90,13 @@ public class WorkspacePanel extends UiPart<TabPane> {
     }
 
     /**
+     * Replaces the records screen's listing with an updated version of it, keeping its scroll position.
+     */
+    public void refreshRecordListing(String listing) {
+        recordListPanel.refreshListing(listing);
+    }
+
+    /**
      * Scrolls the records screen if selected, reporting whether it handled the request.
      */
     public boolean scrollRecords(boolean isDown) {

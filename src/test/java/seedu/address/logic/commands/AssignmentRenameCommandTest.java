@@ -40,6 +40,12 @@ public class AssignmentRenameCommandTest {
         return model;
     }
 
+    /** Returns the result of renaming PS1 in T01, which moves a PS1 records listing to the new name. */
+    private static CommandResult renamedPs1To(String newName) {
+        return CommandResult.forListingRename("Renamed assignment PS1 to " + newName + " in T01.",
+                "assignment list a/PS1", "assignment list a/" + newName);
+    }
+
     @Test
     public void execute_existingAssignment_keepsRecordsAndPositionInActiveGroupOnly() {
         Model model = modelWithActiveT01();
@@ -47,7 +53,7 @@ public class AssignmentRenameCommandTest {
         expected.renameAssignment(NAME_T01, NAME_PS1, NEW_NAME);
 
         assertCommandSuccess(new AssignmentRenameCommand(new AssignmentName("ps1"), NEW_NAME), model,
-                "Renamed assignment PS1 to Problem Set 1 in T01.", expected);
+                renamedPs1To("Problem Set 1"), expected);
         assertEquals(List.of(GRADED_PS1.withName(NEW_NAME), PS2), model.getGroup(NAME_T01).getAssignmentList());
         assertEquals(List.of(PS1), model.getGroup(NAME_T02).getAssignmentList());
     }
@@ -59,7 +65,7 @@ public class AssignmentRenameCommandTest {
         expected.renameAssignment(NAME_T01, NAME_PS1, new AssignmentName("ps1"));
 
         assertCommandSuccess(new AssignmentRenameCommand(NAME_PS1, new AssignmentName("ps1")), model,
-                "Renamed assignment PS1 to ps1 in T01.", expected);
+                renamedPs1To("ps1"), expected);
         assertEquals("ps1", model.getGroup(NAME_T01).getAssignmentList().get(0).getName().fullName);
     }
 
@@ -93,13 +99,13 @@ public class AssignmentRenameCommandTest {
         expected.renameAssignment(NAME_T01, NAME_PS1, otherGroupName);
 
         assertCommandSuccess(new AssignmentRenameCommand(NAME_PS1, otherGroupName), model,
-                "Renamed assignment PS1 to PS3 in T01.", expected);
+                renamedPs1To("PS3"), expected);
     }
 
     @Test
     public void execute_unknownAssignment_reportsErrorAndChangesNothing() {
         Model model = modelWithActiveT01();
-        String message = String.format(Messages.MESSAGE_UNKNOWN_ASSIGNMENT, "PS3", "T01", "PS3");
+        String message = String.format(Messages.MESSAGE_UNKNOWN_ASSIGNMENT_TO_CHANGE, "PS3", "T01");
 
         assertCommandFailure(new AssignmentRenameCommand(new AssignmentName("PS3"), NEW_NAME), model, message);
         assertEquals(List.of(GRADED_PS1, PS2), model.getGroup(NAME_T01).getAssignmentList());

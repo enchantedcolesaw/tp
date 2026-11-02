@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -161,5 +163,15 @@ public class TAssistParserUtilTest {
                     TAssistParserUtil.parseSubmissionStatus(status));
         }
         assertThrows(NullPointerException.class, () -> TAssistParserUtil.parseSubmissionStatus(null));
+    }
+
+    @Test
+    public void parseStudentIds_invalidIdAmongSeveral_namesInvalidId() throws Exception {
+        assertEquals(List.of(new StudentId("A1"), new StudentId("C3")),
+                TAssistParserUtil.parseStudentIds(List.of("a1", "C3", "A1")));
+        String message = String.format(TAssistParserUtil.MESSAGE_INVALID_STUDENT_ID_IN_LIST, "B-2");
+        assertThrows(ParseException.class, message, () -> TAssistParserUtil.parseStudentIds(List.of("A1", " B-2 ")));
+        assertThrows(ParseException.class, StudentId.MESSAGE_CONSTRAINTS, ()
+                -> TAssistParserUtil.parseStudentIds(List.of("B-2")));
     }
 }

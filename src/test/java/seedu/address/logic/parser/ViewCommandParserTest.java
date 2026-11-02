@@ -39,6 +39,14 @@ public class ViewCommandParserTest {
     }
 
     @Test
+    public void parseCommand_singularRecord_returnsRecordsView() throws Exception {
+        for (String name : List.of("record", "Record")) {
+            assertEquals(WorkspaceView.RECORDS, parser.parseCommand("view " + name)
+                    .execute(new ModelManager()).getView().orElseThrow());
+        }
+    }
+
+    @Test
     public void parseCommand_missingOrMultipleScreens_throwsParseException() {
         String[] inputs = {"view", "view students help", "view students students", "view students\thelp",
             "view student help", "view student student"};

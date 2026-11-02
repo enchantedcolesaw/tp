@@ -14,8 +14,9 @@ public class StudentId {
 
     public static final int MAX_LENGTH = 20;
 
-    public static final String MESSAGE_CONSTRAINTS =
-            "Invalid student ID. Use 1-" + MAX_LENGTH + " letters and digits, including at least one digit.";
+    public static final String MESSAGE_RULES =
+            "Use 1-" + MAX_LENGTH + " letters and digits, including at least one digit.";
+    public static final String MESSAGE_CONSTRAINTS = "Invalid student ID. " + MESSAGE_RULES;
 
     /*
      * Letters and digits only, with at least one digit.

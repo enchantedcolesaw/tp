@@ -38,6 +38,9 @@ class JsonAdaptedGroup {
     public static final String MESSAGE_UNKNOWN_RECORD_STUDENT =
             "Assignment record refers to unknown student %s in group %s.";
     public static final String MESSAGE_INVALID_STUDENT = "Group %s, student %s: %s";
+    public static final String MESSAGE_INVALID_GROUP_NAME = "Group '%s': %s";
+    public static final String MESSAGE_INVALID_ASSIGNMENT_NAME = "Group %s, assignment '%s': %s";
+    public static final String MESSAGE_INVALID_RECORD = "Group %s, assignment record %d: %s";
     public static final String MISSING_STUDENT_ID = "with missing ID";
 
     private final String name;
@@ -109,7 +112,8 @@ class JsonAdaptedGroup {
             throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, "name"));
         }
         if (!GroupName.isValidGroupName(name)) {
-            throw new IllegalValueException(GroupName.MESSAGE_CONSTRAINTS);
+            throw new IllegalValueException(String.format(MESSAGE_INVALID_GROUP_NAME, name,
+                    GroupName.MESSAGE_CONSTRAINTS));
         }
         final Group group = new Group(new GroupName(name));
 
@@ -129,9 +133,18 @@ class JsonAdaptedGroup {
             if (adaptedRecord == null) {
                 throw new IllegalValueException(String.format(MESSAGE_EMPTY_ASSIGNMENT_RECORD, group.getName()));
             }
-            AssignmentName assignmentName = adaptedRecord.getAssignmentName();
-            StudentId studentId = adaptedRecord.getStudentId();
-            AssignmentRecord record = adaptedRecord.toModelType();
+            AssignmentName assignmentName;
+            StudentId studentId;
+            AssignmentRecord record;
+            try {
+                assignmentName = adaptedRecord.getAssignmentName();
+                studentId = adaptedRecord.getStudentId();
+                record = adaptedRecord.toModelType();
+            } catch (IllegalValueException exception) {
+                // Count records from 1, as the TA does when finding the entry in the file.
+                throw new IllegalValueException(String.format(MESSAGE_INVALID_RECORD, group.getName(),
+                        assignmentRecords.indexOf(adaptedRecord) + 1, exception.getMessage()), exception);
+            }
             Assignment assignment = group.findAssignment(assignmentName).orElseThrow(() ->
                     new IllegalValueException(String.format(MESSAGE_UNKNOWN_RECORD_ASSIGNMENT,
                             assignmentName, group.getName())));
@@ -174,7 +187,8 @@ class JsonAdaptedGroup {
             throw new IllegalValueException(String.format(MESSAGE_EMPTY_ASSIGNMENT, group.getName()));
         }
         if (!AssignmentName.isValidAssignmentName(assignmentName)) {
-            throw new IllegalValueException(AssignmentName.MESSAGE_CONSTRAINTS);
+            throw new IllegalValueException(String.format(MESSAGE_INVALID_ASSIGNMENT_NAME, group.getName(),
+                    assignmentName, AssignmentName.MESSAGE_CONSTRAINTS));
         }
         Assignment assignment = new Assignment(new AssignmentName(assignmentName));
         if (group.hasAssignment(assignment.getName())) {

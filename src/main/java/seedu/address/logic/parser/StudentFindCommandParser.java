@@ -22,7 +22,7 @@ public class StudentFindCommandParser implements Parser<StudentFindCommand> {
     @Override
     public StudentFindCommand parse(String arguments) throws ParseException {
         TAssistArgumentParser parser = new TAssistArgumentParser(List.of(), List.of(PREFIX_NAME, PREFIX_ID),
-                List.of(), StudentName.SLASH_PARTICLES);
+                List.of(PREFIX_ID), StudentName.SLASH_PARTICLES);
         ArgumentMultimap values = parser.parse(arguments);
         for (Prefix prefix : List.of(PREFIX_NAME, PREFIX_ID)) {
             if (values.getValue(prefix).isEmpty()) {

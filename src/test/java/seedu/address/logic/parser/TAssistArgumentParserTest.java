@@ -144,7 +144,7 @@ public class TAssistArgumentParserTest {
     @Test
     public void parse_withUsage_appendsFormatOnlyToMissingParameterError() throws Exception {
         String usage = "student add n/NAME id/STUDENT_ID";
-        String missingMessage = "Missing required parameter(s): id/. Include each exactly once.";
+        String missingMessage = "Missing required parameter(s): id/.";
         assertThrows(ParseException.class, missingMessage + " Usage: " + usage, () ->
                 parser.parse("n/Alice", usage));
         assertThrows(ParseException.class, missingMessage, () -> parser.parse("n/Alice"));

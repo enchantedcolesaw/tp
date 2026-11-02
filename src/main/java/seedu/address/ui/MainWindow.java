@@ -3,6 +3,7 @@ package seedu.address.ui;
 import static java.util.Objects.requireNonNull;
 
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -34,6 +35,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
  */
 public class MainWindow extends UiPart<Stage> {
     static final String MESSAGE_CANCELLED = "Command cancelled. No changes were made.";
+    static final String MESSAGE_LISTING_UNAVAILABLE = "This listing is no longer available. ";
     private static final String FXML = "MainWindow.fxml";
     private final Logger logger = LogsCenter.getLogger(getClass());
     private final Stage primaryStage;
@@ -46,6 +48,8 @@ public class MainWindow extends UiPart<Stage> {
     private ResultDisplay resultDisplay;
     /** The last list command shown on Records, rerun when data changes so its listing stays current. */
     private String recordListingCommand;
+    /** The last assignment rename that Records followed, so that undo and redo can follow it back. */
+    private Map.Entry<String, String> followedRename;
     private CommandBox commandBox;
     private StatusBarFooter statusBarFooter;
 
@@ -159,10 +163,37 @@ public class MainWindow extends UiPart<Stage> {
             return;
         }
         try {
-            workspacePanel.setRecordListing(logic.execute(recordListingCommand).getFeedbackToUser());
+            CommandResult listing = executeListing();
+            // The listed assignment may now have other capitals, as in another group, so keep its stored name.
+            recordListingCommand = listing.getListingCommand().orElse(recordListingCommand);
+            workspacePanel.refreshRecordListing(listing.getFeedbackToUser());
         } catch (CommandException | ParseException e) {
             logger.fine("Records could not be refreshed: " + e.getMessage());
-            workspacePanel.setRecordListing(e.getMessage());
+            String reason = e.getMessage().lines().findFirst().orElse("");
+            workspacePanel.setRecordListing(MESSAGE_LISTING_UNAVAILABLE + reason);
+        }
+    }
+
+    /**
+     * Reruns the list command shown on Records. If it fails after an undone or redone assignment rename, reruns it
+     * with the assignment's name from the other side of that rename.
+     */
+    private CommandResult executeListing() throws CommandException, ParseException {
+        try {
+            return logic.execute(recordListingCommand);
+        } catch (CommandException e) {
+            if (followedRename == null) {
+                throw e;
+            }
+            String otherSide = followedRename.getValue().equalsIgnoreCase(recordListingCommand)
+                    ? followedRename.getKey() : followedRename.getValue();
+            try {
+                CommandResult listing = logic.execute(otherSide);
+                recordListingCommand = otherSide;
+                return listing;
+            } catch (CommandException | ParseException otherSideError) {
+                throw e;
+            }
         }
     }
 
@@ -254,9 +285,14 @@ public class MainWindow extends UiPart<Stage> {
             CommandResult result = logic.execute(commandText);
             logger.info("Result: " + result.getFeedbackToUser());
             if (result.isRecordListing()) {
-                recordListingCommand = commandText;
+                recordListingCommand = result.getListingCommand().orElse(commandText);
                 workspacePanel.setRecordListing(result.getFeedbackToUser());
             } else if (result.hasSavedChanges()) {
+                result.getListingRename().filter(rename -> rename.getKey().equalsIgnoreCase(recordListingCommand))
+                        .ifPresent(rename -> {
+                            recordListingCommand = rename.getValue();
+                            followedRename = rename;
+                        });
                 refreshRecordListing();
             }
             resultDisplay.setFeedbackToUser(result.isRecordListing()

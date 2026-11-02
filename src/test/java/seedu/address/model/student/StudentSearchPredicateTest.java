@@ -21,10 +21,14 @@ public class StudentSearchPredicateTest {
     }
 
     @Test
-    public void test_accentedName_ignoresCaseButPreservesAccents() {
+    public void test_accentedName_ignoresCaseAndAccents() {
         Student student = new StudentBuilder().withName("Élodie Tan").build();
         assertTrue(new StudentSearchPredicate("ÉLODIE", "").test(student));
-        assertFalse(new StudentSearchPredicate("elodie", "").test(student));
+        assertTrue(new StudentSearchPredicate("elodie", "").test(student));
+        assertTrue(new StudentSearchPredicate("José", "").test(new StudentBuilder().withName("Jose Lim").build()));
+        assertFalse(new StudentSearchPredicate("elodia", "").test(student));
+        Student curlyApostrophe = new StudentBuilder().withName("Sean O’Brien").build();
+        assertTrue(new StudentSearchPredicate("o'brien", "").test(curlyApostrophe));
     }
 
     @Test

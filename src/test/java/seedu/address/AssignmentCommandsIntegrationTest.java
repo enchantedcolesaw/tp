@@ -62,7 +62,7 @@ public class AssignmentCommandsIntegrationTest extends AppIntegrationTest {
     @Test
     public void execute_submitAndGrade_persistsStudentRecordsAfterRestart() throws Exception {
         feedback("assignment add a/PS1");
-        assertEquals("Updated Alice Tan's PS1 submission status to submitted.",
+        assertEquals("Recorded Alice Tan's PS1 submission status as submitted.",
                 feedback("assignment submit a/PS1 id/A0123456X s/yes"));
         assertEquals("Recorded grade 87 for Alice Tan's PS1.",
                 feedback("assignment grade a/PS1 id/A0123456X m/87"));
@@ -82,8 +82,8 @@ public class AssignmentCommandsIntegrationTest extends AppIntegrationTest {
         feedback("assignment add a/PS1");
         CommandResult result = app.logic.execute(
                 "assignment submit a/PS1 id/A0345678Z id/a0123456x id/A0345678Z s/yes");
-        assertEquals("Updated Carl Goh's PS1 submission status to submitted.\n"
-                + "Updated Alice Tan's PS1 submission status to submitted.", result.getFeedbackToUser());
+        assertEquals("Recorded Carl Goh's PS1 submission status as submitted.\n"
+                + "Recorded Alice Tan's PS1 submission status as submitted.", result.getFeedbackToUser());
         assertTrue(result.hasSavedChanges());
 
         restart();
@@ -145,13 +145,13 @@ public class AssignmentCommandsIntegrationTest extends AppIntegrationTest {
         feedback("assignment add a/PS1");
         feedback("assignment submit a/PS1 id/A0123456X s/yes");
         CommandResult ungraded = app.logic.execute("assignment submit a/PS1 id/A0123456X s/no");
-        assertEquals("Updated Alice Tan's PS1 submission status to not submitted.", ungraded.getFeedbackToUser());
+        assertEquals("Recorded Alice Tan's PS1 submission status as not submitted.", ungraded.getFeedbackToUser());
         assertTrue(ungraded.hasSavedChanges());
         feedback("assignment submit a/PS1 id/A0123456X s/yes");
         feedback("assignment grade a/PS1 id/A0123456X m/87");
 
         CommandResult graded = app.logic.execute("assignment submit a/PS1 id/A0123456X s/no");
-        assertEquals("Updated Alice Tan's PS1 submission status to not submitted; the recorded grade was cleared.",
+        assertEquals("Recorded Alice Tan's PS1 submission status as not submitted; the recorded grade was cleared.",
                 graded.getFeedbackToUser());
         assertTrue(graded.hasSavedChanges());
         TAssist expected = new TAssist(app.model.getTAssist());

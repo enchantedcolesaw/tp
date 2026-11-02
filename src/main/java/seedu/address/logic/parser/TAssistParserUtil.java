@@ -23,6 +23,8 @@ public class TAssistParserUtil {
             "Invalid participation score. Enter a whole number from 0 to 5.";
     public static final String MESSAGE_GRADE = AssignmentRecord.MESSAGE_INVALID_GRADE;
     public static final String MESSAGE_SUBMISSION_STATUS = "Invalid submission status. Use yes or no.";
+    public static final String MESSAGE_INVALID_STUDENT_ID_IN_LIST =
+            "Invalid student ID '%s'. " + StudentId.MESSAGE_RULES;
 
     private TAssistParserUtil() {}
 
@@ -71,7 +73,7 @@ public class TAssistParserUtil {
 
     /**
      * Parses student IDs as {@link #parseStudentId(String)} does, keeping the first of any IDs that are the same
-     * once case is ignored.
+     * once case is ignored. When there are several IDs, an invalid one is named in the error.
      *
      * @throws ParseException if any ID is invalid.
      */
@@ -79,6 +81,10 @@ public class TAssistParserUtil {
         requireNonNull(studentIds);
         Set<StudentId> parsedIds = new LinkedHashSet<>();
         for (String studentId : studentIds) {
+            if (studentIds.size() > 1 && !studentId.isBlank() && !StudentId.isValidStudentId(studentId)) {
+                // Among several IDs, the TA needs to know which one to correct.
+                throw new ParseException(String.format(MESSAGE_INVALID_STUDENT_ID_IN_LIST, studentId.trim()));
+            }
             parsedIds.add(parseStudentId(studentId));
         }
         return List.copyOf(parsedIds);

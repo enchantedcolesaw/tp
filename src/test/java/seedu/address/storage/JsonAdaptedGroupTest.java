@@ -52,7 +52,8 @@ public class JsonAdaptedGroupTest {
     @Test
     public void toModelType_invalidName_throwsIllegalValueException() {
         JsonAdaptedGroup group = new JsonAdaptedGroup(INVALID_NAME, VALID_STUDENTS);
-        assertThrows(IllegalValueException.class, GroupName.MESSAGE_CONSTRAINTS, group::toModelType);
+        assertThrows(IllegalValueException.class, String.format(JsonAdaptedGroup.MESSAGE_INVALID_GROUP_NAME,
+                INVALID_NAME, GroupName.MESSAGE_CONSTRAINTS), group::toModelType);
     }
 
     @Test
@@ -176,7 +177,8 @@ public class JsonAdaptedGroupTest {
     public void toModelType_invalidAssignmentName_throwsIllegalValueException() {
         for (String name : new String[] {"", "PS1/PS2", "-", "a".repeat(AssignmentName.MAX_LENGTH + 1)}) {
             JsonAdaptedGroup group = new JsonAdaptedGroup(VALID_NAME, null, List.of(name));
-            assertThrows(IllegalValueException.class, AssignmentName.MESSAGE_CONSTRAINTS, group::toModelType);
+            assertThrows(IllegalValueException.class, String.format(JsonAdaptedGroup.MESSAGE_INVALID_ASSIGNMENT_NAME,
+                    VALID_NAME, name, AssignmentName.MESSAGE_CONSTRAINTS), group::toModelType);
         }
     }
 

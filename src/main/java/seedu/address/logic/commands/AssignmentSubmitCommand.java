@@ -25,11 +25,11 @@ import seedu.address.model.student.StudentId;
 public class AssignmentSubmitCommand extends Command {
     public static final String MESSAGE_USAGE = "assignment submit a/ASSIGNMENT_NAME id/STUDENT_ID "
             + "[id/STUDENT_ID]... s/STATUS";
-    public static final String MESSAGE_SUCCESS = "Updated %s's %s submission status to %s.";
+    public static final String MESSAGE_SUCCESS = "Recorded %s's %s submission status as %s.";
     public static final String MESSAGE_UNCHANGED =
             "%s's %s submission status is already %s. Nothing changed.";
     public static final String MESSAGE_SUCCESS_WITHDRAWN =
-            "Updated %s's %s submission status to not submitted; the recorded grade was cleared.";
+            "Recorded %s's %s submission status as not submitted; the recorded grade was cleared.";
 
     private static final Logger logger = LogsCenter.getLogger(AssignmentSubmitCommand.class);
 

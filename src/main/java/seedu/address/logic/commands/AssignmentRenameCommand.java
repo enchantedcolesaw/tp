@@ -40,7 +40,7 @@ public class AssignmentRenameCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
         Group group = getActiveGroup(model);
-        Assignment target = getAssignment(group, assignmentName);
+        Assignment target = getAssignmentToChange(group, assignmentName);
         Optional<Assignment> clash = group.findAssignment(newName).filter(other -> !other.isSameAssignment(target));
         if (clash.isPresent()) {
             throw new CommandException(String.format(MESSAGE_DUPLICATE_ASSIGNMENT,
@@ -55,7 +55,8 @@ public class AssignmentRenameCommand extends Command {
         model.renameAssignment(group.getName(), oldName, newName);
         assert group.hasAssignment(newName) : "The renamed assignment must exist under its new name";
         logger.fine("Renamed an assignment in " + group.getName());
-        return new CommandResult(String.format(MESSAGE_SUCCESS, oldName, newName, group.getName()));
+        return CommandResult.forListingRename(String.format(MESSAGE_SUCCESS, oldName, newName, group.getName()),
+                AssignmentListCommand.getListCommand(oldName), AssignmentListCommand.getListCommand(newName));
     }
 
     @Override

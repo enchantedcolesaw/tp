@@ -38,7 +38,8 @@ public class AttendanceMarkCommandParserTest {
     @Test
     public void parse_repeatedStudentIdWithBadValue_reportsThatValue() {
         assertParseFailure(parser, "id/A0123456X id/ w/3 s/present", StudentId.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, "id/A0123456X id/invalid! w/3 s/present", StudentId.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "id/A0123456X id/invalid! w/3 s/present",
+                String.format(TAssistParserUtil.MESSAGE_INVALID_STUDENT_ID_IN_LIST, "invalid!"));
         assertParseFailure(parser, "id/A0123456X later id/A0234567Y w/3 s/present",
                 String.format(TAssistArgumentParser.MESSAGE_EXTRA_TEXT, "id/A0123456X", "later"));
         assertParseFailure(parser, "id/A0123456X id/A0234567Yw/3 s/present",

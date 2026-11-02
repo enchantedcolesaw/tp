@@ -32,7 +32,7 @@ public class StudentSortCommandTest {
         model.filterStudents(new StudentSearchPredicate("a", ""));
 
         CommandResult result = new StudentSortCommand(StudentSortField.NAME).execute(model);
-        assertEquals(new CommandResult("Sorted 2 student(s) in T01 by name.", WorkspaceView.STUDENTS), result);
+        assertEquals(new CommandResult("Sorted 2 students in T01 by name.", WorkspaceView.STUDENTS), result);
         assertEquals(List.of(ALICE, CARL), model.getDisplayedStudentList());
         assertEquals(previousData, model.getTAssist());
 
@@ -47,7 +47,7 @@ public class StudentSortCommandTest {
         model.setActiveGroup(TypicalGroups.NAME_T01);
         model.filterStudents(new StudentSearchPredicate("nobody", ""));
         TAssist previousData = new TAssist(model.getTAssist());
-        assertEquals(new CommandResult("Sorted 0 student(s) in T01 by id.",
+        assertEquals(new CommandResult("Sorted 0 students in T01 by id.",
                         WorkspaceView.STUDENTS),
                 new StudentSortCommand(StudentSortField.ID).execute(model));
         assertEquals(previousData, model.getTAssist());
@@ -65,7 +65,7 @@ public class StudentSortCommandTest {
         model.setActiveGroup(TypicalGroups.NAME_T03);
         TAssist previousData = new TAssist(model.getTAssist());
 
-        assertEquals(new CommandResult("Sorted 0 student(s) in T03 by name.", WorkspaceView.STUDENTS),
+        assertEquals(new CommandResult("Sorted 0 students in T03 by name.", WorkspaceView.STUDENTS),
                 new StudentSortCommand(StudentSortField.NAME).execute(model));
         assertEquals(previousData, model.getTAssist());
         model.addStudent(TypicalGroups.NAME_T03, BEN);

@@ -22,8 +22,8 @@ public class ViewCommandParser implements Parser<ViewCommand> {
         }
 
         String screenKeyword = screenName.toLowerCase(Locale.ROOT);
-        if (screenKeyword.equals("student")) {
-            screenKeyword = "students";
+        if (screenKeyword.equals("student") || screenKeyword.equals("record")) {
+            screenKeyword = screenKeyword + "s";
         }
         for (WorkspaceView view : WorkspaceView.values()) {
             if (view.getKeyword().equals(screenKeyword)) {

@@ -18,8 +18,10 @@ activate ModelManager
 ModelManager -> TAssist : setActiveGroup(T02)
 activate TAssist
 TAssist --> ModelManager
+deactivate TAssist
 
 ModelManager -> TAssist : getActiveGroup()
+activate TAssist
 TAssist --> ModelManager : T02
 deactivate TAssist
 
@@ -27,8 +29,14 @@ ModelManager -> ActiveGroupTracker : track(T02)
 activate ActiveGroupTracker
 
 ActiveGroupTracker -> ActiveGroupTracker : stop following T01's students
+activate ActiveGroupTracker
+deactivate ActiveGroupTracker
 ActiveGroupTracker -> ActiveGroupTracker : follow T02's students
+activate ActiveGroupTracker
+deactivate ActiveGroupTracker
 ActiveGroupTracker -> ActiveGroupTracker : set active group to T02
+activate ActiveGroupTracker
+deactivate ActiveGroupTracker
 
 ActiveGroupTracker --> ModelManager
 deactivate ActiveGroupTracker

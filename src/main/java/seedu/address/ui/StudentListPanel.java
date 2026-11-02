@@ -26,6 +26,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import seedu.address.commons.util.StringUtil;
 import seedu.address.model.group.Group;
 import seedu.address.model.student.Student;
 
@@ -48,6 +49,8 @@ public class StudentListPanel extends UiPart<Region> {
     private static final double ROW_NUMBER_WIDTH = 56;
     private static final double NAME_COLUMN_WIDTH = 320;
     private static final double ID_COLUMN_WIDTH = 180;
+    /** Wide enough for a 20-character student ID, so that the ID the TA must type is shown in full. */
+    private static final double ID_COLUMN_MAX_WIDTH = 260;
     private static final double TOOLTIP_MAX_WIDTH = 480;
 
     @FXML
@@ -86,7 +89,7 @@ public class StudentListPanel extends UiPart<Region> {
                 .setMaxWidth(ROW_NUMBER_WIDTH);
         addColumn("NAME", NAME_COLUMN_WIDTH, student -> student.getName().toString());
         addColumn("STUDENT ID", ID_COLUMN_WIDTH, student -> student.getStudentId().toString())
-                .setMaxWidth(ID_COLUMN_WIDTH);
+                .setMaxWidth(ID_COLUMN_MAX_WIDTH);
         // Keep the number and ID columns readable while giving the name all remaining table width.
         studentTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         // Row numbers depend on positions, which change when another student is removed.
@@ -191,7 +194,7 @@ public class StudentListPanel extends UiPart<Region> {
      */
     static String describeCount(int count) {
         assert count >= 0 : "A group cannot have a negative number of students";
-        return count + (count == 1 ? " student" : " students");
+        return StringUtil.pluralize(count, "student");
     }
 
     /**

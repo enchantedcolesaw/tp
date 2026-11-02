@@ -132,12 +132,18 @@ to show `Changes saved.` in the footer. Commands keep the current screen unless 
 Attendance, participation, and assignment listings return `CommandResult.forRecordListing(...)` with their complete
 text and a request to open Records. `MainWindow` sends the text to `RecordListPanel` and puts only its heading in
 `ResultDisplay`. The records text area grows with the workspace, so a normal tutorial's records use the main area.
-PageUp and PageDown scroll Records while it is open and the feedback is short, and the feedback box otherwise;
-neither takes focus from the command box. The last listing stays available through `view records`, without
+PageUp and PageDown scroll Records while it is open and the whole feedback is visible, and the feedback box
+otherwise; neither takes focus from the command box. `PageScrolling` stops both at the end of their text, so PageUp
+responds at once after PageDown reaches the end. A rerun listing keeps its scroll position, so the rows the TA was
+looking at stay in view after a mark; a new list command starts at the top. The last listing stays available through `view records`, without
 changing the model or file. `MainWindow` keeps the list command that produced it and reruns that command after any
 command with saved changes, such as a mark, a group switch, or `undo`, so Records never shows outdated values. A
 list command changes no data, so rerunning it saves nothing and adds nothing to the undo history. Restarting
-clears the listing.
+clears the listing. An assignment listing keeps `assignment list a/NAME` with the stored name
+(`CommandResult#getListingCommand()`), and `assignment rename` returns the old and new form of that command
+(`CommandResult#getListingRename()`), so a listing of the renamed assignment moves to its new name. If rerunning
+fails, for example because the active group has no assignment of that name, Records says that the listing is no
+longer available and gives the first line of the reason, without the advice to create the assignment again.
 
 The command reference is shown only on the Help screen. `help` returns `CommandResult.forHelp(...)` with a one-line
 confirmation and, for `help TOPIC`, the topic. `MainWindow` then asks `WorkspacePanel` to open Help, which scrolls
@@ -163,10 +169,12 @@ It starts a fresh history position, returns focus to the input, and places the c
 A repeated template clears failed-input styling too. Enter still follows the normal parser and command path;
 an incomplete template stays editable after its validation error.
 
-Groups, attendance, participation, and assignments have no screen of their own; their commands show records in the
-feedback box. Earlier versions showed empty **Coming soon** tables for them, which looked like unfinished work, so they
-were removed. Table screens for these records remain a possible future enhancement: each would observe the model in the
-same way as the Students screen, add a `WorkspaceView` constant, and register a button in `NavigationBar`.
+Groups have no screen of their own: the group strip always shows them, and `group list` shows them in the feedback
+box. Attendance, participation, and assignment listings appear as text on the Records screen described above.
+Earlier versions showed empty **Coming soon** tables for each kind of record, which looked like unfinished work, so
+they were replaced by Records. Table views of these records remain a possible future enhancement: each would observe
+the model in the same way as the Students screen, add a `WorkspaceView` constant, and register a button in
+`NavigationBar`.
 
 The screenshot below shows the implemented Students screen with an active group and its roster.
 
@@ -178,8 +186,9 @@ The original mock-up is preserved as [`UiMockup.png`](images/UiMockup.png). The 
 
 * The mock-up's dark menu header and separate group strip are replaced by a light group bar and a screen-navigation row.
 * The app uses native JavaFX controls rather than rendering the mock-up as an HTML page.
-* The mock-up shows an Attendance screen. The app has Students, Help, and Storage screens and the group bar, all
-  showing live data. Attendance, participation, and assignment records appear in the feedback box instead.
+* The mock-up shows an Attendance screen. The app has Students, Records, Help, and Storage screens and the group bar,
+  all showing live data. Attendance, participation, and assignment listings appear as text on Records instead of
+  as an attendance table.
 
 The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-T12-4/tp/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-T12-4/tp/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
 
@@ -278,12 +287,12 @@ Logic logic = new LogicManager(model, storage, registry, dataLoadStatus);
 
 * `TAssistParser` and `LogicManager` take snapshots of registrations at construction. Later changes to the source
   registry do not change the running parser or its help.
-* A feature keyword cannot shadow a built-in command (`help`, `view` or `exit`). Duplicate registrations and invalid registration
+* A feature keyword cannot shadow a built-in command (`help`, `view`, `undo`, `redo` or `exit`). Duplicate registrations and invalid registration
   keywords are developer errors and throw `IllegalArgumentException`.
 
 #### In-app help
 
-* The built-in commands `help`, `view` and `exit` keep their `HelpEntry` objects in `HelpCatalog`. `TAssistParser` combines
+* The built-in commands `help`, `view`, `undo`, `redo` and `exit` keep their `HelpEntry` objects in `HelpCatalog`. `TAssistParser` combines
   them with the registered feature entries, and `Logic#getHelpEntries()` exposes the combined list.
 * `HelpCommandParser` accepts an optional topic and maps `groups`, `students`, and `assignments` to their singular
   topics before validation. `HelpCatalog.TOPICS` lists the canonical topics, and an unknown topic
@@ -599,8 +608,8 @@ changes nothing when the week has no score.
   * Pros: Fixes any mistake, not only weekly records.
   * Cons: It only helps right after the mistake. A wrong mark noticed a week later stays in the data and the export.
 
-`participation set`, `participation list`, and `participation clear` use the standard feedback box and keep the
-current screen selected. Existing JSON storage already persists participation records, so the
+`participation set` and `participation clear` report in the standard feedback box and keep the current screen
+selected; `participation list` opens Records with the complete listing, like the other list commands. Existing JSON storage already persists participation records, so the
 feature adds no new file format. Loading rejects a fractional participation score, or one outside 0–5, the same way
 it rejects a week outside 1–13. `ParticipationCommandsIntegrationTest` exercises startup registration, help,
 restart persistence, clearing a score, and rejected commands preserving existing records and the file. Command and
@@ -662,7 +671,8 @@ replace it.
 
 `StudentFindCommandParser` accepts optional `n/` and `id/` parameters using `TAssistArgumentParser`, requiring
 at least one nonblank fragment. Fragments are not validated as complete names or IDs. `StudentSearchPredicate`
-uses case-insensitive substring matching and combines the supplied filters with AND.
+uses case-insensitive substring matching, ignores accents in names by comparing their `Normalizer` decompositions
+without accent marks, and combines the supplied filters with AND. `id/` takes a single word, like other IDs.
 `StudentFindCommand` checks for an empty roster before applying a new predicate. In that case it reports the
 empty roster and preserves the existing display settings, allowing a later addition to follow those settings.
 
@@ -680,7 +690,8 @@ An active search always shows the matching count against the total, including `0
 
 `StudentSortCommandParser` requires `by/name` or `by/id`, ignoring the field's case. `by/` takes a single word, so
 `by/id now` is reported as extra text rather than as an invalid field. `StudentSortField` supplies
-ascending comparators: names use case-insensitive text comparison with student ID as the tie-breaker; IDs use
+ascending comparators: names are compared word by word with an English `Collator` that ignores case and sorts accented letters with their plain
+letters, with student ID as the tie-breaker; IDs use
 lexicographic comparison of their normalized uppercase values. Sorting is exposed through the CLI; table headers
 remain non-sortable. These transformations keep the original roster order and all record/export commands intact.
 Sort feedback reports the displayed count even when it is zero, without suggesting that the sort be reset.
@@ -816,7 +827,7 @@ Existing `LogicManager` persistence saves the result.
 selects attendance through `Group#getWeeklyRecordEntries`. If the group has no students, it returns
 `No students in GROUP.` Otherwise, it lists every student, formatting each row with the student's name, ID, and
 capitalized status, using `WeeklyRecordEntry#formatValueOrNotRecorded` to show a missing mark as `Not recorded`.
-The rows appear in the scrollable command feedback box.
+The rows appear on the Records screen, and the feedback box shows only the heading.
 
 `AttendanceClearCommandParser` requires `id/` and `w/` exactly once, with the same validation as marking. It does not
 accept `s/`, so a status copied from a mark command is reported instead of being ignored. `AttendanceClearCommand`
@@ -976,8 +987,10 @@ so the existing storage error handling reports the invalid file before commands 
 
 Its Jackson factory keeps week keys as strings until it can check for duplicates during integer conversion.
 Two aliases for the same week, such as `"1"` and `"01"`, are rejected within an attendance or participation map,
-even if their values match. Jackson wraps this rejection as a loading error, so `MainApp#describeLoadFailure` reads
-the original message from it. The startup warning then names the duplicate week and activates startup file protection.
+even if their values match. A key that is not a whole number, such as `"3.0"`, is rejected too. The factory keeps
+the reason in a transient field, and `toModelType()` throws it as an `IllegalValueException`, so `JsonAdaptedGroup`
+adds the group and student to it as for other invalid records. The startup warning then names the student and the
+problem, and activates startup file protection.
 A single alias remains valid and is saved using the canonical week number.
 
 In the same forgiving way, `JsonAdaptedStudent` and `JsonAdaptedAssignmentRecord` read a participation score or
@@ -1173,6 +1186,12 @@ Priority 1 = Must have in MVP, Priority 2 = Nice to have, Priority 3 = Stretch
 | 39 | P2 | TA | export a group's records to CSV | hand figures to the course coordinator |
 | 40 | P3 | TA | import partial records from another TA's export | take over a group mid-semester |
 | 41 | P3 | busy TA | undo and redo my latest changes | recover quickly from a command entered by mistake |
+| 42 | P2 | TA | rename a tutorial group | fix a typo in its name without losing its students and records |
+| 43 | P2 | TA | delete a tutorial group | remove a group I no longer teach |
+| 44 | P2 | TA | rename an assignment | fix its name without losing its submissions and grades |
+| 45 | P2 | TA | delete an assignment | remove one that I created by mistake |
+| 46 | P3 | TA | sort the students of a group by name or ID | find a student quickly in a long roster |
+| 47 | P2 | TA | return to the records I listed last | check them again after looking at another screen |
 
 
 ### Use cases
@@ -1354,8 +1373,8 @@ The following extensions apply to every use case that changes or views records o
 
 **MSS**
 
-1.  TA requests to set a student's participation score for a given week.
-2.  TAssist records the score and shows a confirmation.
+1.  TA requests to set the participation score of one or more students for a given week.
+2.  TAssist records the score for each student and shows a confirmation for each.
 3.  TA requests to view the group's participation scores for that week.
 4.  TAssist shows the participation score of every student in the group for that week.
 
@@ -1363,8 +1382,8 @@ The following extensions apply to every use case that changes or views records o
 
 **Extensions**
 
-* 1a. No student in the active group has the given student ID.
-    * 1a1. TAssist shows an error message stating that the student does not exist in the group.
+* 1a. A given student ID does not belong to any student in the active group.
+    * 1a1. TAssist shows an error message naming the first such ID, and changes no score.
 
       Use case resumes at step 1.
 
@@ -1559,6 +1578,10 @@ The following extensions apply to every use case that changes or views records o
 * **Submission status**: Whether a student has submitted a given assignment
 * **Grade**: A whole number from 0 to 100 given to a student for an assignment
 * **Command box**: The text field in which the user types commands, one line at a time
+* **Feedback box**: The area below the screen that shows the result or error of the last command
+* **Prefix**: The short label that starts a parameter, such as `g/`, `id/` or `w/`
+* **Students screen**: The screen that lists the students of the active group
+* **Records screen**: The screen that shows the attendance, participation or assignment records listed last
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -1846,7 +1869,7 @@ label.
    Add Zoe (Z2), who does not match the attempted search; Zoe must appear immediately.
    Delete Zoe, then repeat the query with an ID fragment and check the same behavior.
    This distinguishes an empty roster from an existing roster with no matching students.
-8. With T04 empty again, enter `student sort by/name`. Expect `Sorted 0 student(s) in T04 by name.`
+8. With T04 empty again, enter `student sort by/name`. Expect `Sorted 0 students in T04 by name.`
    Add Zoe (Z2), then Alice (A1); expect Alice before Zoe on screen, while the saved roster keeps insertion order.
    Run `student find n/missing`, then `student sort by/id`; expect a sort result for zero displayed students.
    The search must remain active, and the sort message must not suggest resetting it.
@@ -1874,7 +1897,7 @@ label.
    Enter `student delete id/a0123456x`. Expect a prompt naming Alice, student ID A0123456X, and T01, and describing
    the records that will be removed. Press Enter to cancel; Alice and the saved data remain unchanged. Enter the
    command again and choose Continue. Expect
-   `Removed Alice Tan from T01.` and A2 becomes row 1.
+   `Removed Alice Tan (A0123456X) from T01.` and A2 becomes row 1.
 6. Delete A2 using `student delete id/A2 f/yes`, then list students. Expect an empty-roster hint. Try deleting A2
    again; expect an unknown-ID error.
    Close and reopen; T01 stays empty and T02 still contains Alice.
@@ -1894,7 +1917,7 @@ label.
    Then try `student add n/Ravi s/o id/A5`, `student add n/Ravi s/oKumar id/A5`, and
    `student add n/Ravi x/o Kumar id/A5`. Expect the name rules for the first, an unknown prefix `s/` with a hint to
    put spaces around `s/o` for the second, and an unknown prefix `x/` for the third.
-   Enter `student find n/Ravi s/o`; expect only Ravi s/o Kumar and `Found 1 matching student(s) in T01.`
+   Enter `student find n/Ravi s/o`; expect only Ravi s/o Kumar and `Found 1 matching student in T01.`
 
 ### Managing tutorial groups
 
@@ -2077,7 +2100,7 @@ parameter errors, empty groups, week boundaries, and display formatting.
 3. Click an empty table row or use the secondary or middle mouse button. The draft must stay unchanged.
    Selecting another row with the keyboard must also leave the command box alone.
 4. Submit the incomplete template with Enter. Expect the missing-parameter error
-   `Missing required parameter(s): s/. Include each exactly once. Usage: attendance mark id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/STATUS`,
+   `Missing required parameter(s): s/. Usage: attendance mark id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/STATUS`,
    retained text, and unchanged records.
    Complete it with a valid week and status, then press Enter; only then should attendance be saved.
 5. Switch groups and click a student. Verify the ID comes from the current group and the current row after deletion.

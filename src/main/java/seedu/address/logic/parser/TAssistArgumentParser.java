@@ -25,7 +25,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
 public class TAssistArgumentParser {
     public static final String MESSAGE_UNKNOWN_PREFIX = "Unknown prefix '%s'. Allowed prefixes: %s.";
     public static final String MESSAGE_MISSING_PARAMETERS =
-            "Missing required parameter(s): %s. Include each exactly once.";
+            "Missing required parameter(s): %s.";
     public static final String MESSAGE_UNEXPECTED_TEXT =
             "Unexpected text before parameters: '%s'. Start each parameter with an allowed prefix: %s.";
     public static final String MESSAGE_NO_PARAMETERS = "This command takes no parameters. Remove the extra input.";

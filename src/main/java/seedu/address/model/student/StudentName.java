@@ -28,9 +28,8 @@ public class StudentName {
     public static final List<String> SLASH_PARTICLES = List.of("s/o", "d/o", "a/l", "a/p");
 
     public static final String MESSAGE_CONSTRAINTS = "Invalid student name. Use 1-" + MAX_LENGTH
-            + " letters, spaces, apostrophes, hyphens, or periods, with at least one letter outside the slash "
-            + "particles. Between two parts of a name, you may also use "
-            + "s/o, d/o, a/l, or a/p.";
+            + " letters, spaces, apostrophes, hyphens, or periods, with at least one letter besides s/o, d/o, a/l, "
+            + "or a/p. Between two parts of a name, you may also use s/o, d/o, a/l, or a/p.";
 
     /** One word: letters (including accented letters), apostrophes (straight or curly), hyphens and periods. */
     private static final String WORD_REGEX = "[\\p{L}\\p{M}'’.-]+";
@@ -68,12 +67,19 @@ public class StudentName {
     }
 
     /**
-     * Returns true if both names are the same after ignoring capitalization.
+     * Returns true if both names are the same after ignoring capitalization and the kind of apostrophe.
      * Spaces are already normalized, so extra spaces do not make names differ.
      */
     public boolean isSameName(StudentName otherName) {
         requireNonNull(otherName);
-        return fullName.equalsIgnoreCase(otherName.fullName);
+        return withStraightApostrophes(fullName).equalsIgnoreCase(withStraightApostrophes(otherName.fullName));
+    }
+
+    /**
+     * Returns {@code text} with each curly apostrophe, as pasted from documents, replaced by a straight one.
+     */
+    public static String withStraightApostrophes(String text) {
+        return text.replace('’', '\'');
     }
 
     @Override

@@ -33,7 +33,15 @@ public class RecordListPanel extends UiPart<Region> {
      * Scrolls the listing by a page, retaining a small overlap for context.
      */
     public void scrollPage(boolean isDown) {
-        double page = recordListing.getHeight() * 0.9;
-        recordListing.setScrollTop(Math.max(0, recordListing.getScrollTop() + (isDown ? page : -page)));
+        PageScrolling.scrollPage(recordListing, recordListing.getHeight() * 0.9, isDown);
+    }
+
+    /**
+     * Displays an updated version of the current listing, keeping the rows in view where they were.
+     */
+    public void refreshListing(String listing) {
+        double scrollTop = recordListing.getScrollTop();
+        recordListing.setText(requireNonNull(listing));
+        recordListing.setScrollTop(scrollTop);
     }
 }

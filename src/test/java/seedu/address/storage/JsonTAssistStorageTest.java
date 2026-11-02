@@ -81,7 +81,8 @@ public class JsonTAssistStorageTest {
 
     @Test
     public void read_invalidAndValidGroups_exceptionThrown() {
-        assertReadFailsWithReason("invalidAndValidGroupTAssist.json", GroupName.MESSAGE_CONSTRAINTS);
+        assertReadFailsWithReason("invalidAndValidGroupTAssist.json",
+                String.format(JsonAdaptedGroup.MESSAGE_INVALID_GROUP_NAME, "T0@", GroupName.MESSAGE_CONSTRAINTS));
     }
 
     @Test
@@ -241,7 +242,8 @@ public class JsonTAssistStorageTest {
                   "assignments":["PS1"],
                   "assignmentRecords":[
                     {"assignmentName":"PS1","studentId":"A1","submitted":true,"grade":100.9}]}]}
-                """, AssignmentRecord.MESSAGE_INVALID_GRADE);
+                """, String.format(JsonAdaptedGroup.MESSAGE_INVALID_RECORD, "T01", 1,
+                AssignmentRecord.MESSAGE_INVALID_GRADE));
     }
 
     /**

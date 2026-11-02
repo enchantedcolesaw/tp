@@ -34,7 +34,7 @@ public class StudentDeleteCommandTest {
         expected.removeStudent(NAME_T01, ALICE.getStudentId());
 
         assertCommandSuccess(new StudentDeleteCommand(new StudentId("a0123456x")), model,
-                "Removed Alice Tan from T01.", expected);
+                "Removed Alice Tan (A0123456X) from T01.", expected);
         assertEquals(expected.getActiveGroupStudentList(), model.getActiveGroupStudentList());
         assertEquals(recorded, model.getGroup(NAME_T02).findStudent(ALICE.getStudentId()).orElseThrow());
     }

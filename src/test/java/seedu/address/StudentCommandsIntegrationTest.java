@@ -62,7 +62,7 @@ public class StudentCommandsIntegrationTest extends AppIntegrationTest {
         Map<String, String> searches = Map.of("student find n/Ravi s/o", "A0345678Z",
                 "student find n/MUTHU A/L raju", "A0456789W");
         for (Map.Entry<String, String> search : searches.entrySet()) {
-            assertEquals("Found 1 matching student(s) in T01.", feedback(search.getKey()), search.getKey());
+            assertEquals("Found 1 matching student in T01.", feedback(search.getKey()), search.getKey());
             assertEquals(List.of(search.getValue()), app.logic.getDisplayedStudentList().stream()
                     .map(student -> student.getStudentId().toString()).toList(), search.getKey());
         }
@@ -80,7 +80,7 @@ public class StudentCommandsIntegrationTest extends AppIntegrationTest {
         assertEquals(2, app.logic.getActiveGroupStudentList().size());
         restart();
         assertEquals("Students in T01:\n1. Alice Tan | A0123456X\n2. Alice Tan | A2", feedback("student list"));
-        assertEquals("Removed Alice Tan from T01.", feedback("student delete id/a0123456x"));
+        assertEquals("Removed Alice Tan (A0123456X) from T01.", feedback("student delete id/a0123456x"));
         restart();
         assertEquals("Students in T01:\n1. Alice Tan | A2", feedback("student list"));
         feedback("student delete id/A2");
@@ -241,6 +241,27 @@ public class StudentCommandsIntegrationTest extends AppIntegrationTest {
     }
 
     @Test
+    public void execute_undoOrRedoActiveGroupRename_preservesSearchAndSort() throws Exception {
+        feedback("student add n/Ben Lim id/B2");
+        feedback("student add n/Alice Tan id/A3");
+        feedback("student add n/Alice Ng id/A1");
+        feedback("student find n/Alice");
+        feedback("student sort by/id");
+        List<Student> displayed = List.copyOf(app.logic.getDisplayedStudentList());
+        feedback("group rename g/T01 n/T01-Thu");
+
+        feedback("undo");
+        assertEquals("T01", app.model.getActiveGroup().orElseThrow().getName().toString());
+        assertEquals(displayed, app.logic.getDisplayedStudentList());
+        feedback("redo");
+        assertEquals(displayed, app.logic.getDisplayedStudentList());
+
+        feedback("group add g/T05");
+        feedback("undo");
+        assertEquals(app.logic.getActiveGroupStudentList(), app.logic.getDisplayedStudentList());
+    }
+
+    @Test
     public void execute_searchAndList_changesOnlyDisplayAndResetsOnRestart() throws Exception {
         feedback("student add n/Alice Tan id/A1");
         feedback("student add n/Ben Lim id/B2");
@@ -312,7 +333,7 @@ public class StudentCommandsIntegrationTest extends AppIntegrationTest {
                 findResult.getFeedbackToUser());
         assertFalse(findResult.hasSavedChanges());
         CommandResult sortResult = app.logic.execute("student sort by/name");
-        assertEquals("Sorted 0 student(s) in T01 by name.", sortResult.getFeedbackToUser());
+        assertEquals("Sorted 0 students in T01 by name.", sortResult.getFeedbackToUser());
         assertFalse(sortResult.hasSavedChanges());
         assertEquals(saved, Files.readString(dataFile));
 

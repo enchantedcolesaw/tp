@@ -86,6 +86,7 @@ public class StudentNameTest {
 
         assertTrue(name.isSameName(new StudentName("alice  TAN ")));
         assertFalse(name.isSameName(new StudentName("Alice")));
+        assertTrue(new StudentName("Sean O’Brien").isSameName(new StudentName("sean o'brien")));
         assertThrows(NullPointerException.class, () -> name.isSameName(null));
     }
 

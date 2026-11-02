@@ -16,6 +16,12 @@ import seedu.address.testutil.StudentBuilder;
 public class StudentAddCommandParserTest {
     private final StudentAddCommandParser parser = new StudentAddCommandParser();
 
+    /** Returns the error for missing {@code prefixes}, followed by the usage of student add. */
+    private static String missingParameters(String prefixes) {
+        return String.format(TAssistArgumentParser.MESSAGE_MISSING_PARAMETERS, prefixes)
+                + " Usage: " + StudentAddCommand.MESSAGE_USAGE;
+    }
+
     @Test
     public void parse_validInput_normalizesValuesInEitherOrder() {
         assertParseSuccess(parser, " n/ Alice   Tan id/a0123456x ", new StudentAddCommand(ALICE));
@@ -56,8 +62,10 @@ public class StudentAddCommandParserTest {
 
     @Test
     public void parse_missingParameter_reportsUsage() {
-        for (String input : new String[] {"", "n/Alice Tan", "id/A0123456X", "n/Ravi s/o Kumar"}) {
-            assertParseFailure(parser, input, "Missing required parameter. Usage: " + StudentAddCommand.MESSAGE_USAGE);
+        assertParseFailure(parser, "", missingParameters("n/ id/"));
+        assertParseFailure(parser, "id/A0123456X", missingParameters("n/"));
+        for (String input : new String[] {"n/Alice Tan", "n/Ravi s/o Kumar"}) {
+            assertParseFailure(parser, input, missingParameters("id/"));
         }
     }
 
@@ -65,7 +73,7 @@ public class StudentAddCommandParserTest {
     public void parse_nameEndingInIdBeforeSlash_reportsMissingParameter() {
         for (String input : new String[] {"n/David/Tan", "n/David/", "n/David/A1!",
             "n/David/" + "1".repeat(StudentId.MAX_LENGTH + 1)}) {
-            assertParseFailure(parser, input, "Missing required parameter. Usage: " + StudentAddCommand.MESSAGE_USAGE);
+            assertParseFailure(parser, input, missingParameters("id/"));
         }
     }
 
@@ -91,8 +99,7 @@ public class StudentAddCommandParserTest {
 
     @Test
     public void parse_missingNameBeforeExtraText_reportsMissingParameter() {
-        assertParseFailure(parser, "id/A0123456X Alice Tan",
-                "Missing required parameter. Usage: " + StudentAddCommand.MESSAGE_USAGE);
+        assertParseFailure(parser, "id/A0123456X Alice Tan", missingParameters("n/"));
     }
 
     @Test
@@ -108,7 +115,7 @@ public class StudentAddCommandParserTest {
     @Test
     public void parse_nameWithoutLetters_explainsLetterRequirement() {
         String message = "Invalid student name. Use 1-60 letters, spaces, apostrophes, hyphens, or periods, "
-                + "with at least one letter outside the slash particles. "
+                + "with at least one letter besides s/o, d/o, a/l, or a/p. "
                 + "Between two parts of a name, you may also use s/o, d/o, a/l, or a/p.";
         for (String name : new String[] {"'-", "' s/o -"}) {
             assertParseFailure(parser, "n/" + name + " id/A1", message);

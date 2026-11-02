@@ -5,7 +5,6 @@ import static seedu.address.storage.JsonAdaptedStudent.MISSING_FIELD_MESSAGE_FOR
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalStudents.BEN;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +17,7 @@ import seedu.address.model.student.AttendanceStatus;
 import seedu.address.model.student.Student;
 import seedu.address.model.student.StudentId;
 import seedu.address.model.student.StudentName;
+import seedu.address.model.student.WeeklyRecord;
 import seedu.address.testutil.TypicalStudents;
 
 public class JsonAdaptedStudentTest {
@@ -46,13 +46,27 @@ public class JsonAdaptedStudentTest {
     }
 
     @Test
-    public void fromJson_duplicateWeekAliases_throwsIoException() {
+    public void toModelType_duplicateWeekAliases_throwsIllegalValueException() throws Exception {
         for (String weeklyRecords : List.of("\"participation\":{\"1\":3,\"01\":5}",
                 "\"participation\":{\"01\":5,\"1\":3}", "\"participation\":{\"1\":3,\"001\":3}",
                 "\"attendance\":{\"1\":\"PRESENT\",\"01\":\"ABSENT\"}")) {
             String json = "{\"name\":\"Ben Lim\",\"studentId\":\"A0234567Y\"," + weeklyRecords + "}";
+            JsonAdaptedStudent adapted = JsonUtil.fromJsonString(json, JsonAdaptedStudent.class);
 
-            assertThrows(IOException.class, () -> JsonUtil.fromJsonString(json, JsonAdaptedStudent.class));
+            assertThrows(IllegalValueException.class,
+                    "Duplicate weekly record for Week 1. Use only one entry per week.", adapted::toModelType);
+        }
+    }
+
+    @Test
+    public void toModelType_nonIntegerWeekKey_throwsIllegalValueException() throws Exception {
+        for (String weeklyRecords : List.of("\"attendance\":{\"3.0\":\"PRESENT\"}",
+                "\"attendance\":{\"abc\":\"ABSENT\"}", "\"participation\":{\"\":3}",
+                "\"participation\":{\"99999999999\":3}")) {
+            String json = "{\"name\":\"Ben Lim\",\"studentId\":\"A0234567Y\"," + weeklyRecords + "}";
+            JsonAdaptedStudent adapted = JsonUtil.fromJsonString(json, JsonAdaptedStudent.class);
+
+            assertThrows(IllegalValueException.class, WeeklyRecord.MESSAGE_INVALID_WEEK, adapted::toModelType);
         }
     }
 

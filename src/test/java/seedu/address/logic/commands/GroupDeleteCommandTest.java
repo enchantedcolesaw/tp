@@ -31,7 +31,7 @@ public class GroupDeleteCommandTest {
         expected.removeGroup(TypicalGroups.NAME_T01);
 
         assertCommandSuccess(new GroupDeleteCommand(new GroupName("t01")), model,
-                "Deleted tutorial group T01 and its 3 student(s).", expected);
+                "Deleted tutorial group T01 and its 3 students.", expected);
         assertEquals(TypicalGroups.NAME_T02, model.getActiveGroup().orElseThrow().getName());
     }
 
@@ -43,7 +43,7 @@ public class GroupDeleteCommandTest {
         expected.removeGroup(TypicalGroups.NAME_T02);
 
         assertCommandSuccess(new GroupDeleteCommand(TypicalGroups.NAME_T02), model,
-                "Deleted tutorial group T02 and its 2 student(s).\n"
+                "Deleted tutorial group T02 and its 2 students.\n"
                         + "No group is active now. Select one with: group use g/GROUP_NAME", expected);
         assertEquals(0, model.getActiveGroupStudentList().size());
     }
@@ -57,7 +57,7 @@ public class GroupDeleteCommandTest {
         expected.removeGroup(TypicalGroups.NAME_T01);
 
         assertCommandSuccess(new GroupDeleteCommand(TypicalGroups.NAME_T01), model,
-                "Deleted tutorial group T01 and its 0 student(s).\n"
+                "Deleted tutorial group T01 and its 0 students.\n"
                         + "No groups left. Create one with: group add g/GROUP_NAME", expected);
     }
 
@@ -65,7 +65,7 @@ public class GroupDeleteCommandTest {
     public void getConfirmationPrompt_namesGroupAndCanBeSkipped() {
         Model model = new ModelManager(TypicalGroups.getTypicalTAssist(), new UserPrefs());
 
-        assertEquals(Optional.of("Delete tutorial group T01, its 3 student(s) and 0 assignment(s), with all their "
+        assertEquals(Optional.of("Delete tutorial group T01, its 3 students and 0 assignments, with all their "
                         + "attendance, participation, submission, and grade records?"),
                 new GroupDeleteCommand(new GroupName("t01")).getConfirmationPrompt(model));
         assertEquals(Optional.empty(), new GroupDeleteCommand(TypicalGroups.NAME_T01, true)
@@ -80,7 +80,7 @@ public class GroupDeleteCommandTest {
                 new Assignment(new AssignmentName("PS1")), new Assignment(new AssignmentName("PS2"))).build();
         Model model = new ModelManager(new TAssistBuilder().withGroup(group).build(), new UserPrefs());
 
-        assertEquals(Optional.of("Delete tutorial group T01, its 0 student(s) and 2 assignment(s), with all their "
+        assertEquals(Optional.of("Delete tutorial group T01, its 0 students and 2 assignments, with all their "
                         + "attendance, participation, submission, and grade records?"),
                 new GroupDeleteCommand(TypicalGroups.NAME_T01).getConfirmationPrompt(model));
     }

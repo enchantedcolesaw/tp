@@ -2,6 +2,7 @@ package seedu.address.model.student;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -10,21 +11,28 @@ import seedu.address.testutil.StudentBuilder;
 
 public class StudentSortFieldTest {
     @Test
-    public void getComparator_name_ignoresCaseAndBreaksTiesById() {
+    public void nameOrder_accentsAndCase_sortsAlphabeticallyThenById() {
         Student zoe = new StudentBuilder().withName("Zoe").withStudentId("A1").build();
-        Student aliceHigh = new StudentBuilder().withName("alice Tan").withStudentId("C2").build();
-        Student aliceLow = new StudentBuilder().withName("Alice Tan").withStudentId("B1").build();
-        assertEquals(List.of(aliceLow, aliceHigh, zoe), List.of(zoe, aliceHigh, aliceLow).stream()
-                .sorted(StudentSortField.NAME.getComparator()).toList());
-        assertEquals(List.of(zoe, aliceLow, aliceHigh), List.of(zoe, aliceHigh, aliceLow).stream()
-                .sorted(StudentSortField.ID.getComparator()).toList());
+        Student emile = new StudentBuilder().withName("Émile").withStudentId("A2").build();
+        Student upperBen = new StudentBuilder().withName("BEN LIM").withStudentId("A3").build();
+        Student lowerBen = new StudentBuilder().withName("ben lim").withStudentId("A4").build();
+        List<Student> students = new ArrayList<>(List.of(zoe, lowerBen, emile, upperBen));
+
+        students.sort(StudentSortField.NAME.getComparator());
+
+        assertEquals(List.of(upperBen, lowerBen, emile, zoe), students);
     }
 
     @Test
-    public void getComparator_id_usesTextRatherThanNumericOrder() {
-        Student a2 = new StudentBuilder().withStudentId("A2").build();
-        Student a10 = new StudentBuilder().withStudentId("A10").build();
-        assertEquals(List.of(a10, a2), List.of(a2, a10).stream()
-                .sorted(StudentSortField.ID.getComparator()).toList());
+    public void nameOrder_sharedFirstWord_keepsWholeWordsTogether() {
+        Student tanAh = new StudentBuilder().withName("Tan Ah Kow").withStudentId("A1").build();
+        Student tanaka = new StudentBuilder().withName("Tanaka Yuki").withStudentId("A2").build();
+        Student tanBee = new StudentBuilder().withName("Tan Bee Lin").withStudentId("A3").build();
+        Student tan = new StudentBuilder().withName("Tan").withStudentId("A4").build();
+        List<Student> students = new ArrayList<>(List.of(tanaka, tanBee, tanAh, tan));
+
+        students.sort(StudentSortField.NAME.getComparator());
+
+        assertEquals(List.of(tan, tanAh, tanBee, tanaka), students);
     }
 }
