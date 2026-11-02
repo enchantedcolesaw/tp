@@ -18,7 +18,7 @@ public class AssignmentDeleteCommandParser implements Parser<AssignmentDeleteCom
 
     @Override
     public AssignmentDeleteCommand parse(String arguments) throws ParseException {
-        ArgumentMultimap values = argumentParser.parse(arguments);
+        ArgumentMultimap values = argumentParser.parse(arguments, AssignmentDeleteCommand.MESSAGE_USAGE);
         if (values.getValue(PREFIX_FAST).isEmpty()) {
             argumentParser.verifyNoMissingSpaceBefore(values, PREFIX_FAST);
         }

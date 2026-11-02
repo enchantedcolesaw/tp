@@ -14,6 +14,12 @@ import seedu.address.model.assignment.AssignmentName;
 public class AssignmentDeleteCommandParserTest {
     private final AssignmentDeleteCommandParser parser = new AssignmentDeleteCommandParser();
 
+    /** Returns the error for missing {@code prefixes}, followed by the usage of the command. */
+    private static String missingParameters(String prefixes) {
+        return String.format(TAssistArgumentParser.MESSAGE_MISSING_PARAMETERS, prefixes)
+                + " Usage: " + AssignmentDeleteCommand.MESSAGE_USAGE;
+    }
+
     @Test
     public void parse_validName_returnsDeleteCommand() {
         assertParseSuccess(parser, " a/ PS1 ", new AssignmentDeleteCommand(NAME_PS1));
@@ -39,8 +45,8 @@ public class AssignmentDeleteCommandParserTest {
 
     @Test
     public void parse_malformedParameters_reportsSpecificError() {
-        assertParseFailure(parser, "", String.format(TAssistArgumentParser.MESSAGE_MISSING_PARAMETERS, "a/"));
-        assertParseFailure(parser, "f/yes", String.format(TAssistArgumentParser.MESSAGE_MISSING_PARAMETERS, "a/"));
+        assertParseFailure(parser, "", missingParameters("a/"));
+        assertParseFailure(parser, "f/yes", missingParameters("a/"));
         assertParseFailure(parser, "a/PS1 a/PS2", Messages.getErrorMessageForDuplicatePrefixes(new Prefix("a/")));
         assertParseFailure(parser, "a/PS1 n/PS2",
                 String.format(TAssistArgumentParser.MESSAGE_UNKNOWN_PREFIX, "n/", "a/ f/"));

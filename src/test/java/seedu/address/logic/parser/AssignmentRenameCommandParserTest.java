@@ -14,6 +14,12 @@ import seedu.address.model.assignment.AssignmentName;
 public class AssignmentRenameCommandParserTest {
     private final AssignmentRenameCommandParser parser = new AssignmentRenameCommandParser();
 
+    /** Returns the error for missing {@code prefixes}, followed by the usage of the command. */
+    private static String missingParameters(String prefixes) {
+        return String.format(TAssistArgumentParser.MESSAGE_MISSING_PARAMETERS, prefixes)
+                + " Usage: " + AssignmentRenameCommand.MESSAGE_USAGE;
+    }
+
     @Test
     public void parse_validNames_returnsRenameCommand() {
         AssignmentRenameCommand expected = new AssignmentRenameCommand(NAME_PS1, new AssignmentName("Problem Set 1"));
@@ -31,9 +37,9 @@ public class AssignmentRenameCommandParserTest {
 
     @Test
     public void parse_malformedParameters_reportsSpecificError() {
-        assertParseFailure(parser, "", String.format(TAssistArgumentParser.MESSAGE_MISSING_PARAMETERS, "a/ n/"));
-        assertParseFailure(parser, "n/PS2", String.format(TAssistArgumentParser.MESSAGE_MISSING_PARAMETERS, "a/"));
-        assertParseFailure(parser, "a/PS1", String.format(TAssistArgumentParser.MESSAGE_MISSING_PARAMETERS, "n/"));
+        assertParseFailure(parser, "", missingParameters("a/ n/"));
+        assertParseFailure(parser, "n/PS2", missingParameters("a/"));
+        assertParseFailure(parser, "a/PS1", missingParameters("n/"));
         assertParseFailure(parser, "a/PS1 n/PS2 n/PS3",
                 Messages.getErrorMessageForDuplicatePrefixes(new Prefix("n/")));
         assertParseFailure(parser, "a/PS1 n/PS2 g/T01",

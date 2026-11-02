@@ -17,7 +17,7 @@ public class AssignmentRenameCommandParser implements Parser<AssignmentRenameCom
 
     @Override
     public AssignmentRenameCommand parse(String arguments) throws ParseException {
-        ArgumentMultimap values = argumentParser.parse(arguments);
+        ArgumentMultimap values = argumentParser.parse(arguments, AssignmentRenameCommand.MESSAGE_USAGE);
         return new AssignmentRenameCommand(
                 TAssistParserUtil.parseAssignmentName(values.getValue(PREFIX_ASSIGNMENT).orElseThrow()),
                 TAssistParserUtil.parseAssignmentName(values.getValue(PREFIX_NEW_NAME).orElseThrow()));
