@@ -58,7 +58,7 @@ public class AssignmentDeleteCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
         Group group = getActiveGroup(model);
-        getAssignment(group, assignmentName);
+        getAssignmentToChange(group, assignmentName);
 
         Assignment removed = model.removeAssignment(group.getName(), assignmentName);
         assert !group.hasAssignment(assignmentName) : "The deleted assignment must no longer belong to the group";

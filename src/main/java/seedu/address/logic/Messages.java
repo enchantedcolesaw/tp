@@ -18,9 +18,10 @@ public class Messages {
     public static final String MESSAGE_DUPLICATE_GROUP = "A tutorial group named %s already exists.";
     public static final String MESSAGE_UNKNOWN_STUDENT =
             "Student ID %s does not exist in %s. See students in the active group with: student list";
-    public static final String MESSAGE_UNKNOWN_ASSIGNMENT =
-            "Assignment %s does not exist in %s. See the group's assignments with: assignment list\n"
-                    + "Or create it with: assignment add a/%s";
+    public static final String MESSAGE_UNKNOWN_ASSIGNMENT_TO_CHANGE =
+            "Assignment %s does not exist in %s. See the group's assignments with: assignment list";
+    public static final String MESSAGE_UNKNOWN_ASSIGNMENT = MESSAGE_UNKNOWN_ASSIGNMENT_TO_CHANGE
+            + "\nOr create it with: assignment add a/%s";
     public static final String MESSAGE_UNKNOWN_COMMAND =
             "Unknown command '%s'. Enter help to see supported commands.";
     public static final String MESSAGE_INVALID_COMMAND_FORMAT = "Invalid command format!\n%1$s";

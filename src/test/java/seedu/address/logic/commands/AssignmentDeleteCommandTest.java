@@ -61,7 +61,7 @@ public class AssignmentDeleteCommandTest {
     @Test
     public void execute_unknownAssignment_reportsErrorAndChangesNothing() {
         Model model = modelWithActiveT01();
-        String message = String.format(Messages.MESSAGE_UNKNOWN_ASSIGNMENT, "PS3", "T01", "PS3");
+        String message = String.format(Messages.MESSAGE_UNKNOWN_ASSIGNMENT_TO_CHANGE, "PS3", "T01");
 
         assertCommandFailure(new AssignmentDeleteCommand(new AssignmentName("PS3")), model, message);
         assertEquals(List.of(PS1.withSubmissionStatus(ALICE.getStudentId(), true), PS2),

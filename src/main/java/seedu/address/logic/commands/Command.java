@@ -2,6 +2,7 @@ package seedu.address.logic.commands;
 
 import static seedu.address.logic.Messages.MESSAGE_NO_ACTIVE_GROUP;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_ASSIGNMENT;
+import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_ASSIGNMENT_TO_CHANGE;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_STUDENT;
 
 import java.util.ArrayList;
@@ -72,6 +73,18 @@ public abstract class Command {
     protected static Assignment getAssignment(Group group, AssignmentName assignmentName) throws CommandException {
         return group.findAssignment(assignmentName).orElseThrow(() -> new CommandException(
                 String.format(MESSAGE_UNKNOWN_ASSIGNMENT, assignmentName, group.getName(), assignmentName)));
+    }
+
+    /**
+     * Returns the assignment named {@code assignmentName} in {@code group}, for a command that renames or deletes it.
+     * Unlike {@link #getAssignment}, the error does not suggest creating the assignment.
+     *
+     * @throws CommandException If no such assignment is in the group.
+     */
+    protected static Assignment getAssignmentToChange(Group group, AssignmentName assignmentName)
+            throws CommandException {
+        return group.findAssignment(assignmentName).orElseThrow(() -> new CommandException(
+                String.format(MESSAGE_UNKNOWN_ASSIGNMENT_TO_CHANGE, assignmentName, group.getName())));
     }
 
     /**

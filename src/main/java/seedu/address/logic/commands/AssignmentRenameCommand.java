@@ -40,7 +40,7 @@ public class AssignmentRenameCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
         Group group = getActiveGroup(model);
-        Assignment target = getAssignment(group, assignmentName);
+        Assignment target = getAssignmentToChange(group, assignmentName);
         Optional<Assignment> clash = group.findAssignment(newName).filter(other -> !other.isSameAssignment(target));
         if (clash.isPresent()) {
             throw new CommandException(String.format(MESSAGE_DUPLICATE_ASSIGNMENT,

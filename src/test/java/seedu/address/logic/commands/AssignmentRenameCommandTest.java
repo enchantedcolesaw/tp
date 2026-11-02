@@ -105,7 +105,7 @@ public class AssignmentRenameCommandTest {
     @Test
     public void execute_unknownAssignment_reportsErrorAndChangesNothing() {
         Model model = modelWithActiveT01();
-        String message = String.format(Messages.MESSAGE_UNKNOWN_ASSIGNMENT, "PS3", "T01", "PS3");
+        String message = String.format(Messages.MESSAGE_UNKNOWN_ASSIGNMENT_TO_CHANGE, "PS3", "T01");
 
         assertCommandFailure(new AssignmentRenameCommand(new AssignmentName("PS3"), NEW_NAME), model, message);
         assertEquals(List.of(GRADED_PS1, PS2), model.getGroup(NAME_T01).getAssignmentList());
