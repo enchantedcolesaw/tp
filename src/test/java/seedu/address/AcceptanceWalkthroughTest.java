@@ -137,7 +137,7 @@ public class AcceptanceWalkthroughTest extends AppIntegrationTest {
     public void studentDelete_restart_removesOnlyThatStudentAndTheirRecords() throws Exception {
         enterTutorialSession();
 
-        assertEquals("Removed Ben Lim from T01.", feedback("student delete id/a0234567y"));
+        assertEquals("Removed Ben Lim (A0234567Y) from T01.", feedback("student delete id/a0234567y"));
         restart();
 
         assertEquals("Students in T01:\n1. Alice Tan | A0123456X\n2. Chloe O'Neil-Ng | A0345678Z",

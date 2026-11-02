@@ -1895,7 +1895,7 @@ label.
    Enter `student delete id/a0123456x`. Expect a prompt naming Alice, student ID A0123456X, and T01, and describing
    the records that will be removed. Press Enter to cancel; Alice and the saved data remain unchanged. Enter the
    command again and choose Continue. Expect
-   `Removed Alice Tan from T01.` and A2 becomes row 1.
+   `Removed Alice Tan (A0123456X) from T01.` and A2 becomes row 1.
 6. Delete A2 using `student delete id/A2 f/yes`, then list students. Expect an empty-roster hint. Try deleting A2
    again; expect an unknown-ID error.
    Close and reopen; T01 stays empty and T02 still contains Alice.

@@ -80,7 +80,7 @@ public class StudentCommandsIntegrationTest extends AppIntegrationTest {
         assertEquals(2, app.logic.getActiveGroupStudentList().size());
         restart();
         assertEquals("Students in T01:\n1. Alice Tan | A0123456X\n2. Alice Tan | A2", feedback("student list"));
-        assertEquals("Removed Alice Tan from T01.", feedback("student delete id/a0123456x"));
+        assertEquals("Removed Alice Tan (A0123456X) from T01.", feedback("student delete id/a0123456x"));
         restart();
         assertEquals("Students in T01:\n1. Alice Tan | A2", feedback("student list"));
         feedback("student delete id/A2");

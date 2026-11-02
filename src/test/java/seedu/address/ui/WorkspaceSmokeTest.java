@@ -594,14 +594,14 @@ public class WorkspaceSmokeTest {
                 isConfirmationAccepted = true;
                 confirmationPrompt = null;
                 enter(input, "student delete id/a1");
-                assertEquals("Removed Alice Tan from T03.", feedback.getText());
+                assertEquals("Removed Alice Tan (A1) from T03.", feedback.getText());
                 assertEquals(1, studentTable().getItems().size());
                 assertEquals("1", studentTable().getColumns().getFirst().getCellObservableValue(0).getValue());
                 assertEquals("Remove Alice Tan (A1) and all their attendance, participation, submission, "
                         + "and grade records from T03?", confirmationPrompt);
                 confirmationPrompt = null;
                 enter(input, "student delete id/A2 f/yes");
-                assertEquals("Removed Ben Lim from T03.", feedback.getText());
+                assertEquals("Removed Ben Lim (A2) from T03.", feedback.getText());
                 assertNull(confirmationPrompt);
                 assertEmptyTitle(String.format(StudentListPanel.EMPTY_GROUP_TITLE_FORMAT, "T03"));
             });
@@ -623,7 +623,7 @@ public class WorkspaceSmokeTest {
 
                 respondToConfirmation("Continue");
                 enter(input, "student delete id/A1");
-                assertEquals("Removed Alice Tan from T03.", feedback.getText());
+                assertEquals("Removed Alice Tan (A1) from T03.", feedback.getText());
                 assertEquals(1, studentTable().getItems().size());
 
                 TAssist beforeCancelledDelete = new TAssist(model.getTAssist());
