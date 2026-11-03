@@ -91,6 +91,29 @@ public class StudentNameTest {
     }
 
     @Test
+    public void isSameName_canonicalUnicodeForms_matchesAndPreservesSpelling() {
+        for (String[] names : new String[][] {{"José Tan", "Jose\u0301 Tan"},
+            {"Åsa Tan", "A\u030asa Tan"}, {"Jo\u0301\u0327 Tan", "Jo\u0327\u0301 Tan"}}) {
+            StudentName first = new StudentName(names[0]);
+            StudentName second = new StudentName(names[1]);
+            assertTrue(first.isSameName(second));
+            assertTrue(second.isSameName(first));
+            assertEquals(names[0], first.fullName);
+            assertEquals(names[1], second.fullName);
+            assertFalse(first.equals(second));
+        }
+        assertTrue(new StudentName("José O’Neil").isSameName(new StudentName(" jose\u0301   o'neil ")));
+    }
+
+    @Test
+    public void isSameName_differentAccentsOrCompatibilityForms_remainDifferent() {
+        StudentName accented = new StudentName("José Tan");
+        assertFalse(accented.isSameName(new StudentName("Jose Tan")));
+        assertFalse(accented.isSameName(new StudentName("Josè Tan")));
+        assertFalse(new StudentName("\uFB01ona Tan").isSameName(new StudentName("fiona Tan")));
+    }
+
+    @Test
     public void equals() {
         StudentName name = new StudentName("Alice Tan");
 

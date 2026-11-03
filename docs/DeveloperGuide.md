@@ -642,8 +642,10 @@ literal words (see [Command registration and shared validation](#command-registr
 
 Each command obtains the active group at execution time and throws `CommandException` if none is selected.
 `StudentAddCommand` checks ID uniqueness before calling `Model.addStudent`; names need not be unique. If
-`Group.findStudentNamed` finds a student with the same name (ignoring case) before the add, the command still adds the
-student and appends a warning that names the existing student and their ID to its success message.
+`Group.findStudentNamed` finds a student with the same name before the add, the command still adds the student and
+appends a warning that names the existing student and their ID to its success message. Both add and edit use
+`StudentName.isSameName`, which ignores case and apostrophe style and compares canonical Unicode forms without
+changing the stored spelling.
 `StudentDeleteCommand` checks for the ID in the active group before calling `Model.removeStudent`. Removing the
 student also removes their owned weekly records. Neither command changes another group, even if it contains the
 same ID. `StudentEditCommand` (`student edit id/STUDENT_ID [n/NEW_NAME] [nid/NEW_ID]`) builds the corrected student

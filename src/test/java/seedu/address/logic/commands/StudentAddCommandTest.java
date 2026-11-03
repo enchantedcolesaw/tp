@@ -66,6 +66,24 @@ public class StudentAddCommandTest {
     }
 
     @Test
+    public void execute_canonicalUnicodeName_addsStudentWithWarningAndPreservesSpelling() {
+        for (String[] names : new String[][] {{"José Tan", "Jose\u0301 Tan"}, {"Jose\u0301 Tan", "José Tan"}}) {
+            Model actual = new ModelManager(model.getTAssist(), new UserPrefs());
+            Student existing = new StudentBuilder(ALICE).withName(names[0]).build();
+            actual.setStudent(NAME_T01, existing);
+            Student added = new StudentBuilder(FIONA).withName(names[1]).build();
+            Model expected = new ModelManager(actual.getTAssist(), new UserPrefs());
+            expected.addStudent(NAME_T01, added);
+            String message = "Added " + names[1] + " to T01. Warning: T01 already has a student named "
+                    + names[0] + " (A0123456X). Check that the student ID is correct.";
+
+            assertCommandSuccess(new StudentAddCommand(added), actual, message, expected);
+            assertEquals(names[1], actual.getGroup(NAME_T01).findStudent(added.getStudentId()).orElseThrow()
+                    .getName().fullName);
+        }
+    }
+
+    @Test
     public void execute_duplicateIdOrNoActiveGroup_preservesData() {
         Student duplicate = new StudentBuilder(FIONA).withStudentId(" a0123456x ").build();
         assertCommandFailure(new StudentAddCommand(duplicate), model, "Student ID A0123456X already exists in T01.");

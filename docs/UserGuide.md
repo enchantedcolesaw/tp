@@ -372,6 +372,8 @@ Format: `student add n/NAME id/STUDENT_ID`
   Students with the same name and different IDs are allowed. If the active group already has a student with the same
   name (ignoring case and extra spaces), the student is still added, and the feedback adds a warning so that you can
   check the ID. The warning names the existing student and their ID, for example `Added Alice Tan to T01. Warning: T01 already has a student named Alice Tan (A0123456X). Check that the student ID is correct.`
+  Names copied with different Unicode representations of the same accented letters also trigger the warning.
+  TAssist keeps the spelling you entered.
 * Supply each prefix exactly once, in either order, with a space before each parameter.
 
 Examples: `student add n/Alice Tan id/A0123456X` shows `Added Alice Tan to T01.` when T01 is active.
