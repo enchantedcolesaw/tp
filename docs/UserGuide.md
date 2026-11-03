@@ -281,7 +281,7 @@ Exported the records of 1 student in T01 to:
 The file has a header row, then one row per student in roster order:
 
 * `Name` and `Student ID`.
-* `Week 1 Attendance` to `Week 13 Attendance`, each `Present`, `Absent`, or empty if no attendance was recorded.
+* `Week 1 Attendance` to `Week 13 Attendance`, each `Present`, `Absent`, `Late`, `Excused`, or empty if no attendance was recorded.
 * `Week 1 Participation` to `Week 13 Participation`, each a score from 0 to 5, or empty if no score was set.
 * Two columns for each assignment of the group, in the order the assignments were created, such as `PS1 Submitted`
   and `PS1 Grade`. The first is `Yes` or `No`, and the second is the grade from 0 to 100, or empty if no grade was
@@ -525,14 +525,16 @@ The students must already be in that group. Add one with `student add` if needed
 
 Format: `attendance mark id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/STATUS`
 
-* `WEEK` is a whole number from 1 to 13. `STATUS` is `present` or `absent`, ignoring case.
+* `WEEK` is a whole number from 1 to 13. `STATUS` is `present`, `absent`, `late`, or `excused`, ignoring case.
+  `late` means the student arrived late; `excused` means absent with an accepted reason, such as a medical certificate.
+  Each week stores one status per student. These categories do not apply any grading penalty.
 * Student IDs ignore case. Supply `w/` and `s/` exactly once, in any order, separated by spaces.
 * To mark several students at once, repeat `id/`, for example `attendance mark id/A0123456X id/A0234567Y w/3 s/present`.
   The feedback has one line for each student, in the order you typed them. A student typed twice is marked once.
   If any ID is invalid or not in the active group, nobody is marked, and the error names the first such ID.
 * Repeating a mark for the same student and week replaces the earlier mark, and the feedback shows the old and
   new status. Other students, weeks, and participation records are preserved.
-* Marking a student absent for a week in which they have a participation score above 0 still records the mark, and
+* Marking a student absent or excused for a week in which they have a participation score above 0 still records the mark, and
   the feedback adds a warning, such as `Warning: Alice Tan has participation score 4 for Week 3.`, so that you can
   check whether you meant another student or week.
 
@@ -540,6 +542,9 @@ For Alice Tan in active group T01, `attendance mark id/A0123456X w/3 s/present` 
 `Recorded Alice Tan as present for Week 3.` Re-entering it with `s/absent` shows
 `Updated Alice Tan's attendance for Week 3: present to absent.` Entering `s/absent` again shows
 `Alice Tan's attendance for Week 3 is already absent. Nothing changed.`
+
+Other examples: `attendance mark id/A0123456X w/4 s/late` records a late arrival, and
+`attendance mark id/A0123456X w/5 s/excused` records an excused absence. Use `attendance clear` to remove either mark.
 
 #### Attendance command errors
 
@@ -551,7 +556,7 @@ Problem | Feedback and correction
 No active group | `No active tutorial group. Create or select a group first.` Use `group add` or `group use`.
 Unknown student | `Student ID A0999999Z does not exist in T01. See students in the active group with: student list` Check the ID, or switch to the student's group with `group use`.
 Invalid week | `Invalid week. Enter a number from 1 to 13.` Supply digits only, without a sign or decimal point.
-Invalid status | `Invalid attendance status. Use present or absent.` Supply `present` or `absent` after `s/`.
+Invalid status | `Invalid attendance status. Use present, absent, late or excused.` Supply `present`, `absent`, `late`, or `excused` after `s/`.
 Blank value | `Missing value after w/. Type the value right after the prefix.` followed by the command's format.
 Missing parameter | The feedback names the missing prefixes. Include `id/`, `w/`, and `s/` for marking; `w/` for listing; `id/` and `w/` for clearing.
 Repeated or unknown prefix | The feedback names the prefix. Use only the documented prefixes, once each, except `id/` in `attendance mark` and `attendance clear`.
@@ -567,13 +572,15 @@ For example, after the examples above, `attendance list w/3` shows the following
 Records screen:
 
 ```text
-Attendance for T01, Week 3: 0 present, 1 absent, 1 not recorded
+Attendance for T01, Week 3: 0 present, 1 absent, 0 late, 0 excused, 1 not recorded
 Alice Tan | A0123456X | Absent
 Ravi s/o Kumar | A0345679Z | Not recorded
 ```
 
-The heading counts the students who are present, absent, and not yet marked, so you can check that you have not
-missed anyone; the feedback box shows it too. Each student appears with `Present`, `Absent`, or `Not recorded`, so a
+The heading counts present, absent, late, excused, and unmarked students separately. Each student counts in exactly
+one category: late students are not counted again as present, and excused students are not counted again as absent.
+The counts add up to the group size; the feedback box shows them too. Each row shows `Present`, `Absent`, `Late`,
+`Excused`, or `Not recorded`, so a
 week with no marks yet lists every student as `Not recorded`. An empty group shows `No students in T01.` Records in other groups or weeks are not included.
 Use `group use g/GROUP_NAME` to choose another group before listing it.
 
@@ -583,7 +590,7 @@ invalid weeks and no active group have the same errors as `attendance mark`.
 ### Clearing an attendance mark: `attendance clear`
 
 Removes the attendance marks of one or more students for a week, so that the week shows `Not recorded` again. Use it
-when you marked the wrong students or the wrong week. To change a mark between present and absent, use
+when you marked the wrong students or the wrong week. To change an existing attendance status, use
 `attendance mark` instead.
 
 Format: `attendance clear id/STUDENT_ID [id/STUDENT_ID]... w/WEEK`
@@ -623,8 +630,9 @@ Format: `participation set id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/SCORE`
   first such ID.
 * Setting the same student and week again replaces the score, and the feedback shows the old and new score.
   Other weeks, other students, and other groups are unaffected.
-* A score above 0 for a student marked absent that week is still recorded, and the feedback adds a warning, such as
-  `Warning: Alice Tan is marked absent for Week 3.` A score of 0 gives no warning.
+* A score above 0 for a student marked absent or excused that week is still recorded, and the feedback adds a warning, such as
+  `Warning: Alice Tan is marked absent for Week 3.` For excused absence, it says `marked excused` instead.
+  A score of 0 gives no warning. A late or present student can receive a positive score without a warning.
 
 Example: `participation set id/A0123456X w/3 s/2` shows
 `Recorded participation score 2 for Alice Tan in Week 3.`
@@ -941,7 +949,7 @@ The file looks like this:
 * Group names, student names, and student IDs follow the same rules as when you type them in a command. As in
   commands, non-breaking and other Unicode spaces in a name, such as those copied from a web page, are read as
   normal spaces.
-* `attendance` maps week numbers (`"1"` through `"13"`) to `"PRESENT"` or `"ABSENT"`.
+* `attendance` maps week numbers (`"1"` through `"13"`) to `"PRESENT"`, `"ABSENT"`, `"LATE"`, or `"EXCUSED"`.
   Status values ignore case and surrounding spaces when loaded. An omitted attendance map means no attendance
   records for that student. Invalid weeks or statuses make the file invalid.
 * Within a student's `attendance` or `participation` map, each week may appear only once. A key such as `"01"`

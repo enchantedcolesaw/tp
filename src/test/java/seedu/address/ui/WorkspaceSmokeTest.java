@@ -1021,7 +1021,8 @@ public class WorkspaceSmokeTest {
                 assertTrue(listing.getText().contains("Alice Tan | A0123456X | Present"));
                 assertTrue(listing.getText().contains("Student | A116 | Not recorded"));
                 assertEquals("records", tabs.getSelectionModel().getSelectedItem().getId());
-                assertEquals("Attendance for T01, Week 3: 1 present, 0 absent, 19 not recorded", feedback.getText());
+                assertEquals("Attendance for T01, Week 3: 1 present, 0 absent, "
+                        + "0 late, 0 excused, 19 not recorded", feedback.getText());
                 assertTrue(input.getText().isEmpty());
             });
             runOnFx(() -> render(root, "attendance-list", 853, 440));
@@ -1041,10 +1042,38 @@ public class WorkspaceSmokeTest {
                 assertEquals(0, listing.getScrollTop());
                 pressKey(KeyCode.UP);
                 assertEquals("attendance list w/3", input.getText());
-                enter(input, "attendance mark id/A0123456X w/3 s/late");
-                assertEquals("attendance mark id/A0123456X w/3 s/late", input.getText());
+                enter(input, "attendance mark id/A0123456X w/3 s/unknown");
+                assertEquals("attendance mark id/A0123456X w/3 s/unknown", input.getText());
                 assertTrue(input.getStyleClass().contains("error"));
-                assertEquals("Invalid attendance status. Use present or absent.", feedback.getText());
+                assertEquals("Invalid attendance status. Use present, absent, late or excused.", feedback.getText());
+            });
+        } finally {
+            runOnFx(() -> stage.hide());
+        }
+    }
+
+    @Test
+    public void attendanceCommands_newStatuses_refreshThroughUndoRedoAndClear() throws Exception {
+        runOnFx(this::initializeWorkspace);
+        try {
+            runOnFx(() -> {
+                enter(input, "group use g/T01");
+                enter(input, "attendance list w/7");
+                enter(input, "attendance mark id/A0123456X w/7 s/late");
+                enter(input, "attendance mark id/A0234567Y w/7 s/excused");
+                TextArea listing = (TextArea) root.lookup("#recordListing");
+                String savedListing = listing.getText();
+                assertTrue(savedListing.contains("0 present, 0 absent, 1 late, 1 excused, 1 not recorded"));
+                assertTrue(savedListing.contains("Alice Tan | A0123456X | Late"));
+                assertTrue(savedListing.contains("Ben Lim | A0234567Y | Excused"));
+                render(root, "attendance-new-statuses", 853, 440);
+                enter(input, "attendance clear id/A0123456X id/A0234567Y w/7");
+                assertTrue(listing.getText().contains("0 late, 0 excused, 3 not recorded"));
+                enter(input, "undo");
+                assertEquals(savedListing, listing.getText());
+                enter(input, "redo");
+                assertTrue(listing.getText().contains("0 late, 0 excused, 3 not recorded"));
+                render(root, "attendance-new-statuses-compact", 853, 440);
             });
         } finally {
             runOnFx(() -> stage.hide());

@@ -160,7 +160,7 @@ public class MainAppTest {
         String[][] cases = {
             {"Ben_Lim", "\"attendance\":{}", StudentName.MESSAGE_CONSTRAINTS},
             {"Ben Lim", "\"attendance\":{\"14\":\"PRESENT\"}", "Week must be a whole number from 1 to 13."},
-            {"Ben Lim", "\"attendance\":{\"3\":\"LATE\"}", AttendanceStatus.MESSAGE_CONSTRAINTS},
+            {"Ben Lim", "\"attendance\":{\"3\":\"UNKNOWN\"}", AttendanceStatus.MESSAGE_CONSTRAINTS},
             {"Ben Lim", "\"participation\":{\"14\":3}", "Week must be a whole number from 1 to 13."},
             {"Ben Lim", "\"participation\":{\"3\":7}", "Participation score must be a whole number from 0 to 5."}
         };
@@ -198,7 +198,8 @@ public class MainAppTest {
                 app.logic.execute("participation list w/1").getFeedbackToUser());
         assertEquals("Participation for T01, Week 2: 1 recorded, 0 not recorded\nAlice Tan | A1 | 5",
                 app.logic.execute("participation list w/2").getFeedbackToUser());
-        assertEquals("Attendance for T01, Week 1: 1 present, 0 absent, 0 not recorded\nAlice Tan | A1 | Present",
+        assertEquals("Attendance for T01, Week 1: 1 present, 0 absent, "
+                + "0 late, 0 excused, 0 not recorded\nAlice Tan | A1 | Present",
                 app.logic.execute("attendance list w/1").getFeedbackToUser());
         assertTrue(app.logic.execute("group add g/T02").hasSavedChanges());
         app.stop();

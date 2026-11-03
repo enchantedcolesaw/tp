@@ -29,7 +29,7 @@ public class AttendanceCommandParserUtilTest {
         assertEquals(AttendanceStatus.PRESENT, AttendanceCommandParserUtil.parseStatus(" Present "));
         assertEquals(AttendanceStatus.ABSENT, AttendanceCommandParserUtil.parseStatus("absent"));
         assertThrows(ParseException.class, AttendanceStatus.MESSAGE_CONSTRAINTS, () -> {
-            AttendanceCommandParserUtil.parseStatus("late");
+            AttendanceCommandParserUtil.parseStatus("unknown");
         });
     }
 }

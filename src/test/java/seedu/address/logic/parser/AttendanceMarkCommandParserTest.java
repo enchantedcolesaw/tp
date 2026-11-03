@@ -85,7 +85,7 @@ public class AttendanceMarkCommandParserTest {
                 blankValueMessage("w/", AttendanceMarkCommand.MESSAGE_USAGE));
         assertParseFailure(parser, "id/A0123456X w/14 s/present", AttendanceCommandParserUtil.MESSAGE_INVALID_WEEK);
         assertParseFailure(parser, "id/A0123456X w/3 s/", blankValueMessage("s/", AttendanceMarkCommand.MESSAGE_USAGE));
-        assertParseFailure(parser, "id/A0123456X w/3 s/late", AttendanceStatus.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "id/A0123456X w/3 s/unknown", AttendanceStatus.MESSAGE_CONSTRAINTS);
     }
 
     @Test

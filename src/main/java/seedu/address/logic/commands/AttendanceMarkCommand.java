@@ -35,14 +35,14 @@ public class AttendanceMarkCommand extends Command {
     private final AttendanceStatus status;
 
     /**
-     * Creates a command to mark the given student present or absent for a valid teaching week.
+     * Creates a command to record the given student's attendance status for a valid teaching week.
      */
     public AttendanceMarkCommand(StudentId studentId, int week, AttendanceStatus status) {
         this(List.of(requireNonNull(studentId)), week, status);
     }
 
     /**
-     * Creates a command to mark the given students present or absent for a valid teaching week.
+     * Creates a command to record the given students' attendance status for a valid teaching week.
      * The list must not be empty.
      */
     public AttendanceMarkCommand(List<StudentId> studentIds, int week, AttendanceStatus status) {
@@ -92,11 +92,11 @@ public class AttendanceMarkCommand extends Command {
     }
 
     /**
-     * Returns a warning if a student with a positive score for the week is marked absent, or an empty string.
+     * Returns a warning if a student with a positive score for the week is marked absent or excused.
      */
     private String warnIfScored(Student student) {
         Optional<Integer> score = student.getParticipationRecord(week).filter(value -> value > 0);
-        return status == AttendanceStatus.ABSENT && score.isPresent()
+        return status.isAbsence() && score.isPresent()
                 ? String.format(MESSAGE_SCORE_WARNING, student.getName(), score.get(), week) : "";
     }
 
