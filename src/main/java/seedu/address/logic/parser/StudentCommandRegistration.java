@@ -9,6 +9,7 @@ import seedu.address.logic.commands.StudentDeleteCommand;
 import seedu.address.logic.commands.StudentEditCommand;
 import seedu.address.logic.commands.StudentFindCommand;
 import seedu.address.logic.commands.StudentListCommand;
+import seedu.address.logic.commands.StudentRecordsCommand;
 import seedu.address.logic.commands.StudentSortCommand;
 import seedu.address.logic.help.HelpEntry;
 
@@ -53,6 +54,11 @@ public final class StudentCommandRegistration {
                         "Sort the displayed students by name or ID, ascending and ignoring case. "
                                 + "FIELD is name or id. Keep the current search; use student list to reset both.",
                         List.of("student sort by/name", "student sort by/id")));
+        registry.register("student", "records", new StudentRecordsCommandParser(),
+                new HelpEntry("student", StudentRecordsCommand.MESSAGE_USAGE,
+                        "Show one student's attendance and participation for weeks 1 to 13, and their submission "
+                                + "status and grade for every assignment, on the Records screen. IDs ignore case.",
+                        List.of("student records id/A0123456X")));
         registry.register("student", "delete", new StudentDeleteCommandParser(),
                 new HelpEntry("student", StudentDeleteCommand.MESSAGE_USAGE,
                         "Remove a student and their records from the active group after confirmation. "
