@@ -42,7 +42,7 @@ public class HelpIntegrationTest {
             "student add n/NAME id/STUDENT_ID", "student edit id/STUDENT_ID [n/NEW_NAME] [nid/NEW_ID]",
             "student list",
             "student find [n/NAME_FRAGMENT] [id/ID_FRAGMENT]", "student sort by/FIELD",
-            "student delete id/STUDENT_ID [f/yes]",
+            "student records id/STUDENT_ID", "student delete id/STUDENT_ID [f/yes]",
             "attendance mark id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/STATUS", "attendance list w/WEEK",
             "attendance clear id/STUDENT_ID [id/STUDENT_ID]... w/WEEK",
             "participation set id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/SCORE", "participation list w/WEEK",

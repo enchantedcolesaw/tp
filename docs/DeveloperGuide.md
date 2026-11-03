@@ -129,8 +129,8 @@ Keyboard or programmatic selection does not prepare a template, and empty rows a
 navigation and other read-only commands do not write data. `CommandResult.hasSavedChanges()` tells the UI whether
 to show `Changes saved.` in the footer. Commands keep the current screen unless they request navigation or help.
 
-Attendance, participation, and assignment listings return `CommandResult.forRecordListing(...)` with their complete
-text and a request to open Records. `MainWindow` sends the text to `RecordListPanel` and puts only its heading in
+Attendance, participation, assignment, and student records listings return `CommandResult.forRecordListing(...)`
+with their complete text and a request to open Records. `MainWindow` sends the text to `RecordListPanel` and puts only its heading in
 `ResultDisplay`. The records text area grows with the workspace, so a normal tutorial's records use the main area.
 PageUp and PageDown scroll Records while it is open and the whole feedback is visible, and the feedback box
 otherwise; neither takes focus from the command box. `PageScrolling` stops both at the end of their text, so PageUp
@@ -632,7 +632,8 @@ participation feedback and failed-input retention through the JavaFX command box
 ### Student commands
 
 `StudentCommandRegistration` registers `student add`, `student edit`, `student list`, `student find`,
-`student sort`, and `student delete`, including their help formats and examples. `MainApp.init` installs these registrations before constructing `LogicManager`.
+`student sort`, `student records`, and `student delete`, including their help formats and examples. `MainApp.init`
+installs these registrations before constructing `LogicManager`.
 The add and delete parsers use `StudentCommandParserUtil` to reject malformed parameters and report missing
 prefixes with the command's usage. `StudentCommandParserUtil#verifyNoBlankValues` then reports a blank value, such as
 `n/` in `student add` or `nid/` in `student edit`, as `Missing value after nid/.` with the command's format, instead
@@ -658,6 +659,26 @@ student, and `n/` for the new name as in `group rename`. An edit that changes no
 Because `LogicManager` stores the whole data before each change, `undo` restores the old name, ID, and records
 together. `StudentListCommand` clears the display filter and sort order, opens Students, and returns the full
 numbered roster or an empty-roster hint.
+
+`StudentRecordsCommand` (`student records id/STUDENT_ID`) finds the student in the active group with
+`Command#getStudent`, then reads their attendance and participation for every week from `WeeklyRecord.MIN_WEEK` to
+`WeeklyRecord.MAX_WEEK`, and their `AssignmentRecord` from each assignment of the group, in creation order. It reuses
+`AttendanceStatus#formatStoredValue` and the submission and grade labels of `AssignmentListCommand`, so a record reads
+the same as in the weekly and assignment listings. The command returns `CommandResult.forRecordListing(...)` with
+`student records id/<stored ID>` as its listing command, so `MainWindow` reruns it after each saved change like the
+other listings. Deleting the student, changing their ID, or switching to a group without that ID makes the rerun fail,
+and Records reports the listing as no longer available. The command changes no data.
+
+**Aspect: Where to show one student's records**
+
+* **Current choice:** A text listing on the Records screen.
+  * Pros: It reuses the listing, refresh, and scrolling of the other listings, so no UI code changes, and it fits
+    13 weeks and every assignment at 1280x720.
+  * Cons: The records are text, not a table.
+* **Alternative:** Week and assignment columns in the Students table.
+  * Pros: Every student's records are visible at once.
+  * Cons: 13 weeks of two values each, plus every assignment, do not fit at 1280x720, so the table would need a week
+    selector or horizontal scrolling.
 
 Before execution, `MainWindow` asks Logic for the command's optional confirmation prompt. A command describes the
 affected data without changing it; cancelling skips execution and persistence. Student deletion names the student,
@@ -1575,6 +1596,34 @@ The following extensions apply to every use case that changes or views records o
 
       Use case ends.
 
+**Use case: UC11 - View a student's records**
+
+**MSS**
+
+1.  A student asks the TA about their standing.
+2.  TA requests the records of that student.
+3.  TAssist shows the student's attendance and participation for every week, and their submission status and grade
+    for every assignment of the active group.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. The student ID is invalid.
+    * 2a1. TAssist shows an error message with the rules for student IDs.
+
+      Use case resumes at step 2.
+
+* 2b. The active group has no student with that ID.
+    * 2b1. TAssist shows an error message and suggests listing the students of the group.
+
+      Use case resumes at step 2.
+
+* 3a. The TA corrects a record while the records are shown.
+    * 3a1. TAssist updates the shown records.
+
+      Use case ends.
+
 ### Non-Functional Requirements
 
 1.  Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
@@ -1920,6 +1969,25 @@ label.
    Add Zoe; she stays hidden by the existing search, and the count becomes `0 of 1 student`.
    Enter `student list`; Zoe appears and the count becomes `1 student`.
 
+
+### Viewing one student's records
+
+1. In a new empty folder, enter `group add g/T01`, `student add n/Alice Tan id/A0123456X`,
+   `student add n/Ben Lim id/A0234567Y`, `attendance mark id/A0123456X w/1 s/present`,
+   `attendance mark id/A0123456X w/2 s/late`, `participation set id/A0123456X w/1 s/3`, `assignment add a/PS1`,
+   `assignment grade a/PS1 id/A0123456X m/87`, and `assignment add a/Lab 2`.
+2. Enter `student records id/a0123456x`. Expect Records to open, with `Records for Alice Tan (A0123456X) in T01:` in
+   the feedback box. Records should list `Week 1 | Present | 3`, `Week 2 | Late | Not recorded`, Weeks 3 to 13 as
+   `Not recorded | Not recorded`, then `PS1 | Submitted | 87` and `Lab 2 | Not submitted | -`. The footer should not
+   say `Changes saved.`
+3. Enter `participation set id/A0123456X w/2 s/1`. Without listing again, expect the Week 2 row to read
+   `Late | 1`. Enter `undo`; expect `Late | Not recorded` again.
+4. Enter `student records id/A0234567Y`. Expect every week as `Not recorded | Not recorded`, and both assignments as
+   `Not submitted | -`. Enter `student delete id/A0234567Y f/yes`. Expect Records to say
+   `This listing is no longer available.` followed by the unknown-ID reason.
+5. Try `student records`, `student records id/`, `student records id/A0123456X now`, and
+   `student records id/A0999999Z`. Expect missing-parameter, missing-value, extra-text, and unknown-ID errors, with
+   no change to the data or the saved file.
 
 ### Managing students
 

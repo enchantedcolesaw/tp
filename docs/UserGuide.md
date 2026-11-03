@@ -70,12 +70,15 @@ the command box.
   The `help` command opens it.
 * **Storage** shows the configured local JSON file and explains automatic saving.
 
-`attendance list w/3`, `participation list w/3`, and `assignment list a/PS1` open **Records** with the complete listing.
+`attendance list w/3`, `participation list w/3`, `assignment list a/PS1`, and `student records id/A0123456X` open
+**Records** with the complete listing.
 The feedback box shows its heading. Records keeps the last listing when you open another screen;
 use `view records` to return to it. After each command that changes your data, such as marking attendance, switching
 groups, or `undo`, the listing updates to match. If you rename the listed assignment, the listing follows the new
 name. If the listing can no longer be shown, for example because the newly active group has no assignment of that
 name, Records says `This listing is no longer available.` and gives the reason. It is not saved between launches. `assignment list` also opens Records with the assignment names.
+A listing of one student's records is no longer available after that student is deleted or given a new ID, or
+when the newly active group has no student with that ID.
 `group list` continues to use the feedback box; `student list` opens the Students table.
 
 ![TAssist displaying attendance for a 20-student tutorial group on the Records screen](images/RecordsUi.png)
@@ -483,6 +486,44 @@ An unsupported field shows `Invalid sort field. Use by/name or by/id.`, and a bl
 `student sort by/id now`, shows `Unexpected extra text after 'by/id': 'now'. This value cannot contain spaces.`
 Sorting zero displayed students reports, for example, `Sorted 0 students in T01 by name.`
 
+### Viewing a student's records: `student records`
+
+Shows one student's attendance and participation for every week, and their submission status and grade for every
+assignment of the active group, on the Records screen. Use it to answer a student's question about their standing,
+or to check everything you have recorded for them in one place. The feedback box shows the heading. Listing does not
+change any data.
+
+Format: `student records id/STUDENT_ID`
+
+* Student IDs ignore case. Supply `id/` exactly once. Only the active group is searched, because a student ID is
+  unique only within a group.
+* Weeks 1 to 13 are always listed, so a week you missed stands out. A week without a mark or score shows
+  `Not recorded`.
+* Assignments are listed in the order they were created. An assignment without a submission shows
+  `Not submitted | -`, and a submitted one without a grade shows `Submitted | -`. A group without assignments shows
+  `Assignments: none in T01.`
+* Records updates after each change, such as a new mark or `undo`, like the other listings. If the student is
+  deleted, given a new ID with `student edit`, or not in the newly active group, Records says
+  `This listing is no longer available.` and gives the reason. List again with the student's current ID.
+
+Example: suppose Alice Tan was present in Week 1 with participation score 3 and late in Week 2, and in T01 she has
+submitted PS1 with grade 87 but not Lab 2 (Graphs). `student records id/A0123456X` shows (Weeks 4 to 12 omitted):
+
+```text
+Records for Alice Tan (A0123456X) in T01:
+Weeks (attendance | participation score):
+Week 1 | Present | 3
+Week 2 | Late | Not recorded
+Week 3 | Not recorded | Not recorded
+Week 13 | Not recorded | Not recorded
+Assignments (submission | grade):
+PS1 | Submitted | 87
+Lab 2 (Graphs) | Not submitted | -
+```
+
+An unknown ID shows
+`Student ID A0999999Z does not exist in T01. See students in the active group with: student list`.
+
 ### Deleting a student: `student delete`
 
 Asks you to confirm before removing a student and all their records from the active group.
@@ -509,7 +550,7 @@ Problem | Feedback and correction
 --------|------------------------
 No active group | `No active tutorial group. Create or select a group first.` Use `group add` or `group use`.
 Duplicate ID when adding | `Student ID A0123456X already exists in T01.` Check `student list` before adding.
-Unknown ID when editing or deleting | `Student ID A0123456X does not exist in T01. See students in the active group with: student list` Check the ID and active group.
+Unknown ID when editing, deleting, or viewing records | `Student ID A0123456X does not exist in T01. See students in the active group with: student list` Check the ID and active group.
 Duplicate ID when editing | `Student ID A0234567Y already exists in T01.` Choose a new ID that no other student in the group has.
 Nothing to edit | `Nothing to edit. Include a new name with n/ or a new student ID with nid/. Usage: student edit id/STUDENT_ID [n/NEW_NAME] [nid/NEW_ID]` Add `n/`, `nid/`, or both.
 Missing parameter | `Missing required parameter(s): id/. Usage: student add n/NAME id/STUDENT_ID` names the missing prefixes, followed by the command's format. Supply all required prefixes.
@@ -1046,6 +1087,7 @@ Action | Format, Examples
 **List students** | `student list`
 **Find students** | `student find [n/NAME_FRAGMENT] [id/ID_FRAGMENT]`<br> e.g., `student find n/alice`
 **Sort students** | `student sort by/FIELD`<br> e.g., `student sort by/name`
+**View student records** | `student records id/STUDENT_ID`<br> e.g., `student records id/A0123456X`
 **Delete student** | `student delete id/STUDENT_ID [f/yes]`<br> e.g., `student delete id/A0234567Y`
 **Mark attendance** | `attendance mark id/STUDENT_ID [id/STUDENT_ID]... w/WEEK s/STATUS`<br> e.g., `attendance mark id/A0123456X w/3 s/present`
 **List attendance** | `attendance list w/WEEK`<br> e.g., `attendance list w/3`

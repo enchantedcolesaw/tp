@@ -219,6 +219,48 @@ public class WorkspaceSmokeTest {
     }
 
     @Test
+    public void studentRecords_changesAndUnavailableStudent_refreshesInRecords() throws Exception {
+        runOnFx(this::initializeWorkspace);
+        try {
+            runOnFx(() -> {
+                enter(input, "group use g/T01");
+                enter(input, "assignment add a/PS1");
+                enter(input, "assignment grade a/PS1 id/A0123456X m/87");
+                String saved = Files.readString(data);
+                enter(input, "student records id/a0123456x");
+                TextArea listing = (TextArea) root.lookup("#recordListing");
+                TextArea feedback = (TextArea) root.lookup("#resultDisplay");
+                assertEquals("records", tabs.getSelectionModel().getSelectedItem().getId());
+                assertEquals("Records for Alice Tan (A0123456X) in T01:", feedback.getText());
+                assertTrue(listing.getText().contains("Week 13 | Not recorded | Not recorded"));
+                assertTrue(listing.getText().endsWith("PS1 | Submitted | 87"));
+                assertEquals(saved, Files.readString(data));
+                render(root, "student-records", 1280, 720);
+                assertTrue(listing.getHeight() > feedback.getHeight() * 3);
+
+                enter(input, "attendance mark id/A0123456X w/2 s/late");
+                assertTrue(listing.getText().contains("Week 2 | Late | Not recorded"));
+                enter(input, "participation set id/A0123456X w/2 s/1");
+                assertTrue(listing.getText().contains("Week 2 | Late | 1"));
+                enter(input, "undo");
+                assertTrue(listing.getText().contains("Week 2 | Late | Not recorded"));
+                enter(input, "student edit id/A0123456X nid/A99");
+                assertTrue(listing.getText().startsWith(MainWindow.MESSAGE_LISTING_UNAVAILABLE));
+                enter(input, "undo");
+                assertTrue(listing.getText().startsWith("Records for Alice Tan"));
+                enter(input, "group use g/T02");
+                assertTrue(listing.getText().startsWith(MainWindow.MESSAGE_LISTING_UNAVAILABLE));
+                enter(input, "group use g/T01");
+                assertTrue(listing.getText().startsWith("Records for Alice Tan"));
+                enter(input, "student delete id/A0123456X f/yes");
+                assertTrue(listing.getText().startsWith(MainWindow.MESSAGE_LISTING_UNAVAILABLE));
+            });
+        } finally {
+            runOnFx(() -> stage.hide());
+        }
+    }
+
+    @Test
     public void recordListing_assignmentRenamedOrMissing_followsRenameOrExplainsUnavailable() throws Exception {
         runOnFx(this::initializeWorkspace);
         try {

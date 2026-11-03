@@ -232,7 +232,7 @@ public class StudentCommandsIntegrationTest extends AppIntegrationTest {
         assertEquals(List.of("student add n/NAME id/STUDENT_ID", "student edit id/STUDENT_ID [n/NEW_NAME] [nid/NEW_ID]",
                         "student list",
                         "student find [n/NAME_FRAGMENT] [id/ID_FRAGMENT]", "student sort by/FIELD",
-                        "student delete id/STUDENT_ID [f/yes]"),
+                        "student records id/STUDENT_ID", "student delete id/STUDENT_ID [f/yes]"),
                 entries.stream().map(HelpEntry::getCommandFormat).toList());
         assertEquals(CommandResult.forHelp("Showing student commands.", "student"), app.logic.execute("help student"));
         for (HelpEntry entry : entries) {
@@ -363,6 +363,42 @@ public class StudentCommandsIntegrationTest extends AppIntegrationTest {
                 .map(student -> student.getStudentId().toString()).toList());
         restart();
         assertEquals("Students in T01:\n1. Ben Lim | B2\n2. Alice Tan | A1", feedback("student list"));
+    }
+
+    @Test
+    public void execute_studentRecords_listsRecordsWithoutSavingAndFollowsChanges() throws Exception {
+        feedback("student add n/Alice Tan id/A1");
+        feedback("student add n/Ben Lim id/B2");
+        feedback("attendance mark id/A1 w/1 s/present");
+        feedback("participation set id/A1 w/1 s/4");
+        feedback("assignment add a/PS1");
+        feedback("assignment grade a/PS1 id/A1 m/87");
+        String saved = Files.readString(dataFile);
+
+        CommandResult result = app.logic.execute("student records id/a1");
+        assertTrue(result.isRecordListing());
+        assertEquals(Optional.of("student records id/A1"), result.getListingCommand());
+        assertFalse(result.hasSavedChanges());
+        assertTrue(result.getFeedbackToUser().startsWith("Records for Alice Tan (A1) in T01:\n"
+                + "Weeks (attendance | participation score):\n"
+                + "Week 1 | Present | 4\nWeek 2 | Not recorded | Not recorded\n"));
+        assertTrue(result.getFeedbackToUser().endsWith("\nAssignments (submission | grade):\nPS1 | Submitted | 87"));
+        assertEquals(saved, Files.readString(dataFile));
+
+        // Rerunning the listing shows corrections, and undo and a restart restore the earlier records.
+        feedback("attendance mark id/A1 w/1 s/late");
+        assertTrue(feedback("student records id/A1").contains("\nWeek 1 | Late | 4\n"));
+        feedback("undo");
+        restart();
+        assertTrue(feedback("student records id/A1").contains("\nWeek 1 | Present | 4\n"));
+
+        // Records belong to one group, and a deleted student has none to show.
+        feedback("group add g/T02");
+        assertRejected("student records id/A1", CommandException.class);
+        feedback("group use g/T01");
+        feedback("student delete id/A1 f/yes");
+        assertRejected("student records id/A1", CommandException.class);
+        assertRejected("student records id/A1 now", ParseException.class);
     }
 
     /**

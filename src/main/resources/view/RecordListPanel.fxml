@@ -11,5 +11,5 @@
   </VBox>
   <TextArea fx:id="recordListing" VBox.vgrow="ALWAYS" minHeight="0" editable="false" wrapText="true"
             focusTraversable="false" accessibleText="Last listed records"
-            text="Use attendance list w/WEEK, participation list w/WEEK, or assignment list a/NAME to show records here." />
+            text="Use attendance list w/WEEK, participation list w/WEEK, assignment list a/NAME, or student records id/STUDENT_ID to show records here." />
 </VBox>
