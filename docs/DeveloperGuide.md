@@ -1927,7 +1927,8 @@ label.
    `student add n/Alice Tan id/A2`. Both succeed, and the Students screen shows two rows. The second feedback
    ends with a warning that T01 already has a student named Alice Tan (A0123456X). Enter
    `student add n/alice  tan id/A3` to see the same warning for a name that differs only in case and spacing.
-3. Enter `student list`. Expect numbered rows with both IDs. Close and reopen the app; both students remain.
+3. Enter `student list`. Expect three numbered rows with IDs A0123456X, A2, and A3. Close and reopen the app;
+   all three students remain.
 4. Try `student add n/Other Name id/a0123456x`, `student add n/Alice`, `student add n/Alice id/ABC`,
    `student add n/Alice id/A3 id/A4`, and `student list extra`. Each reports the specific problem and preserves
    the roster and saved file.
@@ -1936,8 +1937,8 @@ label.
    the records that will be removed. Press Enter to cancel; Alice and the saved data remain unchanged. Enter the
    command again and choose Continue. Expect
    `Removed Alice Tan (A0123456X) from T01.` and A2 becomes row 1.
-6. Delete A2 using `student delete id/A2 f/yes`, then list students. Expect an empty-roster hint. Try deleting A2
-   again; expect an unknown-ID error.
+6. Delete A2 using `student delete id/A2 f/yes` and A3 using `student delete id/A3 f/yes`, then list students.
+   Expect an empty-roster hint. Try deleting A2 again; expect an unknown-ID error.
    Close and reopen; T01 stays empty and T02 still contains Alice.
 7. In T01, enter `student add n/Ravi Kumarr id/A0567890U`, `student add n/Ben Lim id/A0234567Y`,
    `attendance mark id/A0567890U w/1 s/present`, `participation set id/A0567890U w/1 s/4`, `assignment add a/PS1`,
